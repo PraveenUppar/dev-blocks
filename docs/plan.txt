@@ -1,11 +1,4 @@
-Phase 1: Foundation (Week 1-2)
 
-Set up Next.js project with TypeScript and Tailwind
-Configure PostgreSQL database and Prisma
-Design database schema (users, articles, tags, relationships)
-Set up authentication (email/password, Google OAuth)
-Create basic user registration and login pages
-Build protected route middleware
 
 Phase 2: Core Writing Experience (Week 3-4)
 
