@@ -3,8 +3,9 @@ dotenv.config();
 
 import Express from "express";
 import cors from "cors";
-import { clerkAuthMiddleware } from "./middleware/auth.middleware";
+// import { clerkAuthMiddleware   } from "./middleware/auth.middleware";
 import userRouter from "./routes/user.routes";
+import postRouter from "./routes/post.routes";
 
 const app = Express();
 
@@ -19,5 +20,6 @@ app.use(Express.json());
 // app.use(clerkAuthMiddleware);
 
 app.use("/api/user", userRouter);
+app.use("/api/post", postRouter);
 
 export default app;
