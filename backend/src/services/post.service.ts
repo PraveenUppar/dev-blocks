@@ -224,3 +224,90 @@ export const getPostsByAuthor = async (
     },
   };
 };
+
+// Like a post
+export const likePost = async (userId: string, postId: string) => {
+  return prisma.like.create({
+    data: { userId, postId },
+  });
+};
+
+// Unlike a post
+export const unlikePost = async (userId: string, postId: string) => {
+  return prisma.like.delete({
+    where: {
+      userId_postId: { userId, postId },
+    },
+  });
+};
+
+// Bookmark a post
+export const bookmarkPost = async (userId: string, postId: string) => {
+  return prisma.bookmark.create({
+    data: { userId, postId },
+  });
+};
+
+// Remove bookmark
+export const unbookmarkPost = async (userId: string, postId: string) => {
+  return prisma.bookmark.delete({
+    where: {
+      userId_postId: { userId, postId },
+    },
+  });
+};
+
+// Get user's bookmarks
+export const getUserBookmarks = async (
+  userId: string,
+  page: number = 1,
+  limit: number = 10,
+) => {
+  const skip = (page - 1) * limit;
+
+  const [bookmarks, total] = await Promise.all([
+    prisma.bookmark.findMany({
+      where: { userId },
+      skip,
+      take: limit,
+      orderBy: { createdAt: "desc" },
+      include: {
+        post: {
+          include: {
+            author: {
+              select: { id: true, username: true, name: true, avatar: true },
+            },
+          },
+        },
+      },
+    }),
+    prisma.bookmark.count({ where: { userId } }),
+  ]);
+
+  return {
+    data: bookmarks.map((b) => b.post),
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
+};
+
+// Check if user liked/bookmarked a post
+export const getPostEngagement = async (userId: string, postId: string) => {
+  const [like, bookmark] = await Promise.all([
+    prisma.like.findUnique({
+      where: { userId_postId: { userId, postId } },
+    }),
+    prisma.bookmark.findUnique({
+      where: { userId_postId: { userId, postId } },
+    }),
+  ]);
+
+  return {
+    liked: !!like,
+    bookmarked: !!bookmark,
+  };
+};

@@ -9,6 +9,7 @@ import {
   unfollowUserService,
   updateProfileService,
 } from "../services/user.service";
+import { getUserBookmarks } from "../services/post.service";
 
 // Define params type
 interface UsernameParams {
@@ -174,4 +175,12 @@ export async function unfollowUserController(req: Request, res: Response) {
     }
     throw error;
   }
+}
+
+export async function getMyBookmarksController(req: Request, res: Response) {
+  const { userId } = req.query; // For testing; later from auth
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 10;
+  const result = await getUserBookmarks(userId as string, page, limit);
+  return res.json({ success: true, ...result });
 }

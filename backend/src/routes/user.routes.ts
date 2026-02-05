@@ -12,6 +12,7 @@ import {
   updateMyProfileController,
   followUserController,
   unfollowUserController,
+  getMyBookmarksController,
 } from "../controllers/user.controller";
 
 const userRouter = Router();
@@ -49,6 +50,13 @@ userRouter.delete(
   requireAuthentication,
   getCurrentUser,
   unfollowUserController,
+);
+// Get logged-in user's bookmarks
+userRouter.get(
+  "/me/bookmarks",
+  requireAuthentication,
+  getCurrentUser,
+  getMyBookmarksController,
 );
 
 export default userRouter;

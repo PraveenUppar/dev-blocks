@@ -11,6 +11,10 @@ import {
   updatePostController,
   deletePostController,
   publishPostController,
+  likePostController,
+  unlikePostController,
+  bookmarkPostController,
+  unbookmarkPostController,
 } from "../controllers/post.controller";
 
 const postRouter = Router();
@@ -53,6 +57,36 @@ postRouter.patch(
   requireAuthentication,
   getCurrentUser,
   publishPostController,
+);
+
+// ==================== ENGAGEMENT ROUTES ====================
+// Like a post
+postRouter.post(
+  "/:id/like",
+  requireAuthentication,
+  getCurrentUser,
+  likePostController,
+);
+// Unlike a post
+postRouter.delete(
+  "/:id/like",
+  requireAuthentication,
+  getCurrentUser,
+  unlikePostController,
+);
+// Bookmark a post
+postRouter.post(
+  "/:id/bookmark",
+  requireAuthentication,
+  getCurrentUser,
+  bookmarkPostController,
+);
+// Remove bookmark
+postRouter.delete(
+  "/:id/bookmark",
+  requireAuthentication,
+  getCurrentUser,
+  unbookmarkPostController,
 );
 
 export default postRouter;

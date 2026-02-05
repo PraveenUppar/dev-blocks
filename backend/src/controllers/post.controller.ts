@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import * as postService from "../services/post.service";
+import * as tagService from "../services/tag.service";
 
 // GET / - List published posts
 export async function listPostsController(req: Request, res: Response) {
@@ -145,4 +146,87 @@ export async function publishPostController(req: Request, res: Response) {
   const post = await postService.publishPost(id);
 
   return res.json({ success: true, data: post });
+}
+
+// POST /:id/tags - Add tags to post
+export async function addTagsToPostController(req: Request, res: Response) {
+  const id = req.params.id as string;
+  const { tags } = req.body; // Array of tag names: ["JavaScript", "React"]
+  if (!tags || !Array.isArray(tags)) {
+    return res.status(400).json({
+      success: false,
+      error: { message: "tags array is required" },
+    });
+  }
+  const createdTags = await tagService.addTagsToPost(id, tags);
+  return res.json({ success: true, data: createdTags });
+}
+
+// POST /:id/like - Like a post
+export async function likePostController(req: Request, res: Response) {
+  const postId = req.params.id as string;
+  const { userId } = req.body; // For testing; later from auth
+  try {
+    await postService.likePost(userId, postId);
+    return res.status(201).json({ success: true, message: "Post liked" });
+  } catch (error: any) {
+    if (error.code === "P2002") {
+      return res.status(409).json({
+        success: false,
+        error: { message: "Already liked" },
+      });
+    }
+    throw error;
+  }
+}
+// DELETE /:id/like - Unlike a post
+export async function unlikePostController(req: Request, res: Response) {
+  const postId = req.params.id as string;
+  const { userId } = req.body;
+  try {
+    await postService.unlikePost(userId, postId);
+    return res.json({ success: true, message: "Like removed" });
+  } catch (error: any) {
+    if (error.code === "P2025") {
+      return res.status(404).json({
+        success: false,
+        error: { message: "Not liked" },
+      });
+    }
+    throw error;
+  }
+}
+// POST /:id/bookmark - Bookmark a post
+export async function bookmarkPostController(req: Request, res: Response) {
+  const postId = req.params.id as string;
+  const { userId } = req.body;
+  try {
+    await postService.bookmarkPost(userId, postId);
+    return res.status(201).json({ success: true, message: "Post bookmarked" });
+  } catch (error: any) {
+    if (error.code === "P2002") {
+      return res.status(409).json({
+        success: false,
+        error: { message: "Already bookmarked" },
+      });
+    }
+    throw error;
+  }
+}
+// DELETE /:id/bookmark - Remove bookmark
+export async function unbookmarkPostController(req: Request, res: Response) {
+  const postId = req.params.id as string;
+  const { userId } = req.body;
+  try {
+    await postService.unbookmarkPost(userId, postId);
+    return res.json({ success: true, message: "Bookmark removed" });
+  } catch (error: any) {
+    if (error.code === "P2025") {
+      return res.status(404).json({
+        success: false,
+        error: { message: "Not bookmarked" },
+      });
+    }
+    throw error;
+  }
 }
