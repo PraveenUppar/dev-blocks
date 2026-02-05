@@ -9,7 +9,11 @@ import {
   unfollowUserService,
   updateProfileService,
 } from "../services/user.service";
-import { getUserBookmarks } from "../services/post.service";
+import {
+  getUserBookmarks,
+  getUserDrafts,
+  getUserReadingHistory,
+} from "../services/post.service";
 
 // Define params type
 interface UsernameParams {
@@ -182,5 +186,28 @@ export async function getMyBookmarksController(req: Request, res: Response) {
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;
   const result = await getUserBookmarks(userId as string, page, limit);
+  return res.json({ success: true, ...result });
+}
+
+// GET /me/drafts
+export async function getMyDraftsController(req: Request, res: Response) {
+  const { userId } = req.query; // For testing
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 10;
+  const result = await getUserDrafts(userId as string, page, limit);
+  return res.json({ success: true, ...result });
+}
+
+// GET /me/reading-history
+export async function getMyReadingHistoryController(
+  req: Request,
+  res: Response,
+) {
+  const { userId } = req.query;
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 10;
+
+  const result = await getUserReadingHistory(userId as string, page, limit);
+
   return res.json({ success: true, ...result });
 }

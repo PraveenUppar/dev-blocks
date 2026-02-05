@@ -24,7 +24,7 @@ export async function getPostByIdController(req: Request, res: Response) {
       error: { message: "Post not found" },
     });
   }
-
+  postService.incrementViewCount(id);
   return res.json({ success: true, data: post });
 }
 
@@ -40,6 +40,7 @@ export async function getPostBySlugController(req: Request, res: Response) {
       error: { message: "Post not found" },
     });
   }
+  // postService.incrementViewCount(slug);
 
   return res.json({ success: true, data: post });
 }
@@ -229,4 +230,22 @@ export async function unbookmarkPostController(req: Request, res: Response) {
     }
     throw error;
   }
+}
+
+// POST /:id/reading-history
+export async function recordReadingHistoryController(
+  req: Request,
+  res: Response,
+) {
+  const postId = req.params.id as string;
+  const { userId, timeSpent, scrollDepth } = req.body;
+
+  await postService.recordReadingHistory(
+    userId,
+    postId,
+    timeSpent,
+    scrollDepth,
+  );
+
+  return res.json({ success: true, message: "Reading history recorded" });
 }

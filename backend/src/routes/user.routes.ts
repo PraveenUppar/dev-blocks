@@ -13,6 +13,8 @@ import {
   followUserController,
   unfollowUserController,
   getMyBookmarksController,
+  getMyDraftsController,
+  getMyReadingHistoryController,
 } from "../controllers/user.controller";
 
 const userRouter = Router();
@@ -57,6 +59,19 @@ userRouter.get(
   requireAuthentication,
   getCurrentUser,
   getMyBookmarksController,
+);
+userRouter.get(
+  "/me/drafts",
+  requireAuthentication,
+  getCurrentUser,
+  getMyDraftsController,
+);
+
+userRouter.get(
+  "/me/reading-history",
+  requireAuthentication,
+  getCurrentUser,
+  getMyReadingHistoryController,
 );
 
 export default userRouter;

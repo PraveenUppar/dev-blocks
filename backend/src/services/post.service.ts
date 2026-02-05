@@ -311,3 +311,107 @@ export const getPostEngagement = async (userId: string, postId: string) => {
     bookmarked: !!bookmark,
   };
 };
+
+// Increment view count
+export const incrementViewCount = async (id: string) => {
+  return prisma.post.update({
+    where: { id },
+    data: {
+      viewCount: { increment: 1 },
+    },
+  });
+};
+
+// Get user's drafts
+export const getUserDrafts = async (
+  authorId: string,
+  page: number = 1,
+  limit: number = 10,
+) => {
+  const skip = (page - 1) * limit;
+
+  const [posts, total] = await Promise.all([
+    prisma.post.findMany({
+      where: {
+        authorId,
+        status: "DRAFT",
+        deletedAt: null,
+      },
+      skip,
+      take: limit,
+      orderBy: { updatedAt: "desc" },
+    }),
+    prisma.post.count({
+      where: {
+        authorId,
+        status: "DRAFT",
+        deletedAt: null,
+      },
+    }),
+  ]);
+
+  return {
+    data: posts,
+    pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+  };
+};
+
+// Record reading history
+export const recordReadingHistory = async (
+  userId: string,
+  postId: string,
+  timeSpent: number,
+  scrollDepth: number,
+) => {
+  return prisma.readingHistory.upsert({
+    where: {
+      userId_postId: { userId, postId },
+    },
+    update: {
+      timeSpent,
+      scrollDepth,
+    },
+    create: {
+      userId,
+      postId,
+      timeSpent,
+      scrollDepth,
+    },
+  });
+};
+
+// Get user's reading history
+export const getUserReadingHistory = async (
+  userId: string,
+  page: number = 1,
+  limit: number = 10,
+) => {
+  const skip = (page - 1) * limit;
+
+  const [history, total] = await Promise.all([
+    prisma.readingHistory.findMany({
+      where: { userId },
+      skip,
+      take: limit,
+      orderBy: { createdAt: "desc" },
+      include: {
+        post: {
+          include: {
+            author: {
+              select: { id: true, username: true, name: true, avatar: true },
+            },
+          },
+        },
+      },
+    }),
+    prisma.readingHistory.count({ where: { userId } }),
+  ]);
+
+  return {
+    data: history.map((h) => ({
+      ...h.post,
+      readingProgress: { timeSpent: h.timeSpent, scrollDepth: h.scrollDepth },
+    })),
+    pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+  };
+};

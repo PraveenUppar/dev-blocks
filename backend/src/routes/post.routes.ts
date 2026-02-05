@@ -15,6 +15,7 @@ import {
   unlikePostController,
   bookmarkPostController,
   unbookmarkPostController,
+  recordReadingHistoryController,
 } from "../controllers/post.controller";
 
 const postRouter = Router();
@@ -87,6 +88,14 @@ postRouter.delete(
   requireAuthentication,
   getCurrentUser,
   unbookmarkPostController,
+);
+
+// Record reading progress
+postRouter.post(
+  "/:id/reading-history",
+  requireAuthentication,
+  getCurrentUser,
+  recordReadingHistoryController,
 );
 
 export default postRouter;
