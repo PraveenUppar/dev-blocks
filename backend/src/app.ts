@@ -6,6 +6,7 @@ import cors from "cors";
 // import { clerkAuthMiddleware   } from "./middleware/auth.middleware";
 import userRouter from "./routes/user.routes";
 import postRouter from "./routes/post.routes";
+import tagRouter from "./routes/tag.routes";
 
 const app = Express();
 
@@ -21,5 +22,6 @@ app.use(Express.json());
 
 app.use("/api/user", userRouter);
 app.use("/api/post", postRouter);
+app.use("/api/tag", tagRouter);
 
 export default app;
