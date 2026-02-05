@@ -8,6 +8,7 @@ import userRouter from "./routes/user.routes";
 import postRouter from "./routes/post.routes";
 import tagRouter from "./routes/tag.routes";
 import commentRouter from "./routes/comment.routes";
+import notificationRouter from "./routes/notification.routes";
 
 const app = Express();
 
@@ -25,5 +26,6 @@ app.use("/api/user", userRouter);
 app.use("/api/post", postRouter);
 app.use("/api/tag", tagRouter);
 app.use("/api/comment", commentRouter);
+app.use("/api/notification", notificationRouter);
 
 export default app;

@@ -1,6 +1,7 @@
 import prisma from "../libs/prisma";
 import { generateSlug } from "../utils/slug";
 import { calculateReadingTime } from "../utils/readingTime";
+import * as notificationService from "./notification.service";
 
 // Create a new draft post
 export const createPost = async (
@@ -227,9 +228,22 @@ export const getPostsByAuthor = async (
 
 // Like a post
 export const likePost = async (userId: string, postId: string) => {
-  return prisma.like.create({
+  const like = await prisma.like.create({
     data: { userId, postId },
   });
+  // Get post and liker for notification
+  const [post, liker] = await Promise.all([
+    prisma.post.findUnique({ where: { id: postId } }),
+    prisma.user.findUnique({ where: { id: userId } }),
+  ]);
+  if (post && liker) {
+    notificationService.notifyPostLiked(
+      userId,
+      post,
+      liker.name || liker.username,
+    );
+  }
+  return like;
 };
 
 // Unlike a post

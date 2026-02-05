@@ -3,7 +3,7 @@ import {
   findByClerkIdService,
   findByIdService,
   findByUsernameService,
-  followUserService,
+  followUser,
   getFollowersService,
   getFollowingService,
   unfollowUserService,
@@ -134,7 +134,7 @@ export async function followUserController(req: Request, res: Response) {
     });
   }
   try {
-    await followUserService(follower.id, followingId as string);
+    await followUser(follower.id, followingId as string);
     return res.status(201).json({
       success: true,
       message: "Successfully followed user",

@@ -1,4 +1,5 @@
 import prisma from "../libs/prisma";
+import * as notificationService from "./notification.service";
 
 // ==================== FIND FUNCTIONS ====================
 
@@ -66,21 +67,23 @@ export const updateProfileService = async (
 // ==================== FOLLOW FUNCTIONS ====================
 
 // Follow a user
-export const followUserService = async (
-  followerId: string,
-  followingId: string,
-) => {
-  // Prevent following yourself
+export const followUser = async (followerId: string, followingId: string) => {
   if (followerId === followingId) {
     throw new Error("Cannot follow yourself");
   }
-
-  return prisma.follow.create({
-    data: {
-      followerId, // the user who is following
-      followingId, // the user being followed
-    },
+  const follow = await prisma.follow.create({
+    data: { followerId, followingId },
   });
+  // Get follower name for notification
+  const follower = await prisma.user.findUnique({ where: { id: followerId } });
+  if (follower) {
+    notificationService.notifyNewFollower(
+      followerId,
+      followingId,
+      follower.name || follower.username,
+    );
+  }
+  return follow;
 };
 
 // Unfollow a user

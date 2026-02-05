@@ -1,4 +1,5 @@
 import prisma from "../libs/prisma";
+import * as notificationService from "./notification.service";
 
 // Get comments for a post (with replies)
 export const getPostComments = async (
@@ -60,20 +61,26 @@ export const createComment = async (
   userId: string,
   content: string,
 ) => {
-  return prisma.comment.create({
-    data: {
-      postId,
-      userId,
-      content,
-    },
+  const comment = await prisma.comment.create({
+    data: { postId, userId, content },
     include: {
-      user: {
-        select: { id: true, username: true, name: true, avatar: true },
-      },
+      user: { select: { id: true, username: true, name: true, avatar: true } },
     },
   });
+  // Get post and commenter for notification
+  const [post, commenter] = await Promise.all([
+    prisma.post.findUnique({ where: { id: postId } }),
+    prisma.user.findUnique({ where: { id: userId } }),
+  ]);
+  if (post && commenter) {
+    notificationService.notifyPostCommented(
+      userId,
+      post,
+      commenter.name || commenter.username,
+    );
+  }
+  return comment;
 };
-
 // Reply to a comment
 export const replyToComment = async (
   parentId: string,
