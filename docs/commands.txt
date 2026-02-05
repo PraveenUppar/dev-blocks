@@ -1,0 +1,9 @@
+- npm install express cors dotenv
+- npm install -D typescript ts-node @types/node @types/express @types/cors nodemon
+- npx tsc --init
+- npm install prisma @types/node @types/pg --save-dev 
+- npm install @prisma/client @prisma/adapter-pg pg dotenv
+- npx prisma init
+- npx prisma db push
+- npx prisma generate
+- npx prisma studio
