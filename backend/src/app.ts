@@ -9,6 +9,7 @@ import postRouter from "./routes/post.routes";
 import tagRouter from "./routes/tag.routes";
 import commentRouter from "./routes/comment.routes";
 import notificationRouter from "./routes/notification.routes";
+import webhookRoutes from "./routes/webhook.routes";
 
 const app = Express();
 
@@ -19,6 +20,7 @@ app.use(
     credentials: true,
   }),
 );
+app.use("/api/webhooks", Express.json(), webhookRoutes);
 app.use(Express.json());
 // app.use(clerkAuthMiddleware);
 

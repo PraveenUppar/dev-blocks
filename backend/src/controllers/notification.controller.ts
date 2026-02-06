@@ -37,8 +37,6 @@ export async function markAllAsReadController(req: Request, res: Response) {
 // GET /unread-count
 export async function getUnreadCountController(req: Request, res: Response) {
   const { userId } = req.query;
-
   const count = await notificationService.getUnreadCount(userId as string);
-
   return res.json({ success: true, data: { unreadCount: count } });
 }
