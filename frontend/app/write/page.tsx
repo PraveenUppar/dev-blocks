@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import Editor from "./../components/Editor";
 import Image from "next/image";
+import api from "@/lib/axios";
+import { useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import { setAuthTokenGetter } from "@/lib/axios";
 
 export default function WritePage() {
   const router = useRouter();
@@ -13,35 +16,38 @@ export default function WritePage() {
   const [coverImage, setCoverImage] = useState("");
   const [tags, setTags] = useState("");
   const [saving, setSaving] = useState(false);
+  const { getToken } = useAuth();
+
+  useEffect(() => {
+    setAuthTokenGetter(getToken);
+  }, [getToken]);
 
   const handleSaveDraft = async () => {
-    setSaving(true);
-    // TODO: Call API to save draft
-    console.log({ title, subtitle, content, coverImage, tags });
-    setTimeout(() => {
-      setSaving(false);
-      alert("Draft saved!");
-    }, 1000);
-  };
-
-  const handlePublish = async () => {
-    if (!title.trim()) {
-      alert("Please add a title");
-      return;
-    }
-    if (!content.trim()) {
-      alert("Please add some content");
+    if (!title.trim() || !content.trim()) {
+      alert("Please add a title and content");
       return;
     }
 
     setSaving(true);
-    // TODO: Call API to publish
-    console.log({ title, subtitle, content, coverImage, tags, publish: true });
-    setTimeout(() => {
-      setSaving(false);
-      alert("Published!");
+    try {
+      const response = await api.post("/post/create", {
+        title,
+        subtitle: subtitle || undefined,
+        content,
+        coverImage: coverImage || undefined,
+      });
+
+      if (response.data.success) {
+        alert("Draft saved!");
+      }
       router.push("/");
-    }, 1000);
+    } catch (error: unknown) {
+      console.error("Failed to save draft:", error);
+      const errorMessage = "Failed to save draft. Please try again.";
+      alert(errorMessage);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -49,21 +55,14 @@ export default function WritePage() {
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Write a Story</h1>
+          <h1 className="text-2xl font-bold text-gray-900"></h1>
           <div className="flex gap-3">
             <button
               onClick={handleSaveDraft}
               disabled={saving}
-              className="px-4 py-2 text-gray-700 border border-gray-300 rounded-full hover:bg-gray-50 transition disabled:opacity-50"
-            >
-              {saving ? "Saving..." : "Save Draft"}
-            </button>
-            <button
-              onClick={handlePublish}
-              disabled={saving}
               className="px-6 py-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition disabled:opacity-50"
             >
-              Publish
+              {saving ? "Saving..." : "Save Draft"}
             </button>
           </div>
         </div>
@@ -74,12 +73,14 @@ export default function WritePage() {
             type="text"
             value={coverImage}
             onChange={(e) => setCoverImage(e.target.value)}
-            placeholder="Cover image URL (optional)"
-            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+            placeholder="Cover image URL (upload feature will be comming soon)"
+            className="w-full px-4 py-3 border text-black border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
           />
           {coverImage && (
             <Image
               src={coverImage}
+              width={64}
+              height={64}
               alt="Cover preview"
               className="mt-4 w-full h-64 object-cover rounded-lg"
             />
@@ -92,8 +93,8 @@ export default function WritePage() {
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Title"
-            className="w-full text-4xl font-bold placeholder-gray-300 border-0 focus:ring-0 focus:outline-none"
+            placeholder="Add Title"
+            className="w-full text-4xl font-bold text-black placeholder-gray-300 border-0 focus:ring-0 focus:outline-none"
           />
         </div>
 
@@ -103,8 +104,8 @@ export default function WritePage() {
             type="text"
             value={subtitle}
             onChange={(e) => setSubtitle(e.target.value)}
-            placeholder="Subtitle (optional)"
-            className="w-full text-xl text-gray-600 placeholder-gray-300 border-0 focus:ring-0 focus:outline-none"
+            placeholder="Add Subtitle"
+            className="w-full text-xl text-black  placeholder-gray-300 border-0 focus:ring-0 focus:outline-none"
           />
         </div>
 
@@ -115,7 +116,7 @@ export default function WritePage() {
             value={tags}
             onChange={(e) => setTags(e.target.value)}
             placeholder="Tags (comma separated: React, JavaScript, Tutorial)"
-            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+            className="w-full px-4 py-3 border text-black border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
           />
         </div>
 
@@ -127,7 +128,7 @@ export default function WritePage() {
         />
 
         {/* Word Count */}
-        <div className="mt-4 text-sm text-gray-500">
+        <div className="mt-4 text-sm  text-gray-500">
           {
             content
               .replace(/<[^>]*>/g, "")

@@ -1,156 +1,9 @@
-import prisma from "../libs/prisma";
-import { generateSlug } from "../utils/slug";
-import { calculateReadingTime } from "../utils/readingTime";
-import * as notificationService from "./notification.service";
+import prisma from "../libs/prisma.js";
+import { generateSlug } from "../utils/slug.js";
+import { calculateReadingTime } from "../utils/readingTime.js";
 
-// Create a new draft post
-export const createPost = async (
-  authorId: string,
-  data: {
-    title: string;
-    content: string;
-    subtitle?: string;
-    coverImage?: string;
-  },
-) => {
-  // Generate unique slug from title
-  let slug = generateSlug(data.title);
-  let counter = 1;
-  // Keep checking until we find a unique slug
-  while (await prisma.post.findUnique({ where: { slug } })) {
-    slug = `${generateSlug(data.title)}-${counter}`;
-    counter++;
-  }
-  // Calculate reading time
-  const readTime = calculateReadingTime(data.content);
-  return prisma.post.create({
-    data: {
-      title: data.title,
-      content: data.content,
-      subtitle: data.subtitle,
-      coverImage: data.coverImage,
-      slug,
-      readTime,
-      authorId,
-      status: "DRAFT",
-    },
-    include: {
-      author: {
-        select: { id: true, username: true, name: true, avatar: true },
-      },
-    },
-  });
-};
-
-// Get post by ID
-export const findById = async (id: string) => {
-  return prisma.post.findUnique({
-    where: { id, deletedAt: null },
-    include: {
-      author: {
-        select: {
-          id: true,
-          username: true,
-          name: true,
-          avatar: true,
-          bio: true,
-        },
-      },
-      tags: {
-        include: { tag: true },
-      },
-      _count: {
-        select: { comments: true, likes: true },
-      },
-    },
-  });
-};
-
-// Get post by slug
-export const findBySlug = async (slug: string) => {
-  return prisma.post.findUnique({
-    where: { slug, deletedAt: null },
-    include: {
-      author: {
-        select: {
-          id: true,
-          username: true,
-          name: true,
-          avatar: true,
-          bio: true,
-        },
-      },
-      tags: {
-        include: { tag: true },
-      },
-      _count: {
-        select: { comments: true, likes: true },
-      },
-    },
-  });
-};
-
-// Update post
-export const updatePost = async (
-  id: string,
-  data: {
-    title?: string;
-    content?: string;
-    subtitle?: string;
-    coverImage?: string;
-  },
-) => {
-  const updateData: any = { ...data };
-  // Recalculate reading time if content changed
-  if (data.content) {
-    updateData.readTime = calculateReadingTime(data.content);
-  }
-  // Regenerate slug if title changed
-  if (data.title) {
-    let slug = generateSlug(data.title);
-    let counter = 1;
-    // Check for existing slug (excluding current post)
-    const existing = await prisma.post.findUnique({ where: { slug } });
-    if (existing && existing.id !== id) {
-      while (await prisma.post.findUnique({ where: { slug } })) {
-        slug = `${generateSlug(data.title)}-${counter}`;
-        counter++;
-      }
-    }
-    updateData.slug = slug;
-  }
-  return prisma.post.update({
-    where: { id },
-    data: updateData,
-    include: {
-      author: {
-        select: { id: true, username: true, name: true, avatar: true },
-      },
-    },
-  });
-};
-
-// Soft delete post
-export const deletePost = async (id: string) => {
-  return prisma.post.update({
-    where: { id },
-    data: { deletedAt: new Date() },
-  });
-};
-
-// Publish post
-export const publishPost = async (id: string) => {
-  return prisma.post.update({
-    where: { id },
-    data: {
-      status: "PUBLISHED",
-      publishedAt: new Date(),
-    },
-  });
-};
-
-// List published posts with pagination
-export const listPosts = async (page: number = 1, limit: number = 10) => {
+// GET ALL PUBLISHED POST - working
+export async function getPublishedPostService(page: number, limit: number) {
   const skip = (page - 1) * limit;
   const [posts, total] = await Promise.all([
     prisma.post.findMany({
@@ -186,246 +39,225 @@ export const listPosts = async (page: number = 1, limit: number = 10) => {
       totalPages: Math.ceil(total / limit),
     },
   };
+}
+
+// GET PUBLISHED POST BY ID - working
+export async function getPublishedPostByIdService(id: string) {
+  return prisma.post.findFirst({
+    where: {
+      id,
+      deletedAt: null,
+      status: "PUBLISHED",
+    },
+    include: {
+      author: {
+        select: {
+          id: true,
+          username: true,
+          name: true,
+          avatar: true,
+          bio: true,
+        },
+      },
+      tags: {
+        include: { tag: true },
+      },
+      _count: {
+        select: { comments: true, likes: true },
+      },
+    },
+  });
+}
+
+// GET POST BY SLUG - working
+export async function getPublishedPostBySlugService(slug: string) {
+  return prisma.post.findFirst({
+    where: {
+      slug,
+      deletedAt: null,
+      status: "PUBLISHED",
+    },
+    include: {
+      author: {
+        select: {
+          id: true,
+          username: true,
+          name: true,
+          avatar: true,
+          bio: true,
+        },
+      },
+      tags: {
+        include: { tag: true },
+      },
+      _count: {
+        select: { comments: true, likes: true },
+      },
+    },
+  });
+}
+
+// CHECK USER BY USERNAME - working
+export async function getUserNameService(username: string) {
+  return prisma.user.findUnique({
+    where: { username },
+  });
+}
+
+// GET USER BY CLERKID - working
+export const getUserClerkIdService = async (clerkId: string) => {
+  return prisma.user.findUnique({
+    where: { clerkId },
+  });
 };
 
-// Get posts by author
-export const getPostsByAuthor = async (
+// GET USER BY ID - working
+export const getUserIdService = async (id: string) => {
+  return prisma.user.findUnique({
+    where: { id },
+  });
+};
+
+// CREATE A NEW POST
+export async function createPostService(
   authorId: string,
-  page: number = 1,
-  limit: number = 10,
-  includeUnpublished: boolean = false,
-) => {
-  const skip = (page - 1) * limit;
-  const where = {
-    authorId,
-    deletedAt: null,
-    ...(includeUnpublished ? {} : { status: "PUBLISHED" as const }),
-  };
-  const [posts, total] = await Promise.all([
-    prisma.post.findMany({
-      where,
-      skip,
-      take: limit,
-      orderBy: { createdAt: "desc" },
-      include: {
-        _count: {
-          select: { comments: true, likes: true },
-        },
-      },
-    }),
-    prisma.post.count({ where }),
-  ]);
-  return {
-    data: posts,
-    pagination: {
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
-    },
-  };
-};
-
-// Like a post
-export const likePost = async (userId: string, postId: string) => {
-  const like = await prisma.like.create({
-    data: { userId, postId },
-  });
-  // Get post and liker for notification
-  const [post, liker] = await Promise.all([
-    prisma.post.findUnique({ where: { id: postId } }),
-    prisma.user.findUnique({ where: { id: userId } }),
-  ]);
-  if (post && liker) {
-    notificationService.notifyPostLiked(
-      userId,
-      post,
-      liker.name || liker.username,
-    );
+  title: string,
+  content: string,
+  subtitle?: string,
+  coverImage?: string,
+) {
+  let slug = generateSlug(title);
+  let counter = 1;
+  while (await prisma.post.findUnique({ where: { slug } })) {
+    slug = `${generateSlug(title)}-${counter}`;
+    counter++;
   }
-  return like;
-};
-
-// Unlike a post
-export const unlikePost = async (userId: string, postId: string) => {
-  return prisma.like.delete({
-    where: {
-      userId_postId: { userId, postId },
+  const readTime = calculateReadingTime(content);
+  return prisma.post.create({
+    data: {
+      title: title,
+      content: content,
+      ...(subtitle && { subtitle }),
+      ...(coverImage && { coverImage }),
+      slug,
+      readTime,
+      authorId,
+      status: "DRAFT",
     },
-  });
-};
-
-// Bookmark a post
-export const bookmarkPost = async (userId: string, postId: string) => {
-  return prisma.bookmark.create({
-    data: { userId, postId },
-  });
-};
-
-// Remove bookmark
-export const unbookmarkPost = async (userId: string, postId: string) => {
-  return prisma.bookmark.delete({
-    where: {
-      userId_postId: { userId, postId },
-    },
-  });
-};
-
-// Get user's bookmarks
-export const getUserBookmarks = async (
-  userId: string,
-  page: number = 1,
-  limit: number = 10,
-) => {
-  const skip = (page - 1) * limit;
-
-  const [bookmarks, total] = await Promise.all([
-    prisma.bookmark.findMany({
-      where: { userId },
-      skip,
-      take: limit,
-      orderBy: { createdAt: "desc" },
-      include: {
-        post: {
-          include: {
-            author: {
-              select: { id: true, username: true, name: true, avatar: true },
-            },
-          },
-        },
+    include: {
+      author: {
+        select: { id: true, username: true, name: true, avatar: true },
       },
-    }),
-    prisma.bookmark.count({ where: { userId } }),
-  ]);
-
-  return {
-    data: bookmarks.map((b) => b.post),
-    pagination: {
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
     },
+  });
+}
+
+// EDIT A POST
+export async function editPostService(
+  id: string,
+  title?: string,
+  content?: string,
+  subtitle?: string,
+  coverImage?: string,
+) {
+  const data = {
+    ...(title !== undefined && { title }),
+    ...(content !== undefined && { content }),
+    ...(subtitle !== undefined && { subtitle }),
+    ...(coverImage !== undefined && { coverImage }),
   };
-};
-
-// Check if user liked/bookmarked a post
-export const getPostEngagement = async (userId: string, postId: string) => {
-  const [like, bookmark] = await Promise.all([
-    prisma.like.findUnique({
-      where: { userId_postId: { userId, postId } },
-    }),
-    prisma.bookmark.findUnique({
-      where: { userId_postId: { userId, postId } },
-    }),
-  ]);
-
-  return {
-    liked: !!like,
-    bookmarked: !!bookmark,
-  };
-};
-
-// Increment view count
-export const incrementViewCount = async (id: string) => {
+  const updateData: any = { ...data };
+  if (data.content) {
+    updateData.readTime = calculateReadingTime(data.content);
+  }
+  if (data.title) {
+    let slug = generateSlug(data.title);
+    let counter = 1;
+    const existing = await prisma.post.findUnique({ where: { slug } });
+    if (existing && existing.id !== id) {
+      while (await prisma.post.findUnique({ where: { slug } })) {
+        slug = `${generateSlug(data.title)}-${counter}`;
+        counter++;
+      }
+    }
+    updateData.slug = slug;
+  }
   return prisma.post.update({
     where: { id },
-    data: {
-      viewCount: { increment: 1 },
+    data: updateData,
+    include: {
+      author: {
+        select: { id: true, username: true, name: true, avatar: true },
+      },
     },
   });
-};
+}
 
-// Get user's drafts
-export const getUserDrafts = async (
-  authorId: string,
-  page: number = 1,
-  limit: number = 10,
-) => {
-  const skip = (page - 1) * limit;
+// DELETE A POST
+export async function deletePostService(id: string) {
+  return prisma.post.update({
+    where: { id },
+    data: { deletedAt: new Date() },
+  });
+}
 
-  const [posts, total] = await Promise.all([
-    prisma.post.findMany({
-      where: {
-        authorId,
-        status: "DRAFT",
-        deletedAt: null,
-      },
-      skip,
-      take: limit,
-      orderBy: { updatedAt: "desc" },
-    }),
-    prisma.post.count({
-      where: {
-        authorId,
-        status: "DRAFT",
-        deletedAt: null,
-      },
-    }),
-  ]);
+// PUBLISH A POST
+export async function publishPostService(id: string) {
+  return prisma.post.update({
+    where: { id },
+    data: { status: "PUBLISHED", publishedAt: new Date() },
+  });
+}
 
-  return {
-    data: posts,
-    pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
-  };
-};
-
-// Record reading history
-export const recordReadingHistory = async (
-  userId: string,
-  postId: string,
-  timeSpent: number,
-  scrollDepth: number,
-) => {
-  return prisma.readingHistory.upsert({
+// LIKE and UNLIKE A POST
+export async function toggleLikePostService(userId: string, postId: string) {
+  const existingLike = await prisma.like.findUnique({
     where: {
       userId_postId: { userId, postId },
     },
-    update: {
-      timeSpent,
-      scrollDepth,
-    },
-    create: {
-      userId,
-      postId,
-      timeSpent,
-      scrollDepth,
+  });
+
+  if (existingLike) {
+    // Unlike
+    await prisma.like.delete({
+      where: {
+        userId_postId: { userId, postId },
+      },
+    });
+    return { liked: false };
+  } else {
+    // Like
+    await prisma.like.create({
+      data: { userId, postId },
+    });
+    return { liked: true };
+  }
+}
+// BOOKMARK and UNBOOKMARK A POST
+export async function toggleBookmarkPostService(
+  userId: string,
+  postId: string,
+) {
+  const existingBookmark = await prisma.bookmark.findUnique({
+    where: {
+      userId_postId: { userId, postId },
     },
   });
-};
 
-// Get user's reading history
-export const getUserReadingHistory = async (
-  userId: string,
-  page: number = 1,
-  limit: number = 10,
-) => {
-  const skip = (page - 1) * limit;
-
-  const [history, total] = await Promise.all([
-    prisma.readingHistory.findMany({
-      where: { userId },
-      skip,
-      take: limit,
-      orderBy: { createdAt: "desc" },
-      include: {
-        post: {
-          include: {
-            author: {
-              select: { id: true, username: true, name: true, avatar: true },
-            },
-          },
-        },
+  if (existingBookmark) {
+    await prisma.bookmark.delete({
+      where: {
+        userId_postId: { userId, postId },
       },
-    }),
-    prisma.readingHistory.count({ where: { userId } }),
-  ]);
+    });
+    return { bookmarked: false };
+  } else {
+    await prisma.bookmark.create({
+      data: { userId, postId },
+    });
+    return { bookmarked: true };
+  }
+}
 
-  return {
-    data: history.map((h) => ({
-      ...h.post,
-      readingProgress: { timeSpent: h.timeSpent, scrollDepth: h.scrollDepth },
-    })),
-    pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
-  };
-};
+// RECORD READING HISTORY -- later
+// export async function readingPublishedPostService() {}

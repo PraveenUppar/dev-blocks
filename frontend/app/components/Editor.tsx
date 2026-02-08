@@ -40,7 +40,7 @@ export default function Editor({
     editorProps: {
       attributes: {
         class:
-          "prose prose-lg max-w-none focus:outline-none min-h-[300px] prose-headings:font-bold prose-a:text-green-600",
+          "prose prose-lg max-w-none focus:outline-none min-h-[300px] text-black prose-headings:font-bold prose-a:text-green-600",
       },
     },
   });
@@ -52,7 +52,7 @@ export default function Editor({
   return (
     <div>
       {/* Toolbar */}
-      <div className="flex flex-wrap gap-1 p-2 border-b border-gray-200 bg-gray-50 rounded-t-lg">
+      <div className="flex flex-wrap text-black gap-1 p-2 border-b border-gray-200 bg-gray-50 rounded-t-lg">
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBold().run()}
           active={editor.isActive("bold")}
@@ -78,64 +78,6 @@ export default function Editor({
         </ToolbarButton>
 
         <div className="w-px h-6 bg-gray-300 mx-1" />
-
-        <ToolbarButton
-          onClick={() =>
-            editor.chain().focus().toggleHeading({ level: 1 }).run()
-          }
-          active={editor.isActive("heading", { level: 1 })}
-          title="Heading 1"
-        >
-          H1
-        </ToolbarButton>
-
-        <ToolbarButton
-          onClick={() =>
-            editor.chain().focus().toggleHeading({ level: 2 }).run()
-          }
-          active={editor.isActive("heading", { level: 2 })}
-          title="Heading 2"
-        >
-          H2
-        </ToolbarButton>
-
-        <ToolbarButton
-          onClick={() =>
-            editor.chain().focus().toggleHeading({ level: 3 }).run()
-          }
-          active={editor.isActive("heading", { level: 3 })}
-          title="Heading 3"
-        >
-          H3
-        </ToolbarButton>
-
-        <div className="w-px h-6 bg-gray-300 mx-1" />
-
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-          active={editor.isActive("bulletList")}
-          title="Bullet List"
-        >
-          - List
-        </ToolbarButton>
-
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          active={editor.isActive("orderedList")}
-          title="Numbered List"
-        >
-          1. List
-        </ToolbarButton>
-
-        <div className="w-px h-6 bg-gray-300 mx-1" />
-
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleBlockquote().run()}
-          active={editor.isActive("blockquote")}
-          title="Quote"
-        >
-          “ ”
-        </ToolbarButton>
 
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleCodeBlock().run()}

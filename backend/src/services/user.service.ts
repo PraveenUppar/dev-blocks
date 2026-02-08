@@ -1,14 +1,12 @@
-import prisma from "../libs/prisma";
-import * as notificationService from "./notification.service";
+import prisma from "../libs/prisma.js";
 
-// ==================== FIND FUNCTIONS ====================
-
-// Get user by username with follower/following/post counts
-export async function findByUsernameService(username: string) {
+// CHECK USER BY USERNAME GET USER PROFILE DETAILS - working
+export async function getUserProfileService(username: string) {
   return prisma.user.findUnique({
     where: { username },
     select: {
       id: true,
+      email: true,
       username: true,
       name: true,
       bio: true,
@@ -29,91 +27,84 @@ export async function findByUsernameService(username: string) {
   });
 }
 
-// Get user by database ID
-export const findByIdService = async (id: string) => {
+// CHECK USER BY USERNAME - working
+export async function getUserNameService(username: string) {
   return prisma.user.findUnique({
-    where: { id },
+    where: { username },
   });
-};
+}
 
-// Get user by Clerk ID (used after auth middleware)
-export const findByClerkIdService = async (clerkId: string) => {
+// GET USER BY CLERKID - working
+export const getUserClerkIdService = async (clerkId: string) => {
   return prisma.user.findUnique({
     where: { clerkId },
   });
 };
 
-// ==================== UPDATE FUNCTIONS ====================
-
-// Update user profile
-export const updateProfileService = async (
-  userId: string,
-  data: {
-    name?: string;
-    bio?: string;
-    avatar?: string;
-    website?: string;
-    twitter?: string;
-    github?: string;
-    linkedin?: string;
-  },
-) => {
-  return prisma.user.update({
-    where: { id: userId },
-    data,
+// GET USER BY ID - working
+export const getUserIdService = async (id: string) => {
+  return prisma.user.findUnique({
+    where: { id },
   });
 };
 
-// ==================== FOLLOW FUNCTIONS ====================
-
-// Follow a user
-export const followUser = async (followerId: string, followingId: string) => {
-  if (followerId === followingId) {
-    throw new Error("Cannot follow yourself");
-  }
-  const follow = await prisma.follow.create({
-    data: { followerId, followingId },
-  });
-  // Get follower name for notification
-  const follower = await prisma.user.findUnique({ where: { id: followerId } });
-  if (follower) {
-    notificationService.notifyNewFollower(
-      followerId,
-      followingId,
-      follower.name || follower.username,
-    );
-  }
-  return follow;
-};
-
-// Unfollow a user
-export const unfollowUserService = async (
-  followerId: string,
-  followingId: string,
-) => {
-  return prisma.follow.delete({
-    where: {
-      followerId_followingId: {
-        followerId,
-        followingId,
-      },
-    },
-  });
-};
-
-// ==================== GET FOLLOWERS/FOLLOWING ====================
-
-// Get paginated list of followers
-export const getFollowersService = async (
-  userId: string,
+// GET USER POSTS - working
+export async function getUserPostsService(
+  username: string,
   page: number = 1,
   limit: number = 10,
-) => {
+  includeUnpublished: boolean = false,
+) {
   const skip = (page - 1) * limit;
+  const where = {
+    author: {
+      username: username,
+    },
+    deletedAt: null,
+    ...(includeUnpublished ? {} : { status: "PUBLISHED" as const }),
+  };
+  const [posts, total] = await Promise.all([
+    prisma.post.findMany({
+      where,
+      skip,
+      take: limit,
+      orderBy: { createdAt: "desc" },
+      include: {
+        author: {
+          select: {
+            username: true,
+            name: true,
+            avatar: true,
+          },
+        },
+        _count: {
+          select: { comments: true, likes: true },
+        },
+      },
+    }),
+    prisma.post.count({ where }),
+  ]);
+  return {
+    data: posts,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
+}
 
+// GET USER FOLLOWERS - working
+export async function getUserFollowerService(
+  username: string,
+  page: number = 1,
+  limit: number = 10,
+) {
+  const skip = (page - 1) * limit;
   const [followers, total] = await Promise.all([
     prisma.follow.findMany({
-      where: { followingId: userId }, // people who follow this user
+      where: { followingId: username }, // people who follow this username
       skip,
       take: limit,
       include: {
@@ -130,10 +121,9 @@ export const getFollowersService = async (
       orderBy: { createdAt: "desc" },
     }),
     prisma.follow.count({
-      where: { followingId: userId },
+      where: { followingId: username },
     }),
   ]);
-
   return {
     data: followers.map((f) => f.follower),
     pagination: {
@@ -143,19 +133,17 @@ export const getFollowersService = async (
       totalPages: Math.ceil(total / limit),
     },
   };
-};
-
-// Get paginated list of users this user follows
-export const getFollowingService = async (
-  userId: string,
+}
+// GET USER FOLLOWING - working
+export async function getUserFollowingService(
+  username: string,
   page: number = 1,
   limit: number = 10,
-) => {
+) {
   const skip = (page - 1) * limit;
-
   const [following, total] = await Promise.all([
     prisma.follow.findMany({
-      where: { followerId: userId }, // people this user follows
+      where: { followerId: username }, // people this user follows
       skip,
       take: limit,
       include: {
@@ -172,10 +160,9 @@ export const getFollowingService = async (
       orderBy: { createdAt: "desc" },
     }),
     prisma.follow.count({
-      where: { followerId: userId },
+      where: { followingId: username },
     }),
   ]);
-
   return {
     data: following.map((f) => f.following),
     pagination: {
@@ -185,4 +172,156 @@ export const getFollowingService = async (
       totalPages: Math.ceil(total / limit),
     },
   };
-};
+}
+
+// UPDATE USER PROFILE
+export async function updateUserProfileService(
+  userId: string,
+  data: {
+    name?: string;
+    bio?: string;
+    avatar?: string;
+    website?: string;
+    twitter?: string;
+    github?: string;
+    linkedin?: string;
+  },
+) {
+  return prisma.user.update({
+    where: { id: userId },
+    data,
+  });
+}
+
+// FOLLOW USER LOGIC
+export async function followUserProfileService(
+  followerId: string,
+  followingId: string,
+) {
+  const follow = await prisma.follow.create({
+    data: { followerId, followingId },
+  });
+  return follow;
+}
+
+// UNFOLLOW USER LOGIC
+export async function unfollowUserProfileService(
+  followerId: string,
+  followingId: string,
+) {
+  return prisma.follow.delete({
+    where: {
+      followerId_followingId: {
+        followerId,
+        followingId,
+      },
+    },
+  });
+}
+
+// GET USER BOOKMARKS
+export async function getUserBookmarksService(
+  userId: string,
+  page: number = 1,
+  limit: number = 10,
+) {
+  const skip = (page - 1) * limit;
+  const [bookmarks, total] = await Promise.all([
+    prisma.bookmark.findMany({
+      where: { userId },
+      skip,
+      take: limit,
+      orderBy: { createdAt: "desc" },
+      include: {
+        post: {
+          include: {
+            author: {
+              select: { id: true, username: true, name: true, avatar: true },
+            },
+          },
+        },
+      },
+    }),
+    prisma.bookmark.count({ where: { userId } }),
+  ]);
+
+  return {
+    data: bookmarks.map((b) => b.post),
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
+}
+
+// GET USER DRAFTS
+export async function getUserDraftsService(
+  authorId: string,
+  page: number = 1,
+  limit: number = 10,
+) {
+  const skip = (page - 1) * limit;
+
+  const [posts, total] = await Promise.all([
+    prisma.post.findMany({
+      where: {
+        authorId,
+        status: "DRAFT",
+        deletedAt: null,
+      },
+      skip,
+      take: limit,
+      orderBy: { updatedAt: "desc" },
+    }),
+    prisma.post.count({
+      where: {
+        authorId,
+        status: "DRAFT",
+        deletedAt: null,
+      },
+    }),
+  ]);
+
+  return {
+    data: posts,
+    pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+  };
+}
+
+// GET USER READING HISTORY
+export async function getUserReadingHistoryService(
+  userId: string,
+  page: number = 1,
+  limit: number = 10,
+) {
+  const skip = (page - 1) * limit;
+
+  const [history, total] = await Promise.all([
+    prisma.readingHistory.findMany({
+      where: { userId },
+      skip,
+      take: limit,
+      orderBy: { createdAt: "desc" },
+      include: {
+        post: {
+          include: {
+            author: {
+              select: { id: true, username: true, name: true, avatar: true },
+            },
+          },
+        },
+      },
+    }),
+    prisma.readingHistory.count({ where: { userId } }),
+  ]);
+
+  return {
+    data: history.map((h) => ({
+      ...h.post,
+      readingProgress: { timeSpent: h.timeSpent, scrollDepth: h.scrollDepth },
+    })),
+    pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+  };
+}

@@ -1,29 +1,40 @@
 "use client";
 
 import Link from "next/link";
-import { SignInButton, SignUpButton, UserButton, useUser } from "@clerk/nextjs";
+import {
+  SignInButton,
+  SignUpButton,
+  UserButton,
+  useUser,
+  useAuth,
+} from "@clerk/nextjs";
+import { setAuthTokenGetter } from "../../lib/axios";
+import { useEffect, useState } from "react";
 
 export default function Navbar() {
   const { isSignedIn, isLoaded } = useUser();
+  const { getToken } = useAuth();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+  useEffect(() => {
+    setAuthTokenGetter(getToken);
+  }, [getToken]);
   return (
     <nav className="border-b border-gray-200 bg-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <span className="text-2xl font-bold text-black">Dev Blocks</span>
+            <span className="text-2xl font-bold text-black">Blocks</span>
           </Link>
-
           {/* Search (optional - add later) */}
           <div className="hidden md:flex flex-1 max-w-md mx-8">
             <input
               type="text"
               placeholder="Search..."
-              className="w-full px-4 py-2 rounded-full bg-gray-100 border-0 focus:ring-2 focus:ring-green-500 focus:outline-none"
+              className="w-full px-4 py-2 text-black rounded-full bg-gray-100 border-0 focus:ring-2 focus:ring-green-500 focus:outline-none"
             />
           </div>
-
           {/* Right side */}
           <div className="flex items-center gap-4">
             {!isLoaded ? (
@@ -32,7 +43,57 @@ export default function Navbar() {
             ) : isSignedIn ? (
               // Signed in state
               <>
-                <Link
+                <div className="relative">
+                  <button
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+                  >
+                    Menu
+                  </button>
+
+                  {isDropdownOpen && (
+                    <>
+                      {/* Backdrop to close dropdown */}
+                      <div
+                        className="fixed inset-0 z-10"
+                        onClick={() => setIsDropdownOpen(false)}
+                      />
+
+                      {/* Dropdown menu */}
+                      <div className="absolute right-0 z-20 mt-2 w-48 rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
+                        <Link
+                          href="/write"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          onClick={() => setIsDropdownOpen(false)}
+                        >
+                          Write
+                        </Link>
+                        <Link
+                          href="/drafts"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          onClick={() => setIsDropdownOpen(false)}
+                        >
+                          Drafts
+                        </Link>
+                        <Link
+                          href="/bookmarks"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          onClick={() => setIsDropdownOpen(false)}
+                        >
+                          Bookmarks
+                        </Link>
+                        <Link
+                          href="/settings"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          onClick={() => setIsDropdownOpen(false)}
+                        >
+                          Settings
+                        </Link>
+                      </div>
+                    </>
+                  )}
+                </div>
+                {/* <Link
                   href="/write"
                   className="flex items-center gap-2 text-gray-600 hover:text-black transition"
                 >
@@ -51,7 +112,7 @@ export default function Navbar() {
                     />
                   </svg>
                   <span className="hidden sm:inline">Write</span>
-                </Link>
+                </Link> */}
 
                 <Link
                   href="/notifications"
@@ -79,7 +140,6 @@ export default function Navbar() {
                       avatarBox: "w-9 h-9",
                     },
                   }}
-                  afterSignOutUrl="/"
                 />
               </>
             ) : (

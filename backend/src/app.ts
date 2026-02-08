@@ -3,31 +3,25 @@ dotenv.config();
 
 import Express from "express";
 import cors from "cors";
-// import { clerkAuthMiddleware   } from "./middleware/auth.middleware";
-import userRouter from "./routes/user.routes";
-import postRouter from "./routes/post.routes";
-import tagRouter from "./routes/tag.routes";
-import commentRouter from "./routes/comment.routes";
-import notificationRouter from "./routes/notification.routes";
-import webhookRoutes from "./routes/webhook.routes";
+import { clerkMiddleware } from "@clerk/express";
+import userRoute from "./routes/user.route.js";
+import postRoute from "./routes/post.route.js";
+import webhookRoutes from "./config/clerkwebhook.js";
 
 const app = Express();
-
-// CORS - allow frontend origin
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
+    origin: process.env.FRONTEND_URL || "http://localhost:3000",
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   }),
 );
 app.use("/api/webhooks", Express.json(), webhookRoutes);
 app.use(Express.json());
-// app.use(clerkAuthMiddleware);
+app.use(clerkMiddleware());
 
-app.use("/api/user", userRouter);
-app.use("/api/post", postRouter);
-app.use("/api/tag", tagRouter);
-app.use("/api/comment", commentRouter);
-app.use("/api/notification", notificationRouter);
+app.use("/api/user", userRoute);
+app.use("/api/post", postRoute);
 
 export default app;

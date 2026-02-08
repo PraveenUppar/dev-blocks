@@ -1,213 +1,314 @@
-import { Request, Response } from "express";
-import {
-  findByClerkIdService,
-  findByIdService,
-  findByUsernameService,
-  followUser,
-  getFollowersService,
-  getFollowingService,
-  unfollowUserService,
-  updateProfileService,
-} from "../services/user.service";
-import {
-  getUserBookmarks,
-  getUserDrafts,
-  getUserReadingHistory,
-} from "../services/post.service";
+import type { NextFunction, Request, Response } from "express";
+import { getAuth } from "@clerk/express";
 
-// Define params type
-interface UsernameParams {
+import {
+  getUserProfileService,
+  getUserNameService,
+  getUserIdService,
+  getUserClerkIdService,
+  getUserPostsService,
+  getUserFollowerService,
+  getUserFollowingService,
+  updateUserProfileService,
+  followUserProfileService,
+  unfollowUserProfileService,
+  getUserDraftsService,
+  getUserBookmarksService,
+  getUserReadingHistoryService,
+} from "../services/user.service.js";
+
+interface usernameParams {
   username: string;
 }
-export interface IdParams {
-  id: string;
-}
+// interface IdParams {
+//   id: string;
+// }
 
 // ==================== PUBLIC CONTROLLERS ====================
-// GET /:username - Get user's public profile
-export async function getProfileController(
-  req: Request<UsernameParams>,
-  res: Response,
-) {
-  const { username } = req.params;
-  const user = await findByUsernameService(username);
-  if (!user) {
-    return res.status(404).json({
-      success: false,
-      error: { message: "User not found" },
-    });
-  }
-  return res.json({ success: true, data: user });
-}
 
-// GET /:username/posts - Get all published posts by user
+// Tested and Working
+export async function getUserProfileController(
+  req: Request<usernameParams>,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const { username } = req.params;
+    const user = await getUserProfileService(username);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: { message: "User not found" },
+      });
+    }
+    return res.json({ success: true, data: user });
+  } catch (error) {
+    next(error);
+  }
+}
+// Tested and Working
 export async function getUserPostsController(
-  req: Request<UsernameParams>,
+  req: Request<usernameParams>,
   res: Response,
+  next: NextFunction,
 ) {
-  const { username } = req.params;
-  const page = parseInt(req.query.page as string) || 1;
-  const limit = parseInt(req.query.limit as string) || 10;
-  // First find the user
-  const user = await findByUsernameService(username);
-  if (!user) {
-    return res.status(404).json({
-      success: false,
-      error: { message: "User not found" },
-    });
+  try {
+    const { username } = req.params;
+    const user = await getUserNameService(username);
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: { message: "User not found" },
+      });
+    }
+    const posts = await getUserPostsService(username, page, limit);
+    return res.json({ success: true, ...posts });
+  } catch (error) {
+    next(error);
   }
-  // TODO: We'll implement this in post.service.ts later
-  // For now, return empty array
-  return res.json({
-    success: true,
-    data: [],
-    pagination: { page, limit, total: 0, totalPages: 0 },
-  });
 }
-
-// GET /:id/followers - Get list of followers
-export async function getFollowersController(
-  req: Request<IdParams>,
+// Tested and Working
+export async function getUserFollowersController(
+  req: Request<usernameParams>,
   res: Response,
+  next: NextFunction,
 ) {
-  const { id } = req.params;
-  const page = parseInt(req.query.page as string) || 1;
-  const limit = parseInt(req.query.limit as string) || 10;
-  const result = await getFollowersService(id, page, limit);
-  return res.json({ success: true, ...result });
+  try {
+    const { username } = req.params;
+    const user = await getUserNameService(username);
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: { message: "User not found" },
+      });
+    }
+    const followers = await getUserFollowerService(username, page, limit);
+    return res.json({ success: true, ...followers });
+  } catch (error) {
+    next(error);
+  }
 }
-// GET /:id/following - Get list of users this user follows
-export async function getFollowingController(
-  req: Request<IdParams>,
+// Tested and Working
+export async function getUserFollowingController(
+  req: Request<usernameParams>,
   res: Response,
+  next: NextFunction,
 ) {
-  const { id } = req.params;
-  const page = parseInt(req.query.page as string) || 1;
-  const limit = parseInt(req.query.limit as string) || 10;
-  const result = await getFollowingService(id, page, limit);
-  return res.json({ success: true, ...result });
+  try {
+    const { username } = req.params;
+    const user = await getUserNameService(username);
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: { message: "User not found" },
+      });
+    }
+    const following = await getUserFollowingService(username, page, limit);
+    return res.json({ success: true, ...following });
+  } catch (error) {
+    next(error);
+  }
 }
 
 // ==================== PROTECTED CONTROLLERS ====================
 
-// PUT /me - Update logged-in user's profile
-export async function updateMyProfileController(req: Request, res: Response) {
-  const clerkId = (req as any).clerkUserId;
-  // Get user from database using Clerk ID
-  const user = await findByClerkIdService(clerkId!);
-  if (!user) {
-    return res.status(404).json({
-      success: false,
-      error: { message: "User not found" },
-    });
-  }
-  // Update profile with data from request body
-  const updated = await updateProfileService(user.id, req.body);
-  return res.json({ success: true, data: updated });
-}
-
-// POST /:id/follow - Follow a user
-export async function followUserController(req: Request, res: Response) {
-  const { id: followingId } = req.params; // user to follow
-  const clerkId = (req as any).clerkUserId;
-  // Get logged-in user
-  const follower = await findByClerkIdService(clerkId!);
-  if (!follower) {
-    return res.status(404).json({
-      success: false,
-      error: { message: "User not found" },
-    });
-  }
-  // Prevent following yourself
-  if (follower.id === followingId) {
-    return res.status(400).json({
-      success: false,
-      error: { message: "Cannot follow yourself" },
-    });
-  }
-  // Check if target user exists
-  const targetUser = await findByIdService(followingId as string);
-  if (!targetUser) {
-    return res.status(404).json({
-      success: false,
-      error: { message: "User to follow not found" },
-    });
-  }
+//
+export async function updateUserProfileController(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   try {
-    await followUser(follower.id, followingId as string);
+    const clerkId = getAuth(req).userId;
+    if (!clerkId) {
+      return res.status(401).json({
+        success: false,
+        error: { message: "Unauthorized" },
+      });
+    }
+    const user = await getUserClerkIdService(clerkId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: { message: "User not found" },
+      });
+    }
+    const updated = await updateUserProfileService(user.id, req.body);
+    return res.json({ success: true, data: updated });
+  } catch (error) {
+    next(error);
+  }
+}
+//
+export async function followUserProfileController(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const followingId = req.params.id;
+    const clerkId = req.clerkUserId;
+    if (!clerkId) {
+      return res.status(401).json({
+        success: false,
+        error: { message: "Unauthorized" },
+      });
+    }
+    const user = await getUserClerkIdService(clerkId!);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: { message: "User not found" },
+      });
+    }
+    // Prevent following yourself
+    if (user.id === followingId) {
+      return res.status(400).json({
+        success: false,
+        error: { message: "Cannot follow yourself" },
+      });
+    }
+    const targetUser = await getUserIdService(followingId as string);
+    if (!targetUser) {
+      return res.status(404).json({
+        success: false,
+        error: { message: "User to follow not found" },
+      });
+    }
+    await followUserProfileService(user.id, followingId as string);
     return res.status(201).json({
       success: true,
       message: "Successfully followed user",
     });
-  } catch (error: any) {
-    // Handle duplicate follow (already following)
-    if (error.code === "P2002") {
-      return res.status(409).json({
-        success: false,
-        error: { message: "Already following this user" },
-      });
-    }
-    throw error;
+  } catch (error) {
+    next(error);
   }
 }
-
-// DELETE /:id/follow - Unfollow a user
-export async function unfollowUserController(req: Request, res: Response) {
-  const { id: followingId } = req.params; // user to unfollow
-  const clerkId = (req as any).clerkUserId;
-  // Get logged-in user
-  const follower = await findByClerkIdService(clerkId!);
-  if (!follower) {
-    return res.status(404).json({
-      success: false,
-      error: { message: "User not found" },
-    });
-  }
+//
+export async function unfollowUserProfileController(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   try {
-    await unfollowUserService(follower.id, followingId as string);
+    const followingId = req.params.id;
+    const clerkId = req.clerkUserId;
+    if (!clerkId) {
+      return res.status(401).json({
+        success: false,
+        error: { message: "Unauthorized" },
+      });
+    }
+    const user = await getUserClerkIdService(clerkId!);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: { message: "User not found" },
+      });
+    }
+    await unfollowUserProfileService(user.id, followingId as string);
     return res.json({
       success: true,
       message: "Successfully unfollowed user",
     });
-  } catch (error: any) {
-    // Handle not following (record not found)
-    if (error.code === "P2025") {
-      return res.status(404).json({
-        success: false,
-        error: { message: "Not following this user" },
-      });
-    }
-    throw error;
+  } catch (error) {
+    next(error);
   }
 }
-
-export async function getMyBookmarksController(req: Request, res: Response) {
-  const { userId } = req.query; // For testing; later from auth
-  const page = parseInt(req.query.page as string) || 1;
-  const limit = parseInt(req.query.limit as string) || 10;
-  const result = await getUserBookmarks(userId as string, page, limit);
-  return res.json({ success: true, ...result });
-}
-
-// GET /me/drafts
-export async function getMyDraftsController(req: Request, res: Response) {
-  const { userId } = req.query; // For testing
-  const page = parseInt(req.query.page as string) || 1;
-  const limit = parseInt(req.query.limit as string) || 10;
-  const result = await getUserDrafts(userId as string, page, limit);
-  return res.json({ success: true, ...result });
-}
-
-// GET /me/reading-history
-export async function getMyReadingHistoryController(
+//
+export async function getUserBookmarksController(
   req: Request,
   res: Response,
+  next: NextFunction,
 ) {
-  const { userId } = req.query;
-  const page = parseInt(req.query.page as string) || 1;
-  const limit = parseInt(req.query.limit as string) || 10;
-
-  const result = await getUserReadingHistory(userId as string, page, limit);
-
-  return res.json({ success: true, ...result });
+  try {
+    const clerkId = req.clerkUserId;
+    if (!clerkId) {
+      return res.status(401).json({
+        success: false,
+        error: { message: "Unauthorized" },
+      });
+    }
+    const user = await getUserClerkIdService(clerkId!);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: { message: "User not found" },
+      });
+    }
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const bookmarks = await getUserBookmarksService(user.id, page, limit);
+    return res.json({ success: true, ...bookmarks });
+  } catch (error) {
+    next(error);
+  }
+}
+//
+export async function getUserDraftsController(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const clerkId = getAuth(req).userId;
+    if (!clerkId) {
+      return res.status(401).json({
+        success: false,
+        error: { message: "Unauthorized" },
+      });
+    }
+    const user = await getUserClerkIdService(clerkId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: { message: "User not found" },
+      });
+    }
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const drafts = await getUserDraftsService(user.id, page, limit);
+    return res.json({ success: true, ...drafts });
+  } catch (error) {
+    next(error);
+  }
+}
+//
+export async function getUserReadingHistoryController(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const clerkId = req.clerkUserId;
+    if (!clerkId) {
+      return res.status(401).json({
+        success: false,
+        error: { message: "Unauthorized" },
+      });
+    }
+    const user = await getUserClerkIdService(clerkId!);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: { message: "User not found" },
+      });
+    }
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const readinghistory = await getUserReadingHistoryService(
+      user.id,
+      page,
+      limit,
+    );
+    return res.json({ success: true, ...readinghistory });
+  } catch (error) {
+    next(error);
+  }
 }
