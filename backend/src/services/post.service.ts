@@ -3,8 +3,12 @@ import { generateSlug } from "../utils/slug.js";
 import { calculateReadingTime } from "../utils/readingTime.js";
 import { nanoid } from "nanoid";
 
+interface GetPostsParams {
+  page: number;
+  limit: number;
+}
 // GET ALL PUBLISHED POST Service
-export async function getPublishedPostService(page: number, limit: number) {
+export async function getPublishedPostService({ page, limit }: GetPostsParams) {
   const skip = (page - 1) * limit;
   const [posts, total] = await Promise.all([
     prisma.post.findMany({
@@ -64,15 +68,27 @@ export async function getPublishedPostService(page: number, limit: number) {
     },
   };
 }
-// GET PUBLISHED POST BY ID Service
+// GET PUBLISHED POST CONTENT BY ID Service
 export async function getPublishedPostByIdService(id: string, userId?: string) {
-  const post = await prisma.post.findFirst({
+  const post = await prisma.post.findUnique({
     where: {
       id,
       deletedAt: null,
-      status: "PUBLISHED",
     },
-    include: {
+    select: {
+      id: true,
+      title: true,
+      subtitle: true,
+      content: true,
+      slug: true,
+      coverImage: true,
+      readTime: true,
+      viewCount: true,
+      readCount: true,
+      status: true,
+      publishedAt: true,
+      createdAt: true,
+      updatedAt: true,
       author: {
         select: {
           id: true,
@@ -83,7 +99,14 @@ export async function getPublishedPostByIdService(id: string, userId?: string) {
         },
       },
       tags: {
-        include: { tag: true },
+        select: {
+          tag: {
+            select: {
+              name: true,
+              slug: true,
+            },
+          },
+        },
       },
       _count: {
         select: {
@@ -92,19 +115,33 @@ export async function getPublishedPostByIdService(id: string, userId?: string) {
           bookmarks: true,
         },
       },
-      // Only fetch user's like/bookmark if userId is provided(&& operator)
+      // Conditionally fetch user interactions
       ...(userId && {
-        likes: { where: { userId }, take: 1 }, // if liked: likes: [{ id: '...' }] (An array with one object) or likes: []
-        bookmarks: { where: { userId }, take: 1 },
+        likes: {
+          where: { userId },
+          select: { id: true },
+          take: 1,
+        },
+        bookmarks: {
+          where: { userId },
+          select: { id: true },
+          take: 1,
+        },
       }),
     },
   });
 
-  if (!post) return null;
-  // Check if user has liked/bookmarked
+  if (!post || post.status !== "PUBLISHED") {
+    return null;
+  }
+  await prisma.post.update({
+    where: { id },
+    data: { viewCount: { increment: 1 } },
+  });
   const isLiked = userId && post.likes && post.likes.length > 0;
   const isBookmarked = userId && post.bookmarks && post.bookmarks.length > 0;
-  const flattenedTags = post.tags.map((t) => t.tag.name);
+
+  const flattenedTags = post.tags.map((t) => t.tag);
   const { likes, bookmarks, tags, ...postData } = post; // Remove the likes and bookmarks and tags arrays(not needed) for response
   return {
     ...postData,
@@ -114,14 +151,29 @@ export async function getPublishedPostByIdService(id: string, userId?: string) {
   };
 }
 // GET POST BY SLUG Service
-export async function getPublishedPostBySlugService(slug: string) {
-  return prisma.post.findFirst({
+export async function getPublishedPostBySlugService(
+  slug: string,
+  userId?: string,
+) {
+  const post = await prisma.post.findUnique({
     where: {
       slug,
       deletedAt: null,
-      status: "PUBLISHED",
     },
-    include: {
+    select: {
+      id: true,
+      title: true,
+      subtitle: true,
+      content: true,
+      slug: true,
+      coverImage: true,
+      readTime: true,
+      viewCount: true,
+      readCount: true,
+      status: true,
+      publishedAt: true,
+      createdAt: true,
+      updatedAt: true,
       author: {
         select: {
           id: true,
@@ -132,13 +184,56 @@ export async function getPublishedPostBySlugService(slug: string) {
         },
       },
       tags: {
-        include: { tag: true },
+        select: {
+          tag: {
+            select: {
+              name: true,
+              slug: true,
+            },
+          },
+        },
       },
       _count: {
-        select: { comments: true, likes: true },
+        select: {
+          comments: true,
+          likes: true,
+          bookmarks: true,
+        },
       },
+      // Conditionally fetch user interactions
+      ...(userId && {
+        likes: {
+          where: { userId },
+          select: { id: true },
+          take: 1,
+        },
+        bookmarks: {
+          where: { userId },
+          select: { id: true },
+          take: 1,
+        },
+      }),
     },
   });
+
+  if (!post || post.status !== "PUBLISHED") {
+    return null;
+  }
+  await prisma.post.update({
+    where: { slug },
+    data: { viewCount: { increment: 1 } },
+  });
+  const isLiked = userId && post.likes && post.likes.length > 0;
+  const isBookmarked = userId && post.bookmarks && post.bookmarks.length > 0;
+
+  const flattenedTags = post.tags.map((t) => t.tag);
+  const { likes, bookmarks, tags, ...postData } = post; // Remove the likes and bookmarks and tags arrays(not needed) for response
+  return {
+    ...postData,
+    tags: flattenedTags,
+    isLiked: !!isLiked,
+    isBookmarked: !!isBookmarked,
+  };
 }
 // CHECK USER BY USERNAME Service
 export async function getUserNameService(username: string) {

@@ -35,13 +35,16 @@ export async function getPublishedPostController(
       50,
       Math.max(1, parseInt(req.query.limit as string) || 10),
     );
-    const posts = await getPublishedPostService(page, limit);
-    return res.json({ success: true, ...posts });
+    // // Optional: Add sorting and filtering
+    // const sortBy = (req.query.sortBy as string) || "latest";
+    // const tag = req.query.tag as string;
+    const posts = await getPublishedPostService({ page, limit });
+    return res.status(200).json({ success: true, ...posts });
   } catch (error) {
     next(error);
   }
 }
-// GET Published Post by ID Controller
+// GET Published Post Metadata by ID Controller
 // If user is signed in - return his likes on post and bookmark of post he did - so auth needed
 export async function getPublishedPostByIdController(
   req: Request<IdParams>,
@@ -50,16 +53,7 @@ export async function getPublishedPostByIdController(
 ) {
   try {
     const { id } = req.params;
-    let userId: string | undefined;
-    try {
-      const clerkId = req.auth().userId;
-      if (clerkId) {
-        const user = await getUserClerkIdService(clerkId);
-        userId = user?.id;
-      }
-    } catch (error) {
-      userId = undefined;
-    }
+    const userId = req.auth().userId;
     const post = await getPublishedPostByIdService(id, userId);
     if (!post) {
       return res.status(404).json({
@@ -67,7 +61,7 @@ export async function getPublishedPostByIdController(
         error: { message: "Post not found" },
       });
     }
-    return res.json({ success: true, data: post });
+    return res.status(200).json({ success: true, data: post });
   } catch (error) {
     next(error);
   }
@@ -80,14 +74,15 @@ export async function getPublishedPostBySlugController(
 ) {
   try {
     const slug = req.params.slug as string;
-    const post = await getPublishedPostBySlugService(slug);
+    const userId = req.auth().userId;
+    const post = await getPublishedPostBySlugService(slug, userId);
     if (!post) {
       return res.status(404).json({
         success: false,
         error: { message: "Post not found" },
       });
     }
-    return res.json({ success: true, data: post });
+    return res.status(200).json({ success: true, data: post });
   } catch (error) {
     next(error);
   }

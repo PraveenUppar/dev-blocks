@@ -46,4 +46,33 @@ export const validateCreatePost = (
   next();
 };
 
+// middleware/validation.ts
+
+export const validateSlugParam = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const slug = req.params.slug as string;
+
+  // Slug validation rules
+  const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+  if (!slug || slug.length < 3 || slug.length > 200) {
+    return res.status(400).json({
+      success: false,
+      error: "Invalid slug format: must be 3-200 characters",
+    });
+  }
+
+  if (!slugRegex.test(slug)) {
+    return res.status(400).json({
+      success: false,
+      error:
+        "Invalid slug format: only lowercase letters, numbers, and hyphens allowed",
+    });
+  }
+
+  next();
+};
 // Add validateUpdatePost similarly...
