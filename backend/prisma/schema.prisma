@@ -64,7 +64,7 @@ model Post {
   @@index([authorId])
   @@index([status])
   @@index([createdAt])
-  @@index([status, createdAt])
+  @@index([status, publishedAt])
   @@index([slug])
 }
 

@@ -5,47 +5,69 @@ import {
   getPublishedPostByIdController,
   getPublishedPostBySlugController,
   createPostController,
-  editPostController,
+  updatePostController,
   deletePostController,
   publishPostController,
   likePublishedPostController,
   bookmarkPublishedPostController,
   getDraftPostByIdController,
-  //   readingPublishedPostController, -- later
 } from "../controllers/post.controller.js";
-const postRoute = Router();
+import {
+  apiLimiter,
+  createLimiter,
+  interactionLimiter,
+} from "../middleware/rateLimiter.js";
+import {
+  validateCreatePost,
+  validateIdParam,
+} from "../middleware/validation.js";
 
 // ==================== PUBLIC ROUTES ====================
 
-// GET Published Posts for Homepage - working and connected
+const postRoute = Router();
+
+postRoute.use(apiLimiter);
+
+// GET Published Posts for Homepage
 postRoute.get("/", getPublishedPostController);
-// GET Single Published Post by ID - working
-postRoute.get("/id/:id", getPublishedPostByIdController);
-
-// GET Published Post by Slug - working
+// GET Published Post by ID
+postRoute.get("/id/:id", validateIdParam, getPublishedPostByIdController);
+// GET Published Post by Slug
 postRoute.get("/:slug", getPublishedPostBySlugController);
-
-// GET Published Post by username -- defined in user route
 
 // ==================== PROTECTED ROUTES ====================
 
 postRoute.use(requireAuth());
 
-// GET Single Draft Post by ID - working
-postRoute.get("/draft/:id", getDraftPostByIdController);
-// CREATE a new Post
-postRoute.post("/create", createPostController);
-// UPDATE a Post
-postRoute.put("/:id/edit", editPostController);
-// DELETE a Post
-postRoute.delete("/:id/delete", deletePostController);
-// PUBLISH a Post
-postRoute.patch("/:id/publish", publishPostController);
-// LIKE and UNLIKE a Post
-postRoute.post("/:id/like", likePublishedPostController);
-// BOOKMARK and UNBOOKMARK a Post
-postRoute.post("/:id/bookmark", bookmarkPublishedPostController);
-// RECORD a Reading History -- later
-// postRoute.post("/:id/reading", readingPublishedPostController);
+// CREATE a new Draft Post
+postRoute.post(
+  "/create",
+  createLimiter,
+  validateCreatePost,
+  createPostController,
+);
+// GET Draft Post by ID
+postRoute.get("/draft/:id", validateIdParam, getDraftPostByIdController);
+// UPDATE a Post by ID
+postRoute.put("/:id/update", updatePostController);
+// DELETE a Post by ID
+postRoute.delete("/:id/delete", validateIdParam, deletePostController);
+// PUBLISH a Post by ID
+postRoute.patch("/:id/publish", validateIdParam, publishPostController);
+
+// LIKE and UNLIKE a Post by ID
+postRoute.post(
+  "/:id/like",
+  interactionLimiter,
+  validateIdParam,
+  likePublishedPostController,
+);
+// BOOKMARK and UNBOOKMARK a Post by ID
+postRoute.post(
+  "/:id/bookmark",
+  interactionLimiter,
+  validateIdParam,
+  bookmarkPublishedPostController,
+);
 
 export default postRoute;

@@ -1,18 +1,17 @@
 import type { NextFunction, Request, Response } from "express";
-import { getAuth } from "@clerk/express";
-import prisma from "../libs/prisma.js";
 import {
   getPublishedPostService,
   getPublishedPostByIdService,
   getPublishedPostBySlugService,
   getUserClerkIdService,
   createPostService,
-  editPostService,
+  updatePostService,
   deletePostService,
   publishPostService,
   toggleLikePostService,
   toggleBookmarkPostService,
   getDraftPostByIdService,
+  getLikeCountService,
   //   readingPublishedPostService, -- later
 } from "../services/post.service.js";
 
@@ -20,31 +19,30 @@ interface IdParams {
   id: string;
 }
 
-// interface createPostBody {
-//   title: string;
-//   content: string;
-//   subtitle?: string;
-//   coverImage?: string;
-// }
-
 // ==================== PUBLIC CONTROLLERS ====================
 
-// Tested and working
+// GET Published Posts for Homepage Controller
 export async function getPublishedPostController(
   req: Request,
   res: Response,
   next: NextFunction,
 ) {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
+    // User sends: ?limit=999999999
+    // Your DB tries to fetch 999 million records → Server crashes
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const limit = Math.min(
+      50,
+      Math.max(1, parseInt(req.query.limit as string) || 10),
+    );
     const posts = await getPublishedPostService(page, limit);
     return res.json({ success: true, ...posts });
   } catch (error) {
     next(error);
   }
 }
-// Tested and working
+// GET Published Post by ID Controller
+// If user is signed in - return his likes on post and bookmark of post he did - so auth needed
 export async function getPublishedPostByIdController(
   req: Request<IdParams>,
   res: Response,
@@ -52,10 +50,7 @@ export async function getPublishedPostByIdController(
 ) {
   try {
     const { id } = req.params;
-
-    // Try to get authenticated user (optional for public route)
     let userId: string | undefined;
-
     try {
       const clerkId = req.auth().userId;
       if (clerkId) {
@@ -63,47 +58,9 @@ export async function getPublishedPostByIdController(
         userId = user?.id;
       }
     } catch (error) {
-      // User not authenticated - that's okay for public routes
       userId = undefined;
     }
-
     const post = await getPublishedPostByIdService(id, userId);
-
-    if (!post) {
-      return res.status(404).json({
-        success: false,
-        error: { message: "Post not found" },
-      });
-    }
-
-    return res.json({ success: true, data: post });
-  } catch (error) {
-    next(error);
-  }
-}
-//
-export async function getDraftPostByIdController(
-  req: Request<IdParams>,
-  res: Response,
-  next: NextFunction,
-) {
-  try {
-    const clerkId = req.auth?.userId;
-    if (!clerkId) {
-      return res.status(401).json({
-        success: false,
-        error: { message: "Unauthorized" },
-      });
-    }
-    const user = await getUserClerkIdService(clerkId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: { message: "User not found" },
-      });
-    }
-    const { id } = req.params;
-    const post = await getDraftPostByIdService(id);
     if (!post) {
       return res.status(404).json({
         success: false,
@@ -115,7 +72,7 @@ export async function getDraftPostByIdController(
     next(error);
   }
 }
-// Tested and working
+// GET Published Post by Slug Controller
 export async function getPublishedPostBySlugController(
   req: Request,
   res: Response,
@@ -138,6 +95,7 @@ export async function getPublishedPostBySlugController(
 
 // ==================== PROTECTED CONTROLLERS ====================
 
+// CREATE a new Draft Post Controller
 export async function createPostController(
   req: Request,
   res: Response,
@@ -145,12 +103,6 @@ export async function createPostController(
 ) {
   try {
     const clerkId = req.auth().userId;
-    if (!clerkId) {
-      return res.status(401).json({
-        success: false,
-        error: { message: "Unauthorized" },
-      });
-    }
     const user = await getUserClerkIdService(clerkId);
     if (!user) {
       return res.status(404).json({
@@ -158,18 +110,22 @@ export async function createPostController(
         error: { message: "User not found" },
       });
     }
-    const { title, subtitle, content, coverImage } = req.body;
-    if (!title || !content) {
+    const { title, subtitle, content, coverImage, tags } = req.body;
+    if (!title || !content || !subtitle) {
       return res.status(400).json({
         success: false,
-        error: { message: "title and content are required" },
+        error: { message: "title, subtitle and content are required" },
       });
     }
+    // const cleanTags = [
+    //   ...new Set((tags as string[]).map((t) => t.trim().toLowerCase())),
+    // ]; // This ensures that "React", "react ", and "React" are all treated as the same tag, preventing duplicate database entries
     const post = await createPostService(
       user.id,
       title,
       content,
       subtitle,
+      tags,
       coverImage,
     );
     return res.status(201).json({ success: true, data: post });
@@ -177,20 +133,42 @@ export async function createPostController(
     next(error);
   }
 }
-
-export async function editPostController(
+// GET Draft Post by ID Controller
+export async function getDraftPostByIdController(
   req: Request<IdParams>,
   res: Response,
   next: NextFunction,
 ) {
   try {
-    const clerkId = req.auth?.userId;
-    if (!clerkId) {
-      return res.status(401).json({
+    const clerkId = req.auth().userId;
+    const user = await getUserClerkIdService(clerkId);
+    if (!user) {
+      return res.status(404).json({
         success: false,
-        error: { message: "Unauthorized" },
+        error: { message: "User not found" },
       });
     }
+    const { id } = req.params;
+    const post = await getDraftPostByIdService(id);
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        error: { message: "Post not found" },
+      });
+    }
+    return res.json({ success: true, data: post });
+  } catch (error) {
+    next(error);
+  }
+}
+// UPDATE a Draft Post by ID Controller
+export async function updatePostController(
+  req: Request<IdParams>,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const clerkId = req.auth().userId;
     const user = await getUserClerkIdService(clerkId);
     if (!user) {
       return res.status(404).json({
@@ -214,10 +192,11 @@ export async function editPostController(
         },
       });
     }
-    const { title, subtitle, content, coverImage } = req.body;
-    const post = await editPostService(
+    const { title, subtitle, content, tags, coverImage } = req.body;
+    const post = await updatePostService(
       postId,
       title,
+      tags,
       content,
       subtitle,
       coverImage,
@@ -227,7 +206,7 @@ export async function editPostController(
     next(error);
   }
 }
-
+// DELETE a Post by ID Controller
 export async function deletePostController(
   req: Request<IdParams>,
   res: Response,
@@ -235,12 +214,6 @@ export async function deletePostController(
 ) {
   try {
     const clerkId = req.auth().userId;
-    if (!clerkId) {
-      return res.status(401).json({
-        success: false,
-        error: { message: "Unauthorized" },
-      });
-    }
     const user = await getUserClerkIdService(clerkId);
     if (!user) {
       return res.status(404).json({
@@ -270,19 +243,14 @@ export async function deletePostController(
     next(error);
   }
 }
+// PUBLISH a Post by ID Controller
 export async function publishPostController(
   req: Request<IdParams>,
   res: Response,
   next: NextFunction,
 ) {
   try {
-    const clerkId = req.auth?.userId;
-    if (!clerkId) {
-      return res.status(401).json({
-        success: false,
-        error: { message: "Unauthorized" },
-      });
-    }
+    const clerkId = req.auth().userId;
     const user = await getUserClerkIdService(clerkId);
     if (!user) {
       return res.status(404).json({
@@ -318,20 +286,14 @@ export async function publishPostController(
     next(error);
   }
 }
+// LIKE and UNLIKE a Post by ID Controller
 export async function likePublishedPostController(
   req: Request<IdParams>,
   res: Response,
   next: NextFunction,
 ) {
   try {
-    const clerkId = req.auth?.userId;
-    if (!clerkId) {
-      return res.status(401).json({
-        success: false,
-        error: { message: "Unauthorized" },
-      });
-    }
-
+    const clerkId = req.auth().userId;
     const user = await getUserClerkIdService(clerkId);
     if (!user) {
       return res.status(404).json({
@@ -339,7 +301,6 @@ export async function likePublishedPostController(
         error: { message: "User not found" },
       });
     }
-
     const { id: postId } = req.params;
     const existing = await getPublishedPostByIdService(postId);
     if (!existing) {
@@ -348,14 +309,8 @@ export async function likePublishedPostController(
         error: { message: "Post not found" },
       });
     }
-
     const result = await toggleLikePostService(user.id, postId);
-
-    // Get updated like count
-    const likeCount = await prisma.like.count({
-      where: { postId },
-    });
-
+    const likeCount = await getLikeCountService(postId);
     return res.json({
       success: true,
       data: {
@@ -368,19 +323,14 @@ export async function likePublishedPostController(
     next(error);
   }
 }
+// BOOKMARK and UNBOOKMARK a Post by ID Controller
 export async function bookmarkPublishedPostController(
   req: Request<IdParams>,
   res: Response,
   next: NextFunction,
 ) {
   try {
-    const clerkId = req.auth?.userId;
-    if (!clerkId) {
-      return res.status(401).json({
-        success: false,
-        error: { message: "Unauthorized" },
-      });
-    }
+    const clerkId = req.auth().userId;
     const user = await getUserClerkIdService(clerkId);
     if (!user) {
       return res.status(404).json({
@@ -408,6 +358,7 @@ export async function bookmarkPublishedPostController(
     next(error);
   }
 }
+// RECORD a Reading History -- later
 // export async function readingPublishedPostController(
 //   req: Request,
 //   res: Response,
