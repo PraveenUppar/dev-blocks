@@ -1,0 +1,48 @@
+/**
+ * Verify user owns the post (for edit/delete operations)
+ */
+import type { NextFunction, Request, Response } from "express";
+import prisma from "../libs/prisma.js";
+interface IdParams {
+  id: string;
+}
+
+export async function verifyPostOwnership(
+  req: Request<IdParams>,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const userId = req.auth().userId;
+    const postId = req.params.id;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: "Authentication required",
+      });
+    }
+    // Check ownership
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      select: { authorId: true },
+    });
+
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        error: "Post not found",
+      });
+    }
+
+    if (post.authorId !== userId) {
+      return res.status(403).json({
+        success: false,
+        error: "You do not have permission to access this resource",
+      });
+    }
+    next();
+  } catch (error) {
+    next(error);
+  }
+}

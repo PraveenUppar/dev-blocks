@@ -14,10 +14,7 @@ import {
   getLikeCountService,
   //   readingPublishedPostService, -- later
 } from "../services/post.service.js";
-
-interface IdParams {
-  id: string;
-}
+import { sanitizeHtml } from "../utils/contentSanitization.js";
 
 // ==================== PUBLIC CONTROLLERS ====================
 
@@ -43,6 +40,9 @@ export async function getPublishedPostController(
   } catch (error) {
     next(error);
   }
+}
+interface IdParams {
+  id: string;
 }
 // GET Published Post Metadata by ID Controller
 // If user is signed in - return his likes on post and bookmark of post he did - so auth needed
@@ -97,32 +97,18 @@ export async function createPostController(
   next: NextFunction,
 ) {
   try {
-    const clerkId = req.auth().userId;
-    const user = await getUserClerkIdService(clerkId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: { message: "User not found" },
-      });
-    }
+    const userId = req.auth().userId;
     const { title, subtitle, content, coverImage, tags } = req.body;
-    if (!title || !content || !subtitle) {
-      return res.status(400).json({
-        success: false,
-        error: { message: "title, subtitle and content are required" },
-      });
-    }
-    // const cleanTags = [
-    //   ...new Set((tags as string[]).map((t) => t.trim().toLowerCase())),
-    // ]; // This ensures that "React", "react ", and "React" are all treated as the same tag, preventing duplicate database entries
-    const post = await createPostService(
-      user.id,
+    // For tags "React", "react ", and "React" are all treated as the same tag, preventing duplicate database entries - done during validation
+    const sanitizedContent = sanitizeHtml(content);
+    const post = await createPostService({
+      authorId: userId,
       title,
-      content,
+      content: sanitizedContent,
       subtitle,
       tags,
       coverImage,
-    );
+    });
     return res.status(201).json({ success: true, data: post });
   } catch (error) {
     next(error);
@@ -135,23 +121,16 @@ export async function getDraftPostByIdController(
   next: NextFunction,
 ) {
   try {
-    const clerkId = req.auth().userId;
-    const user = await getUserClerkIdService(clerkId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: { message: "User not found" },
-      });
-    }
+    const userId = req.auth().userId;
     const { id } = req.params;
-    const post = await getDraftPostByIdService(id);
+    const post = await getDraftPostByIdService(id, userId);
     if (!post) {
       return res.status(404).json({
         success: false,
         error: { message: "Post not found" },
       });
     }
-    return res.json({ success: true, data: post });
+    return res.status(200).json({ success: true, data: post });
   } catch (error) {
     next(error);
   }
@@ -163,33 +142,18 @@ export async function updatePostController(
   next: NextFunction,
 ) {
   try {
-    const clerkId = req.auth().userId;
-    const user = await getUserClerkIdService(clerkId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: { message: "User not found" },
-      });
-    }
-    const { id: postId } = req.params;
-    const existing = await getDraftPostByIdService(postId);
+    const userId = req.auth().userId;
+    const { id } = req.params;
+    const existing = await getDraftPostByIdService(id, userId);
     if (!existing) {
       return res.status(404).json({
         success: false,
         error: { message: "Post not found" },
       });
     }
-    if (existing.authorId !== user.id) {
-      return res.status(403).json({
-        success: false,
-        error: {
-          message: "Forbidden: You don't have permission to edit this post",
-        },
-      });
-    }
     const { title, subtitle, content, tags, coverImage } = req.body;
     const post = await updatePostService(
-      postId,
+      id,
       title,
       tags,
       content,

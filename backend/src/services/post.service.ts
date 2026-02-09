@@ -1,13 +1,30 @@
 import prisma from "../libs/prisma.js";
-import { generateSlug } from "../utils/slug.js";
-import { calculateReadingTime } from "../utils/readingTime.js";
+import { generateSlug, calculateReadingTime } from "../utils/helper.js";
 import { nanoid } from "nanoid";
 
+// CHECK USER BY USERNAME Service
+export async function getUserNameService(username: string) {
+  return prisma.user.findUnique({
+    where: { username },
+  });
+}
+// GET USER BY CLERKID Service
+export const getUserClerkIdService = async (clerkId: string) => {
+  return prisma.user.findUnique({
+    where: { clerkId },
+  });
+};
+// GET USER BY ID Service
+export const getUserIdService = async (id: string) => {
+  return prisma.user.findUnique({
+    where: { id },
+  });
+};
+// GET ALL PUBLISHED POST Service
 interface GetPostsParams {
   page: number;
   limit: number;
 }
-// GET ALL PUBLISHED POST Service
 export async function getPublishedPostService({ page, limit }: GetPostsParams) {
   const skip = (page - 1) * limit;
   const [posts, total] = await Promise.all([
@@ -235,33 +252,17 @@ export async function getPublishedPostBySlugService(
     isBookmarked: !!isBookmarked,
   };
 }
-// CHECK USER BY USERNAME Service
-export async function getUserNameService(username: string) {
-  return prisma.user.findUnique({
-    where: { username },
-  });
-}
-// GET USER BY CLERKID Service
-export const getUserClerkIdService = async (clerkId: string) => {
-  return prisma.user.findUnique({
-    where: { clerkId },
-  });
-};
-// GET USER BY ID Service
-export const getUserIdService = async (id: string) => {
-  return prisma.user.findUnique({
-    where: { id },
-  });
-};
 // CREATE A NEW DRAFT POST Service
-export async function createPostService(
-  authorId: string,
-  title: string,
-  content: string,
-  subtitle: string,
-  tags?: string[],
-  coverImage?: string,
-) {
+interface CreatePostData {
+  authorId: string;
+  title: string;
+  subtitle: string;
+  content: string;
+  coverImage?: string;
+  tags?: string[];
+}
+export async function createPostService(data: CreatePostData) {
+  const { authorId, title, subtitle, content, coverImage, tags } = data;
   let slug = generateSlug(title);
   const existingPost = await prisma.post.findUnique({
     where: { slug },
@@ -273,14 +274,14 @@ export async function createPostService(
   const readTime = calculateReadingTime(content);
   const post = await prisma.post.create({
     data: {
-      title: title,
-      content: content,
-      subtitle: subtitle,
-      ...(coverImage && { coverImage }),
+      title,
+      content,
+      subtitle,
       slug,
       readTime,
       authorId,
       status: "DRAFT",
+      ...(coverImage && { coverImage }),
       ...(tags &&
         tags.length > 0 && {
           tags: {
@@ -295,49 +296,92 @@ export async function createPostService(
           },
         }),
     },
-    include: {
-      author: {
-        select: { id: true, username: true, name: true, avatar: true },
-      },
-      tags: {
-        include: {
-          tag: true,
-        },
-      },
-    },
-  });
-  const flattenedTags = post.tags.map((t) => t.tag.name);
-  return {
-    ...post,
-    tags: flattenedTags, // Transforms [{tag: {name: 'Tech'}}] into ['Tech']
-  };
-}
-// GET DRAFT POST BY ID Service
-export async function getDraftPostByIdService(id: string) {
-  return prisma.post.findFirst({
-    where: {
-      id,
-      deletedAt: null,
-      status: "DRAFT",
-    },
-    include: {
+    select: {
+      id: true,
+      title: true,
+      subtitle: true,
+      content: true,
+      slug: true,
+      coverImage: true,
+      readTime: true,
+      status: true,
+      createdAt: true,
+      updatedAt: true,
       author: {
         select: {
           id: true,
           username: true,
           name: true,
           avatar: true,
-          bio: true,
         },
       },
       tags: {
-        include: { tag: true },
-      },
-      _count: {
-        select: { comments: true, likes: true },
+        select: {
+          tag: {
+            select: {
+              name: true,
+              slug: true,
+            },
+          },
+        },
       },
     },
   });
+  const flattenedTags = post.tags.map((t) => t.tag);
+  return {
+    ...post,
+    tags: flattenedTags, // Transforms [{tag: {name: 'Tech'}}] into ['Tech']
+  };
+}
+// GET DRAFT POST BY ID Service
+export async function getDraftPostByIdService(id: string, userId: string) {
+  const post = await prisma.post.findUnique({
+    where: {
+      id,
+      authorId: userId,
+      deletedAt: null,
+    },
+    select: {
+      id: true,
+      title: true,
+      subtitle: true,
+      content: true,
+      slug: true,
+      coverImage: true,
+      readTime: true,
+      status: true,
+      createdAt: true,
+      updatedAt: true,
+      author: {
+        select: {
+          id: true,
+          username: true,
+          name: true,
+          avatar: true,
+        },
+      },
+      tags: {
+        select: {
+          tag: {
+            select: {
+              name: true,
+              slug: true,
+            },
+          },
+        },
+      },
+    },
+  });
+  if (!post || post.status !== "DRAFT") {
+    return null;
+  }
+  if (post.author.id !== userId) {
+    return null;
+  }
+  return {
+    ...post,
+    tags: post.tags.map((t) => t.tag),
+  };
 }
 // UPDATE A POST BY ID Service
 export async function updatePostService(

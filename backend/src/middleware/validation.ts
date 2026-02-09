@@ -21,11 +21,44 @@ export const validateIdParam = (
 
 // Post creation validation
 const createPostSchema = z.object({
-  title: z.string().min(1).max(200),
-  subtitle: z.string().max(500).optional(),
-  content: z.string().min(1),
-  coverImage: z.url().optional(),
-  tags: z.array(z.string()).max(5).optional(),
+  title: z
+    .string()
+    .min(1, "Title is required")
+    .max(200, "Title must be less than 200 characters")
+    .trim(),
+
+  subtitle: z
+    .string()
+    .min(1, "Subtitle is required")
+    .max(500, "Subtitle must be less than 500 characters")
+    .trim(),
+
+  content: z
+    .string()
+    .min(100, "Content must be at least 100 characters")
+    .max(100000, "Content must be less than 100,000 characters"), // ~50 pages
+
+  coverImage: z
+    .url("Invalid image URL")
+    .optional()
+    .refine(
+      (url) => !url || /\.(jpg|jpeg|png|webp|gif)$/i.test(url),
+      "Cover image must be a valid image URL",
+    ),
+
+  tags: z
+    .array(
+      z
+        .string()
+        .min(2, "Tag must be at least 2 characters")
+        .max(30, "Tag must be less than 30 characters")
+        .regex(/^[a-zA-Z0-9\s-]+$/, "Tag contains invalid characters"),
+    )
+    .max(5, "Maximum 5 tags allowed")
+    .optional()
+    .transform((tags) =>
+      tags ? [...new Set(tags.map((t) => t.trim().toLowerCase()))] : undefined,
+    ),
 });
 
 export const validateCreatePost = (
@@ -33,17 +66,23 @@ export const validateCreatePost = (
   res: Response,
   next: NextFunction,
 ) => {
-  const result = createPostSchema.safeParse(req.body);
-
-  if (!result.success) {
-    return res.status(400).json({
-      error: "Validation failed",
-      details: result.error.issues,
-    });
+  try {
+    const result = createPostSchema.parse(req.body);
+    req.body = result; // Replace with validated & sanitized data
+    next();
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({
+        success: false,
+        error: "Validation failed",
+        details: error.issues.map((e) => ({
+          field: e.path.join("."),
+          message: e.message,
+        })),
+      });
+    }
+    next(error);
   }
-
-  req.body = result.data; // Type-safe parsed data
-  next();
 };
 
 // middleware/validation.ts

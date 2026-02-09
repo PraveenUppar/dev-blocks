@@ -22,6 +22,7 @@ import {
   validateIdParam,
   validateSlugParam,
 } from "../middleware/validation.js";
+import { verifyPostOwnership } from "../middleware/ownership.js";
 
 // ==================== PUBLIC ROUTES ====================
 
@@ -59,33 +60,35 @@ postRoute.post(
 postRoute.get<{ id: string }>(
   "/draft/:id",
   validateIdParam,
+  verifyPostOwnership,
   getDraftPostByIdController,
 );
 // UPDATE a Post by ID
-postRoute.put("/:id/update", updatePostController);
+postRoute.put("/update/:id", verifyPostOwnership, updatePostController);
 // DELETE a Post by ID
 postRoute.delete<{ id: string }>(
-  "/:id/delete",
+  "/delete/:id",
   validateIdParam,
+  verifyPostOwnership,
   deletePostController,
 );
 // PUBLISH a Post by ID
 postRoute.patch<{ id: string }>(
-  "/:id/publish",
+  "/publish/:id",
   validateIdParam,
   publishPostController,
 );
 
 // LIKE and UNLIKE a Post by ID
 postRoute.post<{ id: string }>(
-  "/:id/like",
+  "/like/:id",
   interactionLimiter,
   validateIdParam,
   likePublishedPostController,
 );
 // BOOKMARK and UNBOOKMARK a Post by ID
 postRoute.post<{ id: string }>(
-  "/:id/bookmark",
+  "/bookmark/:id",
   interactionLimiter,
   validateIdParam,
   bookmarkPublishedPostController,
