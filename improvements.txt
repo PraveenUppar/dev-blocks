@@ -1,0 +1,12 @@
+- Change the clerkId in controllers to ====> req.auth().userId;
+- No need to check for user it is done by clerk in the routes.ts through middleware require.auth()
+
+
+
+PENDING
+
+
+- follow
+- comments
+- notiffication
+- reading history

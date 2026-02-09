@@ -83,6 +83,13 @@ export default function Navbar() {
                           Bookmarks
                         </Link>
                         <Link
+                          href="/history"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          onClick={() => setIsDropdownOpen(false)}
+                        >
+                          Reading History
+                        </Link>
+                        <Link
                           href="/settings"
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                           onClick={() => setIsDropdownOpen(false)}

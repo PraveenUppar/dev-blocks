@@ -9,7 +9,7 @@ interface PostCardProps {
 
 export default function PostCard({ post }: PostCardProps) {
   return (
-    <article className="py-6 border-b border-gray-100">
+    <article className="py-6 border-b bg-white border-gray-100">
       <div className="flex flex-col-reverse md:flex-row gap-4 md:gap-6">
         {/* Content */}
         <div className="flex-1 min-w-0">

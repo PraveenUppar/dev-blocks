@@ -7,6 +7,7 @@ declare global {
     interface Request {
       clerkUserId?: string;
       user?: SafeUser;
+      auth: import("@clerk/types").Auth;
     }
   }
 }

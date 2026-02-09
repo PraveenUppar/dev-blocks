@@ -1,11 +1,24 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, useParams } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useAuth } from "@clerk/nextjs";
+import api from "@/lib/axios";
+import { setAuthTokenGetter } from "@/lib/axios";
+import { Post, PostResponse } from "@/types";
 
-const HeartIcon = ({ className }: { className?: string }) => (
+const HeartIcon = ({
+  className,
+  filled,
+}: {
+  className?: string;
+  filled?: boolean;
+}) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    fill="none"
+    fill={filled ? "currentColor" : "none"}
     viewBox="0 0 24 24"
     strokeWidth={1.5}
     stroke="currentColor"
@@ -36,10 +49,16 @@ const CommentIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-const BookmarkIcon = ({ className }: { className?: string }) => (
+const BookmarkIcon = ({
+  className,
+  filled,
+}: {
+  className?: string;
+  filled?: boolean;
+}) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    fill="none"
+    fill={filled ? "currentColor" : "none"}
     viewBox="0 0 24 24"
     strokeWidth={1.5}
     stroke="currentColor"
@@ -53,30 +72,131 @@ const BookmarkIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-import { Post, PostResponse } from "@/types";
-import api from "@/lib/axios";
+export default function PostPage() {
+  const params = useParams();
+  const { getToken, isSignedIn } = useAuth();
+  const id = params.id as string;
 
-// Fetch post by ID
-async function getPost(id: string): Promise<Post | null> {
-  try {
-    const response = await api.get<PostResponse>(`/post/id/${id}`);
-    return response.data.data;
-  } catch (error) {
-    console.error("Error fetching post:", error);
-    return null;
+  const [post, setPost] = useState<Post | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isLiked, setIsLiked] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const [isLiking, setIsLiking] = useState(false);
+  const [isBookmarking, setIsBookmarking] = useState(false);
+
+  useEffect(() => {
+    setAuthTokenGetter(getToken);
+  }, [getToken]);
+
+  useEffect(() => {
+    if (id) {
+      fetchPost();
+    }
+  }, [id]);
+
+  const fetchPost = async () => {
+    setLoading(true);
+    try {
+      const response = await api.get<PostResponse>(`/post/id/${id}`);
+      const postData = response.data.data;
+      setPost(postData);
+      setLikeCount(postData._count?.likes ?? 0);
+      setIsLiked(postData.isLiked ?? false);
+      setIsBookmarked(postData.isBookmarked ?? false);
+    } catch (error) {
+      console.error("Error fetching post:", error);
+      setPost(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLike = async () => {
+    if (!isSignedIn) {
+      alert("Please sign in to like posts");
+      return;
+    }
+
+    if (isLiking) return;
+
+    setIsLiking(true);
+    const previousLiked = isLiked;
+    const previousCount = likeCount;
+
+    // Optimistic update
+    setIsLiked(!isLiked);
+    setLikeCount(isLiked ? likeCount - 1 : likeCount + 1);
+
+    try {
+      const response = await api.post(`/post/${id}/like`);
+
+      if (response.data.success) {
+        // Update with server response
+        setIsLiked(response.data.data.liked);
+        if (response.data.data.likeCount !== undefined) {
+          setLikeCount(response.data.data.likeCount);
+        }
+      }
+    } catch (error: any) {
+      console.error("Failed to like post:", error);
+      // Revert on error
+      setIsLiked(previousLiked);
+      setLikeCount(previousCount);
+
+      if (error.response?.status === 401) {
+        alert("Please sign in to like posts");
+      } else {
+        alert("Failed to like post. Please try again.");
+      }
+    } finally {
+      setIsLiking(false);
+    }
+  };
+
+  const handleBookmark = async () => {
+    if (!isSignedIn) {
+      alert("Please sign in to bookmark posts");
+      return;
+    }
+
+    if (isBookmarking) return;
+
+    setIsBookmarking(true);
+    const previousBookmarked = isBookmarked;
+
+    // Optimistic update
+    setIsBookmarked(!isBookmarked);
+
+    try {
+      const response = await api.post(`/post/${id}/bookmark`);
+
+      if (response.data.success) {
+        setIsBookmarked(response.data.data.bookmarked);
+      }
+    } catch (error: any) {
+      console.error("Failed to bookmark post:", error);
+      // Revert on error
+      setIsBookmarked(previousBookmarked);
+
+      if (error.response?.status === 401) {
+        alert("Please sign in to bookmark posts");
+      } else {
+        alert("Failed to bookmark post. Please try again.");
+      }
+    } finally {
+      setIsBookmarking(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-gray-500">Loading post...</div>
+      </div>
+    );
   }
-}
 
-// Page props - includes both id and slug from URL
-interface PageProps {
-  params: Promise<{ id: string; slug: string }>;
-}
-
-export default async function PostPage({ params }: PageProps) {
-  const { id } = await params;
-  const post = await getPost(id);
-
-  // Show 404 if post not found
   if (!post) {
     notFound();
   }
@@ -86,18 +206,18 @@ export default async function PostPage({ params }: PageProps) {
       {/* Hero Section */}
       <div className="bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-            {/* Tags */}
-            <div className="flex flex-wrap gap-2 mb-6">
-              {(post.tags || []).map((postTag) => (
-                <Link
-                  key={postTag.tag.id}
-                  href={`/tags/${postTag.tag.slug}`}
-                  className="px-3 py-1.5 text-xs sm:text-sm font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full hover:bg-emerald-100 transition"
-                >
-                  {postTag.tag.name}
-                </Link>
-              ))}
-            </div>
+          {/* Tags */}
+          <div className="flex flex-wrap gap-2 mb-6">
+            {(post.tags || []).map((postTag) => (
+              <Link
+                key={postTag.tag.id}
+                href={`/tags/${postTag.tag.slug}`}
+                className="px-3 py-1.5 text-xs sm:text-sm font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full hover:bg-emerald-100 transition"
+              >
+                {postTag.tag.name}
+              </Link>
+            ))}
+          </div>
 
           {/* Title */}
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 leading-tight">
@@ -155,18 +275,45 @@ export default async function PostPage({ params }: PageProps) {
 
               {/* Actions */}
               <div className="flex items-center gap-2 sm:gap-4">
-                <button className="flex items-center gap-1.5 px-3 py-1.5 text-gray-600 hover:text-red-500 hover:bg-red-50 rounded-full transition text-sm">
-                  <HeartIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span className="hidden sm:inline">{post._count?.likes ?? 0}</span>
+                {/* Like Button */}
+                <button
+                  onClick={handleLike}
+                  disabled={isLiking}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition text-sm disabled:opacity-50 ${
+                    isLiked
+                      ? "text-red-500 bg-red-50"
+                      : "text-gray-600 hover:text-red-500 hover:bg-red-50"
+                  }`}
+                >
+                  <HeartIcon
+                    className="w-4 h-4 sm:w-5 sm:h-5"
+                    filled={isLiked}
+                  />
+                  <span className="hidden sm:inline">{likeCount}</span>
                 </button>
+
+                {/* Comment Button */}
                 <button className="flex items-center gap-1.5 px-3 py-1.5 text-gray-600 hover:text-blue-500 hover:bg-blue-50 rounded-full transition text-sm">
                   <CommentIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                   <span className="hidden sm:inline">
                     {post._count?.comments ?? 0}
                   </span>
                 </button>
-                <button className="flex items-center gap-1.5 px-3 py-1.5 text-gray-600 hover:text-amber-600 hover:bg-amber-50 rounded-full transition">
-                  <BookmarkIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+
+                {/* Bookmark Button */}
+                <button
+                  onClick={handleBookmark}
+                  disabled={isBookmarking}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition disabled:opacity-50 ${
+                    isBookmarked
+                      ? "text-amber-600 bg-amber-50"
+                      : "text-gray-600 hover:text-amber-600 hover:bg-amber-50"
+                  }`}
+                >
+                  <BookmarkIcon
+                    className="w-4 h-4 sm:w-5 sm:h-5"
+                    filled={isBookmarked}
+                  />
                 </button>
               </div>
             </div>
@@ -182,7 +329,7 @@ export default async function PostPage({ params }: PageProps) {
             alt={post.title}
             width={1200}
             height={600}
-            className="rounded-xl w-full h-48 sm:h-64 md:h-80 lg:h-400px object-cover "
+            className="rounded-xl w-full h-48 sm:h-64 md:h-80 lg:h-400px object-cover"
           />
         </div>
       )}
@@ -200,7 +347,7 @@ export default async function PostPage({ params }: PageProps) {
               prose-li:text-gray-700 prose-li:marker:text-gray-400
               prose-strong:text-gray-900
               prose-ul:my-4 prose-ol:my-4"
-            dangerouslySetInnerHTML={{ __html: post.content || '' }}
+            dangerouslySetInnerHTML={{ __html: post.content || "" }}
           />
 
           {/* Author Card */}

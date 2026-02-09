@@ -26,6 +26,34 @@ interface usernameParams {
 
 // ==================== PUBLIC CONTROLLERS ====================
 
+export async function getCurrentUserController(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const clerkId = getAuth(req).userId;
+    if (!clerkId) {
+      return res.status(401).json({
+        success: false,
+        error: { message: "Unauthorized" },
+      });
+    }
+
+    const user = await getUserClerkIdService(clerkId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: { message: "User not found" },
+      });
+    }
+
+    return res.json({ success: true, data: user });
+  } catch (error) {
+    next(error);
+  }
+}
+
 // Tested and Working
 export async function getUserProfileController(
   req: Request<usernameParams>,
@@ -125,11 +153,11 @@ export async function updateUserProfileController(
   next: NextFunction,
 ) {
   try {
-    const clerkId = getAuth(req).userId;
+    const clerkId = req.auth().userId;
     if (!clerkId) {
       return res.status(401).json({
         success: false,
-        error: { message: "Unauthorized" },
+        error: { message: "Unauthorized Unauthorized From Space" },
       });
     }
     const user = await getUserClerkIdService(clerkId);
@@ -153,14 +181,14 @@ export async function followUserProfileController(
 ) {
   try {
     const followingId = req.params.id;
-    const clerkId = req.clerkUserId;
+    const clerkId = req.auth().userId;
     if (!clerkId) {
       return res.status(401).json({
         success: false,
-        error: { message: "Unauthorized" },
+        error: { message: "Unauthorized Unauthorized From Space" },
       });
     }
-    const user = await getUserClerkIdService(clerkId!);
+    const user = await getUserClerkIdService(clerkId);
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -198,14 +226,14 @@ export async function unfollowUserProfileController(
 ) {
   try {
     const followingId = req.params.id;
-    const clerkId = req.clerkUserId;
+    const clerkId = req.auth().userId;
     if (!clerkId) {
       return res.status(401).json({
         success: false,
-        error: { message: "Unauthorized" },
+        error: { message: "Unauthorized Unauthorized From Space" },
       });
     }
-    const user = await getUserClerkIdService(clerkId!);
+    const user = await getUserClerkIdService(clerkId);
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -228,14 +256,14 @@ export async function getUserBookmarksController(
   next: NextFunction,
 ) {
   try {
-    const clerkId = req.clerkUserId;
+    const clerkId = req.auth?.userId;
     if (!clerkId) {
       return res.status(401).json({
         success: false,
-        error: { message: "Unauthorized" },
+        error: { message: "Unauthorized From Space" },
       });
     }
-    const user = await getUserClerkIdService(clerkId!);
+    const user = await getUserClerkIdService(clerkId);
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -257,11 +285,11 @@ export async function getUserDraftsController(
   next: NextFunction,
 ) {
   try {
-    const clerkId = getAuth(req).userId;
+    const clerkId = req.auth?.userId;
     if (!clerkId) {
       return res.status(401).json({
         success: false,
-        error: { message: "Unauthorized" },
+        error: { message: "Unauthorized Unauthorized " },
       });
     }
     const user = await getUserClerkIdService(clerkId);
@@ -286,14 +314,14 @@ export async function getUserReadingHistoryController(
   next: NextFunction,
 ) {
   try {
-    const clerkId = req.clerkUserId;
+    const clerkId = req.auth?.userId;
     if (!clerkId) {
       return res.status(401).json({
         success: false,
-        error: { message: "Unauthorized" },
+        error: { message: "Unauthorized Unauthorized" },
       });
     }
-    const user = await getUserClerkIdService(clerkId!);
+    const user = await getUserClerkIdService(clerkId);
     if (!user) {
       return res.status(404).json({
         success: false,

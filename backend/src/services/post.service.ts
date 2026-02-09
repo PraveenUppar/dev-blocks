@@ -42,12 +42,70 @@ export async function getPublishedPostService(page: number, limit: number) {
 }
 
 // GET PUBLISHED POST BY ID - working
-export async function getPublishedPostByIdService(id: string) {
-  return prisma.post.findFirst({
+export async function getPublishedPostByIdService(id: string, userId?: string) {
+  const post = await prisma.post.findFirst({
     where: {
       id,
       deletedAt: null,
       status: "PUBLISHED",
+    },
+    include: {
+      author: {
+        select: {
+          id: true,
+          username: true,
+          name: true,
+          avatar: true,
+          bio: true,
+        },
+      },
+      tags: {
+        include: { tag: true },
+      },
+      _count: {
+        select: {
+          comments: true,
+          likes: true,
+          bookmarks: true,
+        },
+      },
+      // Only fetch user's like/bookmark if userId is provided
+      ...(userId && {
+        likes: {
+          where: { userId },
+          take: 1,
+        },
+        bookmarks: {
+          where: { userId },
+          take: 1,
+        },
+      }),
+    },
+  });
+
+  if (!post) return null;
+
+  // Check if user has liked/bookmarked
+  const isLiked = userId && post.likes && post.likes.length > 0;
+  const isBookmarked = userId && post.bookmarks && post.bookmarks.length > 0;
+
+  // Remove the likes and bookmarks arrays from response
+  const { likes, bookmarks, ...postData } = post;
+
+  return {
+    ...postData,
+    isLiked: !!isLiked,
+    isBookmarked: !!isBookmarked,
+  };
+}
+
+// GET PUBLISHED POST BY ID - working
+export async function getDraftPostByIdService(id: string) {
+  return prisma.post.findFirst({
+    where: {
+      id,
+      deletedAt: null,
+      status: "DRAFT",
     },
     include: {
       author: {

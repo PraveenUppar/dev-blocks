@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { requireAuthentication } from "../middleware/auth.middleware.js";
+import { requireAuth } from "@clerk/express";
 import {
   getPublishedPostController,
   getPublishedPostByIdController,
@@ -10,6 +10,7 @@ import {
   publishPostController,
   likePublishedPostController,
   bookmarkPublishedPostController,
+  getDraftPostByIdController,
   //   readingPublishedPostController, -- later
 } from "../controllers/post.controller.js";
 const postRoute = Router();
@@ -20,6 +21,7 @@ const postRoute = Router();
 postRoute.get("/", getPublishedPostController);
 // GET Single Published Post by ID - working
 postRoute.get("/id/:id", getPublishedPostByIdController);
+
 // GET Published Post by Slug - working
 postRoute.get("/:slug", getPublishedPostBySlugController);
 
@@ -27,14 +29,16 @@ postRoute.get("/:slug", getPublishedPostBySlugController);
 
 // ==================== PROTECTED ROUTES ====================
 
-postRoute.use(requireAuthentication);
+postRoute.use(requireAuth());
 
+// GET Single Draft Post by ID - working
+postRoute.get("/draft/:id", getDraftPostByIdController);
 // CREATE a new Post
 postRoute.post("/create", createPostController);
 // UPDATE a Post
 postRoute.put("/:id/edit", editPostController);
 // DELETE a Post
-postRoute.delete("/:id", deletePostController);
+postRoute.delete("/:id/delete", deletePostController);
 // PUBLISH a Post
 postRoute.patch("/:id/publish", publishPostController);
 // LIKE and UNLIKE a Post

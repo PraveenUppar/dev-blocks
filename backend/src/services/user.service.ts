@@ -263,7 +263,6 @@ export async function getUserDraftsService(
   limit: number = 10,
 ) {
   const skip = (page - 1) * limit;
-
   const [posts, total] = await Promise.all([
     prisma.post.findMany({
       where: {

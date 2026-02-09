@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { requireAuthentication } from "../middleware/auth.middleware.js";
+import { requireAuth } from "@clerk/express";
 import {
   getUserProfileController,
   getUserPostsController,
@@ -11,25 +11,30 @@ import {
   getUserBookmarksController,
   getUserDraftsController,
   getUserReadingHistoryController,
+  getCurrentUserController,
 } from "../controllers/user.controller.js";
 
 const userRoute = Router();
 
 // ==================== PROTECTED ROUTES ==================
 
-
+userRoute.get("/profile", requireAuth(), getCurrentUserController);
 // UPDATE USER profile -
-userRoute.put("/update", requireAuthentication, updateUserProfileController);
-// POST Follow USER -
-userRoute.post("/:id/follow", requireAuthentication, followUserProfileController);
-// POST Unfollow USER -
-userRoute.delete("/:id/unfollow", requireAuthentication, unfollowUserProfileController);
-// GET USER Bookmark -
-userRoute.get("/bookmarks", requireAuthentication, getUserBookmarksController);
+userRoute.put("/update", requireAuth(), updateUserProfileController);
 // GET USER Drafts -
-userRoute.get("/drafts", requireAuthentication, getUserDraftsController);
+userRoute.get("/drafts", requireAuth(), getUserDraftsController);
+// GET USER Bookmark -
+userRoute.get("/bookmarks", requireAuth(), getUserBookmarksController);
 // GET USER Reading History -
-userRoute.get("/reading-history", requireAuthentication, getUserReadingHistoryController);
+userRoute.get(
+  "/reading-history",
+  requireAuth(),
+  getUserReadingHistoryController,
+);
+// POST Follow USER -
+userRoute.post("/:id/follow", requireAuth(), followUserProfileController);
+// POST Unfollow USER -
+userRoute.delete("/:id/unfollow", requireAuth(), unfollowUserProfileController);
 
 // ==================== PUBLIC ROUTES ====================
 
