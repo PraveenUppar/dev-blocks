@@ -65,6 +65,7 @@ model Post {
   @@index([status])
   @@index([createdAt])
   @@index([status, publishedAt])
+  @@index([status, deletedAt])
   @@index([slug])
 }
 

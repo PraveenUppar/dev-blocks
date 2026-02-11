@@ -21,6 +21,7 @@ import {
   validateCreatePost,
   validateIdParam,
   validateSlugParam,
+  validateUpdatePost,
 } from "../middleware/validation.js";
 import { verifyPostOwnership } from "../middleware/ownership.js";
 
@@ -64,7 +65,13 @@ postRoute.get<{ id: string }>(
   getDraftPostByIdController,
 );
 // UPDATE a Post by ID
-postRoute.put("/update/:id", verifyPostOwnership, updatePostController);
+postRoute.put<{ id: string }>(
+  "/update/:id",
+  validateIdParam,
+  validateUpdatePost,
+  verifyPostOwnership,
+  updatePostController,
+);
 // DELETE a Post by ID
 postRoute.delete<{ id: string }>(
   "/delete/:id",
@@ -76,6 +83,7 @@ postRoute.delete<{ id: string }>(
 postRoute.patch<{ id: string }>(
   "/publish/:id",
   validateIdParam,
+  verifyPostOwnership,
   publishPostController,
 );
 
@@ -86,6 +94,7 @@ postRoute.post<{ id: string }>(
   validateIdParam,
   likePublishedPostController,
 );
+
 // BOOKMARK and UNBOOKMARK a Post by ID
 postRoute.post<{ id: string }>(
   "/bookmark/:id",

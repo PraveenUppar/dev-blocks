@@ -384,27 +384,24 @@ export async function getDraftPostByIdService(id: string, userId: string) {
   };
 }
 // UPDATE A POST BY ID Service
-export async function updatePostService(
-  id: string,
-  title?: string,
-  content?: string,
-  tags?: string,
-  subtitle?: string,
-  coverImage?: string,
-) {
-  const data = {
-    ...(title !== undefined && { title }),
-    ...(content !== undefined && { content }),
-    ...(subtitle !== undefined && { subtitle }),
-    ...(coverImage !== undefined && { coverImage }),
-    ...(tags !== undefined && { tags }),
-  };
+interface UpdatePostData {
+  userId: string;
+  postId: string;
+  title?: string;
+  subtitle?: string;
+  content?: string;
+  coverImage?: string;
+  tags?: string[];
+}
+export async function updatePostService(data: UpdatePostData) {
+  const { userId, postId, title, subtitle, content, coverImage, tags } = data;
   const updateData: any = { ...data };
-  if (data.content) {
-    updateData.readTime = calculateReadingTime(data.content);
+  if (content) {
+    updateData.content = content;
+    updateData.readTime = calculateReadingTime(content);
   }
-  if (data.title) {
-    let slug = generateSlug(data.title);
+  if (title) {
+    let slug = generateSlug(title);
     const existingPost = await prisma.post.findUnique({
       where: { slug },
       select: { id: true },
@@ -414,27 +411,80 @@ export async function updatePostService(
     }
     updateData.slug = slug;
   }
-  return prisma.post.update({
-    where: { id },
+  if (subtitle) {
+    updateData.subtitle = subtitle;
+  }
+  if (tags) {
+    updateData.tags = tags;
+  }
+  if (coverImage) {
+    updateData.coverImage = coverImage;
+  }
+  updateData.updatedAt = new Date();
+
+  const updatedPost = await prisma.post.update({
+    where: {
+      id: postId,
+      authorId: userId,
+    },
     data: updateData,
-    include: {
+    select: {
+      id: true,
+      title: true,
+      subtitle: true,
+      content: true,
+      slug: true,
+      coverImage: true,
+      readTime: true,
+      status: true,
+      publishedAt: true,
+      createdAt: true,
+      updatedAt: true,
       author: {
-        select: { id: true, username: true, name: true, avatar: true },
+        select: {
+          id: true,
+          username: true,
+          name: true,
+          avatar: true,
+        },
+      },
+      tags: {
+        select: {
+          tag: {
+            select: {
+              name: true,
+              slug: true,
+            },
+          },
+        },
       },
     },
   });
+  return {
+    ...updatedPost,
+    tags: updatedPost.tags.map((t) => t.tag),
+  };
 }
 // DELETE A POST BY ID Service
-export async function deletePostService(id: string) {
+export async function deletePostService(postId: string, userId: string) {
   return prisma.post.update({
-    where: { id },
+    where: {
+      id: postId,
+      authorId: userId,
+      deletedAt: null,
+    },
+    select: {
+      id: true,
+      title: true,
+      deletedAt: true,
+    },
     data: { deletedAt: new Date() },
   });
 }
 // PUBLISH A POST BY ID Service
-export async function publishPostService(id: string) {
+export async function publishPostService(postId: string, userId: string) {
   return prisma.post.update({
-    where: { id },
+    where: { id: postId, authorId: userId, status: "DRAFT" },
     data: { status: "PUBLISHED", publishedAt: new Date() },
   });
 }

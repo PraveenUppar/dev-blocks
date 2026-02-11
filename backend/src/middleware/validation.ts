@@ -85,7 +85,72 @@ export const validateCreatePost = (
   }
 };
 
-// middleware/validation.ts
+const updatePostSchema = z
+  .object({
+    title: z
+      .string()
+      .min(1, "Title is required")
+      .max(200, "Title must be less than 200 characters")
+      .trim()
+      .optional(),
+
+    subtitle: z
+      .string()
+      .max(500, "Subtitle must be less than 500 characters")
+      .trim()
+      .optional(),
+
+    content: z
+      .string()
+      .min(100, "Content must be at least 100 characters")
+      .max(100000, "Content must be less than 100,000 characters")
+      .optional(),
+
+    coverImage: z.string().url("Invalid image URL").optional().nullable(), // Allow null to remove image
+
+    tags: z
+      .array(
+        z
+          .string()
+          .min(2, "Tag must be at least 2 characters")
+          .max(30, "Tag must be less than 30 characters"),
+      )
+      .max(5, "Maximum 5 tags allowed")
+      .optional()
+      .transform((tags) =>
+        tags
+          ? [...new Set(tags.map((t) => t.trim().toLowerCase()))]
+          : undefined,
+      ),
+  })
+  .refine(
+    (data) => Object.keys(data).length > 0,
+    "At least one field must be provided for update",
+  );
+
+export const validateUpdatePost = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const result = updatePostSchema.parse(req.body);
+    req.body = result;
+    next();
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({
+        success: false,
+        error: "Validation failed",
+        details: error.issues.map((e) => ({
+          field: e.path.join("."),
+          message: e.message,
+        })),
+      });
+    }
+    next(error);
+  }
+};
 
 export const validateSlugParam = (
   req: Request,

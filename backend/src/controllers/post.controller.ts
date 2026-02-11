@@ -144,23 +144,24 @@ export async function updatePostController(
   try {
     const userId = req.auth().userId;
     const { id } = req.params;
-    const existing = await getDraftPostByIdService(id, userId);
-    if (!existing) {
-      return res.status(404).json({
-        success: false,
-        error: { message: "Post not found" },
-      });
-    }
     const { title, subtitle, content, tags, coverImage } = req.body;
-    const post = await updatePostService(
-      id,
+    const sanitizedContent = sanitizeHtml(content);
+    const post = await updatePostService({
+      userId: userId,
+      postId: id,
       title,
       tags,
-      content,
+      content: sanitizedContent,
       subtitle,
       coverImage,
-    );
-    return res.json({ success: true, data: post });
+    });
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        error: "Post not found",
+      });
+    }
+    return res.status(200).json({ success: true, data: post });
   } catch (error) {
     next(error);
   }
@@ -172,31 +173,9 @@ export async function deletePostController(
   next: NextFunction,
 ) {
   try {
-    const clerkId = req.auth().userId;
-    const user = await getUserClerkIdService(clerkId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: { message: "User not found" },
-      });
-    }
+    const userId = req.auth().userId;
     const { id: postId } = req.params;
-    const existing = await getDraftPostByIdService(postId);
-    if (!existing) {
-      return res.status(404).json({
-        success: false,
-        error: { message: "Post not found" },
-      });
-    }
-    if (existing.authorId !== user.id) {
-      return res.status(403).json({
-        success: false,
-        error: {
-          message: "Forbidden: You don't have permission to delete this post",
-        },
-      });
-    }
-    await deletePostService(postId);
+    await deletePostService(postId, userId);
     return res.json({ success: true, message: "Post deleted" });
   } catch (error) {
     next(error);
@@ -209,37 +188,9 @@ export async function publishPostController(
   next: NextFunction,
 ) {
   try {
-    const clerkId = req.auth().userId;
-    const user = await getUserClerkIdService(clerkId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: { message: "User not found" },
-      });
-    }
+    const userId = req.auth().userId;
     const { id: postId } = req.params;
-    const existing = await getDraftPostByIdService(postId);
-    if (!existing) {
-      return res.status(404).json({
-        success: false,
-        error: { message: "Post not found" },
-      });
-    }
-    if (existing.authorId !== user.id) {
-      return res.status(403).json({
-        success: false,
-        error: {
-          message: "Forbidden: You don't have permission to delete this post",
-        },
-      });
-    }
-    if (existing.status === "PUBLISHED") {
-      return res.status(400).json({
-        success: false,
-        error: { message: "Post is already published" },
-      });
-    }
-    const post = await publishPostService(postId);
+    const post = await publishPostService(postId, userId);
     return res.json({ success: true, data: post });
   } catch (error) {
     next(error);
