@@ -1,3 +1,4 @@
+
 import PostCard from "./components/PostCard";
 import { PostsResponse } from "@/types";
 import api from "@/lib/axios";

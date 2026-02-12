@@ -1,5 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import {
+  Geist,
+  Geist_Mono,
+  Mrs_Sheppards,
+  Google_Sans_Code,
+  Montserrat,
+} from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import Navbar from "./components/Navbar";
@@ -11,6 +17,23 @@ const geistSans = Geist({
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+const mrsSheppards = Mrs_Sheppards({
+  weight: "400",
+  variable: "--font-mrs-sheppards",
+  subsets: ["latin"],
+});
+
+const googleSansCode = Google_Sans_Code({
+  weight: "300",
+  variable: "--font-google-sans-code",
+  subsets: ["latin"],
+});
+const montserrat = Montserrat({
+  weight: "400",
+  variable: "--font-montserrat",
   subsets: ["latin"],
 });
 
@@ -28,7 +51,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white`}
+          className={`${geistSans.variable} ${geistMono.variable} ${mrsSheppards.variable} ${googleSansCode.variable} ${montserrat.variable} antialiased bg-white`}
         >
           <Navbar />
           <main>{children}</main>

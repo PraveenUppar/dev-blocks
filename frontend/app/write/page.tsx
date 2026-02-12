@@ -12,7 +12,6 @@ export default function WritePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const draftId = searchParams.get("draftId");
-
   const [title, setTitle] = useState("");
   const [subtitle, setSubtitle] = useState("");
   const [content, setContent] = useState("");
@@ -45,6 +44,7 @@ export default function WritePage() {
         setSubtitle(draft.subtitle || "");
         setContent(draft.content || "");
         setCoverImage(draft.coverImage || "");
+        setTags(draft.tags || "");
         // setTags if your API returns tags
       }
     } catch (error) {
@@ -66,7 +66,7 @@ export default function WritePage() {
     try {
       if (draftId) {
         // Update existing draft using PUT /:id/edit
-        const response = await api.put(`/post/${draftId}/edit`, {
+        const response = await api.put(`/post/update/${draftId}`, {
           title,
           subtitle: subtitle || undefined,
           content,
@@ -110,14 +110,14 @@ export default function WritePage() {
     try {
       if (draftId) {
         // First update the draft, then publish using PATCH /:id/publish
-        await api.put(`/post/${draftId}/edit`, {
+        await api.put(`/post/update/${draftId}`, {
           title,
           subtitle: subtitle || undefined,
           content,
           coverImage: coverImage || undefined,
         });
 
-        const response = await api.patch(`/post/${draftId}/publish`);
+        const response = await api.patch(`/post/publish/${draftId}`);
 
         if (response.data.success) {
           alert("Post published successfully!");
@@ -136,7 +136,7 @@ export default function WritePage() {
           const newPostId = createResponse.data.data.id;
 
           // Now publish it
-          const publishResponse = await api.patch(`/post/${newPostId}/publish`);
+          const publishResponse = await api.patch(`/post/publish/${newPostId}`);
 
           if (publishResponse.data.success) {
             alert("Post published successfully!");
@@ -158,7 +158,7 @@ export default function WritePage() {
     setSaving(true);
     try {
       // Using DELETE /:id
-      const response = await api.delete(`/post/${draftId}/delete`);
+      const response = await api.delete(`/post/delete/${draftId}`);
 
       if (response.data.success) {
         alert("Draft deleted successfully!");
