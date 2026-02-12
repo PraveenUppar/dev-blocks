@@ -35,23 +35,23 @@ const createPostSchema = z.object({
 
   content: z
     .string()
-    .min(100, "Content must be at least 100 characters")
-    .max(100000, "Content must be less than 100,000 characters"), // ~50 pages
+    .min(10, "Content must be at least 10 characters")
+    .max(1000, "Content must be less than 1000 characters"), // ~ pages
 
-  coverImage: z
-    .url("Invalid image URL")
-    .optional()
-    .refine(
-      (url) => !url || /\.(jpg|jpeg|png|webp|gif)$/i.test(url),
-      "Cover image must be a valid image URL",
-    ),
+  // coverImage: z
+  //   .url("Invalid image URL")
+  //   .optional()
+  //   .refine(
+  //     (url) => !url || /\.(jpg|jpeg|png|webp|gif)$/i.test(url),
+  //     "Cover image must be a valid image URL",
+  //   ),
 
   tags: z
     .array(
       z
         .string()
         .min(2, "Tag must be at least 2 characters")
-        .max(30, "Tag must be less than 30 characters")
+        .max(20, "Tag must be less than 20 characters")
         .regex(/^[a-zA-Z0-9\s-]+$/, "Tag contains invalid characters"),
     )
     .max(5, "Maximum 5 tags allowed")
@@ -106,7 +106,7 @@ const updatePostSchema = z
       .max(100000, "Content must be less than 100,000 characters")
       .optional(),
 
-    coverImage: z.string().url("Invalid image URL").optional().nullable(), // Allow null to remove image
+    coverImage: z.url("Invalid image URL").optional().nullable(), // Allow null to remove image
 
     tags: z
       .array(

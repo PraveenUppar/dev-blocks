@@ -23,7 +23,6 @@ import {
   validateSlugParam,
   validateUpdatePost,
 } from "../middleware/validation.js";
-import { verifyPostOwnership } from "../middleware/ownership.js";
 
 // ==================== PUBLIC ROUTES ====================
 
@@ -31,9 +30,9 @@ const postRoute = Router();
 
 postRoute.use(apiLimiter);
 
-// GET Published Posts for Homepage - Fetches only the metadata of posts
+// GET Published Posts for Homepage - Fetches only the metadata of posts -- working and tested
 postRoute.get("/", getPublishedPostController);
-// GET Published Post by ID - Fetches full content of the post
+// GET Published Post by ID - Fetches full content of the post --  working and tested
 postRoute.get<{ id: string }>(
   "/id/:id",
   validateIdParam,
@@ -50,40 +49,36 @@ postRoute.get(
 
 postRoute.use(requireAuth());
 
-// CREATE a new Draft Post
+// CREATE a new Draft Post - working and tested
 postRoute.post(
   "/create",
   createLimiter,
   validateCreatePost,
   createPostController,
 );
-// GET Draft Post by ID
+// GET Draft Post by ID - working and tested
 postRoute.get<{ id: string }>(
   "/draft/:id",
   validateIdParam,
-  verifyPostOwnership,
   getDraftPostByIdController,
 );
-// UPDATE a Post by ID
+// UPDATE a Post by ID - working and tested
 postRoute.put<{ id: string }>(
   "/update/:id",
   validateIdParam,
   validateUpdatePost,
-  verifyPostOwnership,
   updatePostController,
 );
-// DELETE a Post by ID
+// DELETE a Post by ID - working and tested
 postRoute.delete<{ id: string }>(
   "/delete/:id",
   validateIdParam,
-  verifyPostOwnership,
   deletePostController,
 );
-// PUBLISH a Post by ID
+// PUBLISH a Post by ID - working and tested
 postRoute.patch<{ id: string }>(
   "/publish/:id",
   validateIdParam,
-  verifyPostOwnership,
   publishPostController,
 );
 

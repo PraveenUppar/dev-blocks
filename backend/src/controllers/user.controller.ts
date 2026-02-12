@@ -157,7 +157,7 @@ export async function updateUserProfileController(
     if (!clerkId) {
       return res.status(401).json({
         success: false,
-        error: { message: "Unauthorized Unauthorized From Space" },
+        error: { message: "Unauthorized User" },
       });
     }
     const user = await getUserClerkIdService(clerkId);
@@ -167,6 +167,7 @@ export async function updateUserProfileController(
         error: { message: "User not found" },
       });
     }
+    // choose the parts to update and sanitize the content
     const updated = await updateUserProfileService(user.id, req.body);
     return res.json({ success: true, data: updated });
   } catch (error) {

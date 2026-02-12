@@ -6,18 +6,21 @@ import { nanoid } from "nanoid";
 export async function getUserNameService(username: string) {
   return prisma.user.findUnique({
     where: { username },
+    select: { id: true },
   });
 }
 // GET USER BY CLERKID Service
 export const getUserClerkIdService = async (clerkId: string) => {
   return prisma.user.findUnique({
     where: { clerkId },
+    select: { id: true },
   });
 };
 // GET USER BY ID Service
 export const getUserIdService = async (id: string) => {
   return prisma.user.findUnique({
     where: { id },
+    select: { id: true },
   });
 };
 // GET ALL PUBLISHED POST Service
@@ -265,11 +268,11 @@ export async function createPostService(data: CreatePostData) {
   const { authorId, title, subtitle, content, coverImage, tags } = data;
   let slug = generateSlug(title);
   const existingPost = await prisma.post.findUnique({
-    where: { slug },
+    where: { id: authorId, slug },
     select: { id: true },
   });
   if (existingPost) {
-    slug = `${slug}-${nanoid(5)}`; // If it exists, append a random 5-char string immediately.
+    slug = `${slug}-${nanoid(5)}`;
   }
   const readTime = calculateReadingTime(content);
   const post = await prisma.post.create({
@@ -279,7 +282,7 @@ export async function createPostService(data: CreatePostData) {
       subtitle,
       slug,
       readTime,
-      authorId,
+      authorId: authorId,
       status: "DRAFT",
       ...(coverImage && { coverImage }),
       ...(tags &&
@@ -395,12 +398,14 @@ interface UpdatePostData {
 }
 export async function updatePostService(data: UpdatePostData) {
   const { userId, postId, title, subtitle, content, coverImage, tags } = data;
-  const updateData: any = { ...data };
+  const updateData: any = {};
   if (content) {
     updateData.content = content;
     updateData.readTime = calculateReadingTime(content);
   }
   if (title) {
+    updateData.title = title;
+
     let slug = generateSlug(title);
     const existingPost = await prisma.post.findUnique({
       where: { slug },

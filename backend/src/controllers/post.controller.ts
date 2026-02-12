@@ -97,12 +97,20 @@ export async function createPostController(
   next: NextFunction,
 ) {
   try {
-    const userId = req.auth().userId;
+    const clerkId = req.auth().userId;
+    const user = await getUserClerkIdService(clerkId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: { message: "User not found" },
+      });
+    }
+
     const { title, subtitle, content, coverImage, tags } = req.body;
     // For tags "React", "react ", and "React" are all treated as the same tag, preventing duplicate database entries - done during validation
     const sanitizedContent = sanitizeHtml(content);
     const post = await createPostService({
-      authorId: userId,
+      authorId: user.id,
       title,
       content: sanitizedContent,
       subtitle,
@@ -121,9 +129,16 @@ export async function getDraftPostByIdController(
   next: NextFunction,
 ) {
   try {
-    const userId = req.auth().userId;
+    const clerkId = req.auth().userId;
+    const user = await getUserClerkIdService(clerkId);
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        error: "User not found",
+      });
+    }
     const { id } = req.params;
-    const post = await getDraftPostByIdService(id, userId);
+    const post = await getDraftPostByIdService(id, user.id);
     if (!post) {
       return res.status(404).json({
         success: false,
@@ -142,12 +157,26 @@ export async function updatePostController(
   next: NextFunction,
 ) {
   try {
-    const userId = req.auth().userId;
+    const clerkId = req.auth().userId;
+    const user = await getUserClerkIdService(clerkId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: { message: "User not found" },
+      });
+    }
     const { id } = req.params;
+    const findpost = await getDraftPostByIdService(id, user.id);
+    if (!findpost) {
+      return res.status(404).json({
+        success: false,
+        error: { message: "Post not found" },
+      });
+    }
     const { title, subtitle, content, tags, coverImage } = req.body;
     const sanitizedContent = sanitizeHtml(content);
     const post = await updatePostService({
-      userId: userId,
+      userId: user.id,
       postId: id,
       title,
       tags,
@@ -173,9 +202,23 @@ export async function deletePostController(
   next: NextFunction,
 ) {
   try {
-    const userId = req.auth().userId;
+    const clerkId = req.auth().userId;
+    const user = await getUserClerkIdService(clerkId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: { message: "User not found" },
+      });
+    }
     const { id: postId } = req.params;
-    await deletePostService(postId, userId);
+    const findpost = await getDraftPostByIdService(postId, user.id);
+    if (!findpost) {
+      return res.status(404).json({
+        success: false,
+        error: { message: "Post not found" },
+      });
+    }
+    await deletePostService(postId, user.id);
     return res.json({ success: true, message: "Post deleted" });
   } catch (error) {
     next(error);
@@ -188,9 +231,23 @@ export async function publishPostController(
   next: NextFunction,
 ) {
   try {
-    const userId = req.auth().userId;
+    const clerkId = req.auth().userId;
+    const user = await getUserClerkIdService(clerkId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: { message: "User not found" },
+      });
+    }
     const { id: postId } = req.params;
-    const post = await publishPostService(postId, userId);
+    // const findpost = await getDraftPostByIdService(postId, user.id);
+    // if (!findpost) {
+    //   return res.status(404).json({
+    //     success: false,
+    //     error: { message: "Post not found" },
+    //   });
+    // }
+    const post = await publishPostService(postId, user.id);
     return res.json({ success: true, data: post });
   } catch (error) {
     next(error);

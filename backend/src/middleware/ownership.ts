@@ -13,15 +13,28 @@ export async function verifyPostOwnership(
   next: NextFunction,
 ) {
   try {
-    const userId = req.auth().userId;
+    const clerkId = req.auth().userId;
     const postId = req.params.id;
 
-    if (!userId) {
+    if (!clerkId) {
       return res.status(401).json({
         success: false,
         error: "Authentication required",
       });
     }
+
+    const user = await prisma.user.findUnique({
+      where: { clerkId },
+      select: { id: true },
+    });
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        error: "User not found",
+      });
+    }
+
     // Check ownership
     const post = await prisma.post.findUnique({
       where: { id: postId },
@@ -35,7 +48,7 @@ export async function verifyPostOwnership(
       });
     }
 
-    if (post.authorId !== userId) {
+    if (post.authorId !== user.id) {
       return res.status(403).json({
         success: false,
         error: "You do not have permission to access this resource",
