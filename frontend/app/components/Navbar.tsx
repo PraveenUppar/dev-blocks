@@ -9,6 +9,7 @@ import {
   FiBookmark,
   FiClock,
   FiSettings,
+  FiMenu,
 } from "react-icons/fi";
 
 export default function Navbar() {
@@ -21,26 +22,59 @@ export default function Navbar() {
   }, [getToken]);
 
   return (
-    <nav className="bg-gray">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-18 items-center justify-between">
+    <nav className="bg-gray-50 border-b border-gray-500">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 border-l border-r border-gray-500">
+        <div className="flex h-18 items-center justify-between ">
           {/* Logo */}
-          <Link href="/" className="flex items-center">
+          <Link href="/" className="flex items-center ">
             <span
-              className="text-4xl "
+              className="text-4xl text-black "
               style={{ fontFamily: "var(--font-mrs-sheppards)" }}
             >
-              Blocks
+              Dev Blocks
             </span>
           </Link>
-          {/* Search (optional - add later) */}
-          <div className="hidden md:flex flex-1 max-w-md">
-            <input
-              type="text"
-              placeholder="Search..."
-              className="w-full px-4 py-2 text-black rounded-full bg-gray-100"
-            />
-          </div>
+          {/* Desktop Menu - Hidden on mobile */}
+          {isSignedIn && (
+            <div className="hidden md:flex items-center gap-8">
+              <Link
+                href="/write"
+                className="text-sm font-medium text-gray-700 hover:text-gray-900 transition"
+                style={{ fontFamily: "var(--font-montserrat)" }}
+              >
+                Write
+              </Link>
+              <Link
+                href="/drafts"
+                className="text-sm font-medium text-gray-700 hover:text-gray-900 transition"
+                style={{ fontFamily: "var(--font-montserrat)" }}
+              >
+                Drafts
+              </Link>
+              <Link
+                href="/bookmarks"
+                className="text-sm font-medium text-gray-700 hover:text-gray-900 transition"
+                style={{ fontFamily: "var(--font-montserrat)" }}
+              >
+                Bookmarks
+              </Link>
+              <Link
+                href="/history"
+                className="text-sm font-medium text-gray-700 hover:text-gray-900 transition"
+                style={{ fontFamily: "var(--font-montserrat)" }}
+              >
+                Reading History
+              </Link>
+              <Link
+                href="/settings"
+                className="text-sm font-medium text-gray-700 hover:text-gray-900 transition"
+                style={{ fontFamily: "var(--font-montserrat)" }}
+              >
+                Settings
+              </Link>
+            </div>
+          )}
+
           {/* Right side */}
           <div className="flex items-center gap-4">
             {!isLoaded ? (
@@ -48,13 +82,15 @@ export default function Navbar() {
             ) : isSignedIn ? (
               // Signed in state
               <>
-                <div className="relative">
+                {/* Mobile Dropdown Menu - Visible only on mobile */}
+                <div className="relative md:hidden">
                   <button
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className="rounded-md bg-white px-6 py-2 text-sm  text-black cursor-pointer"
+                    className="rounded-md flex gap-2 bg-white px-3 py-2 text-sm items-center text-black border border-gray-300 hover:bg-gray-50"
                     style={{ fontFamily: "var(--font-montserrat)" }}
                   >
-                    Explore
+                    <FiMenu className="h-5 w-5" />
+                    Menu
                   </button>
 
                   {isDropdownOpen && (
@@ -67,24 +103,20 @@ export default function Navbar() {
 
                       {/* Dropdown menu */}
                       <div
-                        className="
-    fixed inset-x-0 top-16 z-20
-    bg-white py-2 shadow-lg ring-1 ring-black
-    md:absolute md:inset-auto md:right-0 md:mt-2 md:w-56 md:rounded-md
-  "
+                        className="absolute right-0 mt-2 w-56 z-20 bg-white py-2 rounded-md shadow-lg ring-1 ring-black/5"
                         style={{ fontFamily: "var(--font-montserrat)" }}
                       >
                         <Link
                           href="/write"
-                          className="flex gap-2 px-4 py-2  text-md text-gray-900 hover:bg-gray-100"
+                          className="flex gap-2 px-4 py-2 items-center text-md text-gray-900 cursor-pointer hover:bg-gray-100"
                           onClick={() => setIsDropdownOpen(false)}
                         >
-                          <FiEdit className="h-5 w-5  text-gray-500" />
+                          <FiEdit className="h-5 w-5 text-gray-500" />
                           Write
                         </Link>
                         <Link
                           href="/drafts"
-                          className="flex gap-2 px-4 py-2 text-md text-gray-900 hover:bg-gray-100"
+                          className="flex gap-2 px-4 py-2 text-md items-center text-gray-900 cursor-pointer hover:bg-gray-100"
                           onClick={() => setIsDropdownOpen(false)}
                         >
                           <FiFileText className="h-5 w-5 text-gray-500" />
@@ -92,7 +124,7 @@ export default function Navbar() {
                         </Link>
                         <Link
                           href="/bookmarks"
-                          className="flex gap-2 px-4  py-2 text-md text-gray-900 hover:bg-gray-100"
+                          className="flex gap-2 px-4 py-2 text-md items-center text-gray-900 cursor-pointer hover:bg-gray-100"
                           onClick={() => setIsDropdownOpen(false)}
                         >
                           <FiBookmark className="h-5 w-5 text-gray-500" />
@@ -100,7 +132,7 @@ export default function Navbar() {
                         </Link>
                         <Link
                           href="/history"
-                          className="flex gap-2 px-4 py-2 text-md text-gray-900 hover:bg-gray-100"
+                          className="flex gap-2 px-4 py-2 text-md items-center text-gray-900 cursor-pointer hover:bg-gray-100"
                           onClick={() => setIsDropdownOpen(false)}
                         >
                           <FiClock className="h-5 w-5 text-gray-500" />
@@ -108,7 +140,7 @@ export default function Navbar() {
                         </Link>
                         <Link
                           href="/settings"
-                          className="flex gap-2 px-4 py-2 text-md text-gray-900 hover:bg-gray-100"
+                          className="flex gap-2 px-4 py-2 text-md items-center text-gray-900 cursor-pointer hover:bg-gray-100"
                           onClick={() => setIsDropdownOpen(false)}
                         >
                           <FiSettings className="h-5 w-5 text-gray-500" />

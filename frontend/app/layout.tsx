@@ -5,6 +5,7 @@ import {
   Mrs_Sheppards,
   Google_Sans_Code,
   Montserrat,
+  Arimo,
 } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
@@ -31,9 +32,16 @@ const googleSansCode = Google_Sans_Code({
   variable: "--font-google-sans-code",
   subsets: ["latin"],
 });
+
 const montserrat = Montserrat({
   weight: "400",
   variable: "--font-montserrat",
+  subsets: ["latin"],
+});
+
+const arimo = Arimo({
+  weight: "400",
+  variable: "--font-arimo",
   subsets: ["latin"],
 });
 
@@ -51,7 +59,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body
-          className={`${geistSans.variable} ${geistMono.variable} ${mrsSheppards.variable} ${googleSansCode.variable} ${montserrat.variable} antialiased bg-white`}
+          className={`${geistSans.variable} ${geistMono.variable} ${mrsSheppards.variable} ${googleSansCode.variable} ${montserrat.variable} ${arimo.variable} bg-gray-50`}
         >
           <Navbar />
           <main>{children}</main>
