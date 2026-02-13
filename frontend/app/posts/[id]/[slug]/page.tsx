@@ -202,12 +202,12 @@ export default function PostPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 ">
       {/* Hero Section */}
-      <div className="bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <div className="">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 border-l border-r border-gray-500">
           {/* Tags */}
-          <div className="flex flex-wrap gap-2 mb-6">
+          <div className="flex flex-wrap gap-2 mb-6   ">
             {(post.tags || []).map((postTag) => (
               <Link
                 key={postTag.tag.id}
@@ -220,7 +220,10 @@ export default function PostPage() {
           </div>
 
           {/* Title */}
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 leading-tight">
+          <h1
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 leading-tight "
+            style={{ fontFamily: "var(--font-arimo)" }}
+          >
             {post.title}
           </h1>
 
@@ -232,7 +235,7 @@ export default function PostPage() {
           )}
 
           {/* Author & Meta */}
-          <div className="flex flex-col gap-4 py-6 border-t border-gray-200">
+          <div className="flex flex-col gap-4 py-6 px-3 border-l border-r border-t border-b border-gray-500">
             <div className="flex items-center justify-between">
               {/* Author Info */}
               <div className="flex items-center gap-3">
@@ -318,10 +321,89 @@ export default function PostPage() {
               </div>
             </div>
           </div>
+          {/* Content */}
+          <div
+            className="bg-gray-50 border-l border-r border-gray-500"
+            style={{ fontFamily: "var(--font-arimo)" }}
+          >
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-black py-12 sm:py-16">
+              <article
+                className="prose prose-sm sm:prose-base md:prose-lg max-w-none 
+              prose-headings:font-bold prose-headings:text-gray-900 prose-headings:mt-8 prose-headings:mb-4
+              prose-p:text-gray-700 prose-p:leading-relaxed
+              prose-a:text-emerald-600 prose-a:no-underline hover:prose-a:underline
+              prose-code:bg-gray-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-gray-800 prose-code:text-sm
+              prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:rounded-lg
+              prose-li:text-gray-700 prose-li:marker:text-gray-400
+              prose-strong:text-gray-900
+              prose-ul:my-4 prose-ol:my-4"
+                dangerouslySetInnerHTML={{ __html: post.content || "" }}
+              />
+
+              {/* Author Card */}
+              <div className="mt-12 sm:mt-16 p-6 sm:p-8 bg-gray-200 rounded-xl border border-gray-100">
+                <div className="flex flex-col sm:flex-row gap-4">
+                  {/* Avatar */}
+                  <Link
+                    href={`/users/${post.author.username}`}
+                    className="shrink-0"
+                  >
+                    {post.author.avatar ? (
+                      <Image
+                        src={post.author.avatar}
+                        alt={post.author.name}
+                        width={72}
+                        height={72}
+                        className="rounded-full w-16 h-16 sm:w-72px sm:h-72px object-cover"
+                      />
+                    ) : (
+                      <div className="w-16 h-16 sm:w-72px sm:h-72px rounded-full bg-gray-300" />
+                    )}
+                  </Link>
+
+                  {/* Author Details */}
+                  <div className="flex-1">
+                    <div className="flex flex-row items-start sm:items-center justify-between gap-3">
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+                          Written by
+                        </p>
+                        <Link
+                          href={`/users/${post.author.username}`}
+                          className="font-bold text-lg sm:text-xl text-gray-900 hover:text-emerald-600 transition"
+                        >
+                          {post.author.name}
+                        </Link>
+                      </div>
+                      <button className="px-5 py-2 bg-emerald-600 text-white rounded-full text-sm font-medium hover:bg-emerald-700 transition shrink-0">
+                        Follow
+                      </button>
+                    </div>
+                    <p className="text-gray-600 mt-3 text-sm sm:text-base leading-relaxed">
+                      {post.author.bio}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Comments Section Placeholder */}
+              <div className="mt-12 sm:mt-16">
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">
+                  Comments ({post._count?.comments ?? 0})
+                </h3>
+                <div className="bg-gray-50 border border-gray-200 rounded-xl p-8 sm:p-12 text-center">
+                  <CommentIcon className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-500 text-sm sm:text-base">
+                    Comments section coming soon...
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Cover Image */}
+      {/* Cover Image
       {post.coverImage && (
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <Image
@@ -332,84 +414,7 @@ export default function PostPage() {
             className="rounded-xl w-full h-48 sm:h-64 md:h-80 lg:h-400px object-cover"
           />
         </div>
-      )}
-
-      {/* Content */}
-      <div className="bg-white">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-black py-12 sm:py-16">
-          <article
-            className="prose prose-sm sm:prose-base md:prose-lg max-w-none 
-              prose-headings:font-bold prose-headings:text-gray-900 prose-headings:mt-8 prose-headings:mb-4
-              prose-p:text-gray-700 prose-p:leading-relaxed
-              prose-a:text-emerald-600 prose-a:no-underline hover:prose-a:underline
-              prose-code:bg-gray-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-gray-800 prose-code:text-sm
-              prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:rounded-lg
-              prose-li:text-gray-700 prose-li:marker:text-gray-400
-              prose-strong:text-gray-900
-              prose-ul:my-4 prose-ol:my-4"
-            dangerouslySetInnerHTML={{ __html: post.content || "" }}
-          />
-
-          {/* Author Card */}
-          <div className="mt-12 sm:mt-16 p-6 sm:p-8 bg-gray-50 rounded-xl border border-gray-100">
-            <div className="flex flex-col sm:flex-row gap-4">
-              {/* Avatar */}
-              <Link
-                href={`/users/${post.author.username}`}
-                className="shrink-0"
-              >
-                {post.author.avatar ? (
-                  <Image
-                    src={post.author.avatar}
-                    alt={post.author.name}
-                    width={72}
-                    height={72}
-                    className="rounded-full w-16 h-16 sm:w-72px sm:h-72px object-cover"
-                  />
-                ) : (
-                  <div className="w-16 h-16 sm:w-72px sm:h-72px rounded-full bg-gray-300" />
-                )}
-              </Link>
-
-              {/* Author Details */}
-              <div className="flex-1">
-                <div className="flex flex-row items-start sm:items-center justify-between gap-3">
-                  <div>
-                    <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
-                      Written by
-                    </p>
-                    <Link
-                      href={`/users/${post.author.username}`}
-                      className="font-bold text-lg sm:text-xl text-gray-900 hover:text-emerald-600 transition"
-                    >
-                      {post.author.name}
-                    </Link>
-                  </div>
-                  <button className="px-5 py-2 bg-emerald-600 text-white rounded-full text-sm font-medium hover:bg-emerald-700 transition shrink-0">
-                    Follow
-                  </button>
-                </div>
-                <p className="text-gray-600 mt-3 text-sm sm:text-base leading-relaxed">
-                  {post.author.bio}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Comments Section Placeholder */}
-          <div className="mt-12 sm:mt-16">
-            <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">
-              Comments ({post._count?.comments ?? 0})
-            </h3>
-            <div className="bg-gray-50 border border-gray-200 rounded-xl p-8 sm:p-12 text-center">
-              <CommentIcon className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500 text-sm sm:text-base">
-                Comments section coming soon...
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+      )} */}
     </div>
   );
 }

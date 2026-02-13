@@ -5,7 +5,7 @@ import { useAuth, useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import api from "@/lib/axios";
 import { setAuthTokenGetter } from "@/lib/axios";
-import Image from "next/image";
+// import Image from "next/image";
 
 interface UserProfile {
   id: string;
@@ -124,8 +124,8 @@ export default function Settings() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gray-50 ">
+      <div className="max-w-7xl mx-auto px-4 py-8 border-l border-r  border-gray-500">
         {/* Header */}
         <div className="mb-8">
           <button

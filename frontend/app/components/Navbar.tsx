@@ -39,35 +39,35 @@ export default function Navbar() {
             <div className="hidden md:flex items-center gap-8">
               <Link
                 href="/write"
-                className="text-sm font-medium text-gray-700 hover:text-gray-900 transition"
+                className="text-md font-medium text-gray-700 hover:text-gray-900 transition"
                 style={{ fontFamily: "var(--font-montserrat)" }}
               >
                 Write
               </Link>
               <Link
                 href="/drafts"
-                className="text-sm font-medium text-gray-700 hover:text-gray-900 transition"
+                className="text-md font-medium text-gray-700 hover:text-gray-900 transition"
                 style={{ fontFamily: "var(--font-montserrat)" }}
               >
                 Drafts
               </Link>
               <Link
                 href="/bookmarks"
-                className="text-sm font-medium text-gray-700 hover:text-gray-900 transition"
+                className="text-md font-medium text-gray-700 hover:text-gray-900 transition"
                 style={{ fontFamily: "var(--font-montserrat)" }}
               >
                 Bookmarks
               </Link>
               <Link
                 href="/history"
-                className="text-sm font-medium text-gray-700 hover:text-gray-900 transition"
+                className="text-md font-medium text-gray-700 hover:text-gray-900 transition"
                 style={{ fontFamily: "var(--font-montserrat)" }}
               >
                 Reading History
               </Link>
               <Link
                 href="/settings"
-                className="text-sm font-medium text-gray-700 hover:text-gray-900 transition"
+                className="text-md font-medium text-gray-700 hover:text-gray-900 transition"
                 style={{ fontFamily: "var(--font-montserrat)" }}
               >
                 Settings

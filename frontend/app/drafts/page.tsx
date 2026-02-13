@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
+// import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import api from "@/lib/axios";
@@ -89,19 +89,27 @@ export default function DraftsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-gray-500">Loading drafts...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-6xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gray-50 ">
+      <div className="max-w-7xl mx-auto px-4 py-8 border-l border-r border-gray-500">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Your Drafts</h1>
-          <p className="text-gray-600">
+          <h1
+            className="text-4xl font-bold text-gray-900 mb-2"
+            style={{ fontFamily: "var(--font-montserrat)" }}
+          >
+            Your Drafts
+          </h1>
+          <p
+            className="text-gray-600"
+            style={{ fontFamily: "var(--font-montserrat)" }}
+          >
             {pagination.total} {pagination.total === 1 ? "draft" : "drafts"}
           </p>
         </div>
@@ -145,23 +153,35 @@ export default function DraftsPage() {
                 <div
                   key={draft.id}
                   onClick={() => handleDraftClick(draft.id)}
-                  className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow cursor-pointer group"
+                  className="border-t border-b border-gray-200  p-6  cursor-pointer group"
                 >
                   <div className="flex gap-6">
                     {/* Content */}
                     <div className="flex-1">
-                      <h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-green-600 transition">
+                      <h2
+                        className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-500 transition"
+                        style={{ fontFamily: "var(--font-montserrat)" }}
+                      >
                         {draft.title}
                       </h2>
                       {draft.subtitle && (
-                        <p className="text-lg text-gray-600 mb-3">
+                        <p
+                          className="text-lg text-gray-600 mb-3"
+                          style={{ fontFamily: "var(--font-arimo)" }}
+                        >
                           {draft.subtitle}
                         </p>
                       )}
-                      <p className="text-gray-700 mb-4 line-clamp-2">
+                      <p
+                        className="text-gray-700 mb-4 line-clamp-2"
+                        style={{ fontFamily: "var(--font-montserrat)" }}
+                      >
                         {getContentPreview(draft.content)}
                       </p>
-                      <div className="flex items-center gap-4 text-sm text-gray-500">
+                      <div
+                        className="flex items-center gap-4 text-sm text-gray-500"
+                        style={{ fontFamily: "var(--font-montserrat)" }}
+                      >
                         <span>Last edited {formatDate(draft.updatedAt)}</span>
                         <span>•</span>
                         <span>
@@ -176,7 +196,7 @@ export default function DraftsPage() {
                       </div>
                     </div>
 
-                    {/* Cover Image */}
+                    {/* Cover Image
                     {draft.coverImage && (
                       <div className="shrink-0">
                         <Image
@@ -187,7 +207,7 @@ export default function DraftsPage() {
                           className="w-40 h-30 object-cover rounded-lg"
                         />
                       </div>
-                    )}
+                    )} */}
                   </div>
                 </div>
               ))}

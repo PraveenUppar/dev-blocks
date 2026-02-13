@@ -6,6 +6,7 @@ import {
   Google_Sans_Code,
   Montserrat,
   Arimo,
+  Raleway,
 } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
@@ -45,6 +46,12 @@ const arimo = Arimo({
   subsets: ["latin"],
 });
 
+const raleway = Raleway({
+  weight: "400",
+  variable: "--font-arimo",
+  subsets: ["latin"],
+});
+
 export const metadata: Metadata = {
   title: "Dev Blocks",
   description: "A Medium-like blogging platform",
@@ -59,7 +66,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body
-          className={`${geistSans.variable} ${geistMono.variable} ${mrsSheppards.variable} ${googleSansCode.variable} ${montserrat.variable} ${arimo.variable} bg-gray-50`}
+          className={`${geistSans.variable} ${geistMono.variable} ${mrsSheppards.variable} ${googleSansCode.variable} ${montserrat.variable} ${arimo.variable} ${raleway.variable} bg-gray-50`}
         >
           <Navbar />
           <main>{children}</main>

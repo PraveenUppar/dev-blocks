@@ -7,6 +7,8 @@ import { useParams } from "next/navigation";
 import api from "../../../lib/axios";
 import { User, Post } from "../../../types/index";
 import PostCard from "../../components/PostCard";
+import { FiGlobe, FiGithub, FiLinkedin } from "react-icons/fi";
+import { FaXTwitter } from "react-icons/fa6";
 
 type TabType = "posts" | "followers" | "following";
 
@@ -200,11 +202,11 @@ export default function UserPage() {
   const postsCount = user?._count?.posts ?? 0;
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="min-h-screen bg-gray-50 ">
+      <div className="container mx-auto px-4 py-8 max-w-7xl border-l border-r border-gray-500 ">
         {/* Profile Header */}
         <div className="flex flex-col md:flex-row items-start text-black md:items-center gap-6 mb-8">
-          <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-2 border-gray-200">
+          <div className="relative w-24 h-24  md:w-32 md:h-32 rounded-full overflow-hidden border-2 border-gray-600">
             {user.avatar ? (
               <Image
                 src={user.avatar}
@@ -220,31 +222,27 @@ export default function UserPage() {
           </div>
 
           <div className="flex-1">
-            <h1 className="text-3xl font-bold mb-1">{user.name}</h1>
-            <p className="text-lg text-gray-600 mb-4">@{user.username}</p>
+            <h1
+              className="text-3xl font-bold mb-1"
+              style={{ fontFamily: "var(--font-montserrat)" }}
+            >
+              {user.name}
+            </h1>
+            <p
+              className="text-lg text-gray-600 mb-2"
+              style={{ fontFamily: "var(--font-montserrat)" }}
+            >
+              @{user.username}
+            </p>
 
-            {user.bio && <p className="text-base mb-4 max-w-2xl">{user.bio}</p>}
-
-            <div className="flex flex-wrap gap-6 text-sm">
-              <button
-                onClick={() => setActiveTab("followers")}
-                className="flex items-center gap-1 hover:text-green-600 transition"
+            {user.bio && (
+              <p
+                className="text-base mb-4 max-w-2xl"
+                style={{ fontFamily: "var(--font-arimo)" }}
               >
-                <span className="font-bold">{followersCount}</span>
-                <span className="text-gray-600">Followers</span>
-              </button>
-              <button
-                onClick={() => setActiveTab("following")}
-                className="flex items-center gap-1 hover:text-green-600 transition"
-              >
-                <span className="font-bold">{followingCount}</span>
-                <span className="text-gray-600">Following</span>
-              </button>
-              <div className="flex items-center gap-1">
-                <span className="font-bold">{postsCount}</span>
-                <span className="text-gray-600">Posts</span>
-              </div>
-            </div>
+                {user.bio}
+              </p>
+            )}
 
             {/* Social Links */}
             {(user.website || user.twitter || user.github || user.linkedin) && (
@@ -254,9 +252,9 @@ export default function UserPage() {
                     href={user.website}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-green-600 hover:underline text-sm"
+                    className=" cursor-pointer  p-1 border border-gray-900"
                   >
-                    Website
+                    <FiGlobe className="w-4 h-4" />
                   </a>
                 )}
                 {user.twitter && (
@@ -264,9 +262,9 @@ export default function UserPage() {
                     href={`https://twitter.com/${user.twitter}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-green-600 hover:underline text-sm"
+                    className=" cursor-pointer p-1 border border-gray-900"
                   >
-                    Twitter
+                    <FaXTwitter className="w-4 h-4" />
                   </a>
                 )}
                 {user.github && (
@@ -274,9 +272,9 @@ export default function UserPage() {
                     href={`https://github.com/${user.github}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-green-600 hover:underline text-sm"
+                    className=" cursor-pointer p-1 border border-gray-900"
                   >
-                    GitHub
+                    <FiGithub className="w-4 h-4" />
                   </a>
                 )}
                 {user.linkedin && (
@@ -284,9 +282,9 @@ export default function UserPage() {
                     href={`https://linkedin.com/in/${user.linkedin}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-green-600 hover:underline text-sm"
+                    className=" cursor-pointer p-1 border border-gray-900"
                   >
-                    LinkedIn
+                    <FiLinkedin className="w-4 h-4" />
                   </a>
                 )}
               </div>
@@ -295,7 +293,10 @@ export default function UserPage() {
         </div>
 
         {/* Tabs */}
-        <div className="border-b border-gray-200 text-black mb-6">
+        <div
+          className="border-b border-gray-300 text-black mb-6"
+          style={{ fontFamily: "var(--font-montserrat)" }}
+        >
           <div className="flex gap-6">
             <button
               onClick={() => setActiveTab("posts")}

@@ -182,12 +182,12 @@ export default function WritePage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-white ">
+      <div className="max-w-7xl mx-auto px-4 py-8 border-l border-r  border-gray-500">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-8 cursor-pointer">
           <button
-            onClick={() => router.push("/drafts")}
+            onClick={() => router.push("/")}
             className="text-gray-600 hover:text-gray-900 flex items-center gap-2"
           >
             <svg
