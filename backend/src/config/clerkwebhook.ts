@@ -26,7 +26,8 @@ webhookRouter.post("/clerk", async (req: Request, res: Response) => {
   let evt: any;
 
   try {
-    evt = wh.verify(JSON.stringify(req.body), {
+    const payload = req.body.toString();
+    evt = wh.verify(payload, {
       "svix-id": svix_id,
       "svix-timestamp": svix_timestamp,
       "svix-signature": svix_signature,
