@@ -1,8 +1,8 @@
 "use client";
+
 import Link from "next/link";
-import { SignUpButton, UserButton, useUser, useAuth } from "@clerk/nextjs";
-import { setAuthTokenGetter } from "../../lib/axios";
-import { useEffect, useState } from "react";
+import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
+import { useState } from "react";
 import {
   FiEdit,
   FiFileText,
@@ -14,27 +14,23 @@ import {
 
 export default function Navbar() {
   const { isSignedIn, isLoaded } = useUser();
-  const { getToken } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  useEffect(() => {
-    setAuthTokenGetter(getToken);
-  }, [getToken]);
-
   return (
-    <nav className="bg-gray-50 border-b border-gray-500">
+    <nav className="bg-gray-50 border-b border-gray-500 sticky top-0 z-30">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 border-l border-r border-gray-500">
-        <div className="flex h-18 items-center justify-between ">
+        <div className="flex h-18 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center ">
+          <Link href="/" className="flex items-center">
             <span
-              className="text-4xl text-black "
+              className="text-4xl text-black"
               style={{ fontFamily: "var(--font-mrs-sheppards)" }}
             >
               Dev Blocks
             </span>
           </Link>
-          {/* Desktop Menu - Hidden on mobile */}
+
+          {/* Desktop Menu options - Hidden on mobile */}
           {isSignedIn && (
             <div className="hidden md:flex items-center gap-8">
               <Link
@@ -82,74 +78,16 @@ export default function Navbar() {
             ) : isSignedIn ? (
               // Signed in state
               <>
-                {/* Mobile Dropdown Menu - Visible only on mobile */}
-                <div className="relative md:hidden">
-                  <button
-                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className="rounded-md flex gap-2 bg-white px-3 py-2 text-sm items-center text-black border border-gray-300 hover:bg-gray-50"
-                    style={{ fontFamily: "var(--font-montserrat)" }}
-                  >
-                    <FiMenu className="h-5 w-5" />
-                    Menu
-                  </button>
+                {/* Mobile Menu Button - Visible only on mobile */}
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="md:hidden rounded-md flex gap-2 bg-white px-3 py-2 text-sm items-center text-black border border-gray-300 hover:bg-gray-50"
+                  style={{ fontFamily: "var(--font-montserrat)" }}
+                >
+                  <FiMenu className="h-5 w-5" />
+                  Menu
+                </button>
 
-                  {isDropdownOpen && (
-                    <>
-                      {/* Close dropdown */}
-                      <div
-                        className="fixed inset-0 z-10"
-                        onClick={() => setIsDropdownOpen(false)}
-                      />
-
-                      {/* Dropdown menu */}
-                      <div
-                        className="absolute right-0 mt-2 w-56 z-20 bg-white py-2 rounded-md shadow-lg ring-1 ring-black/5"
-                        style={{ fontFamily: "var(--font-montserrat)" }}
-                      >
-                        <Link
-                          href="/write"
-                          className="flex gap-2 px-4 py-2 items-center text-md text-gray-900 cursor-pointer hover:bg-gray-100"
-                          onClick={() => setIsDropdownOpen(false)}
-                        >
-                          <FiEdit className="h-5 w-5 text-gray-500" />
-                          Write
-                        </Link>
-                        <Link
-                          href="/drafts"
-                          className="flex gap-2 px-4 py-2 text-md items-center text-gray-900 cursor-pointer hover:bg-gray-100"
-                          onClick={() => setIsDropdownOpen(false)}
-                        >
-                          <FiFileText className="h-5 w-5 text-gray-500" />
-                          Drafts
-                        </Link>
-                        <Link
-                          href="/bookmarks"
-                          className="flex gap-2 px-4 py-2 text-md items-center text-gray-900 cursor-pointer hover:bg-gray-100"
-                          onClick={() => setIsDropdownOpen(false)}
-                        >
-                          <FiBookmark className="h-5 w-5 text-gray-500" />
-                          Bookmarks
-                        </Link>
-                        <Link
-                          href="/history"
-                          className="flex gap-2 px-4 py-2 text-md items-center text-gray-900 cursor-pointer hover:bg-gray-100"
-                          onClick={() => setIsDropdownOpen(false)}
-                        >
-                          <FiClock className="h-5 w-5 text-gray-500" />
-                          Reading History
-                        </Link>
-                        <Link
-                          href="/settings"
-                          className="flex gap-2 px-4 py-2 text-md items-center text-gray-900 cursor-pointer hover:bg-gray-100"
-                          onClick={() => setIsDropdownOpen(false)}
-                        >
-                          <FiSettings className="h-5 w-5 text-gray-500" />
-                          Settings
-                        </Link>
-                      </div>
-                    </>
-                  )}
-                </div>
                 <UserButton
                   appearance={{
                     elements: {
@@ -160,19 +98,77 @@ export default function Navbar() {
               </>
             ) : (
               // Signed out state
-              <>
-                <SignUpButton mode="modal">
-                  <button
-                    className="bg-gray-100 text-black px-4 py-2 rounded-full cursor-pointer"
-                    style={{ fontFamily: "var(--font-google-sans-code)" }}
-                  >
-                    Get started
-                  </button>
-                </SignUpButton>
-              </>
+              <SignInButton mode="modal">
+                <button
+                  className="bg-gray-200 text-black px-4 py-2 rounded-full cursor-pointer"
+                  style={{ fontFamily: "var(--font-google-sans-code)" }}
+                >
+                  Get started
+                </button>
+              </SignInButton>
             )}
           </div>
         </div>
+
+        {/* Full-width Mobile Dropdown - Outside of flex container */}
+        {isDropdownOpen && isSignedIn && (
+          <>
+            {/* Backdrop overlay */}
+            <div
+              className="fixed inset-0 z-10 md:hidden"
+              onClick={() => setIsDropdownOpen(false)}
+            />
+
+            {/* Dropdown menu - spans full width */}
+            <div
+              className="absolute left-0 right-0 top-full z-20 bg-gray-50 py-2 shadow-lg border-b border-gray-200 md:hidden"
+              style={{ fontFamily: "var(--font-montserrat)" }}
+            >
+              <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <Link
+                  href="/write"
+                  className="flex gap-2 px-4 py-2 items-center text-md text-gray-900 cursor-pointer hover:bg-gray-100 rounded-md"
+                  onClick={() => setIsDropdownOpen(false)}
+                >
+                  <FiEdit className="h-5 w-5 text-gray-500" />
+                  Write
+                </Link>
+                <Link
+                  href="/drafts"
+                  className="flex gap-2 px-4 py-2 text-md items-center text-gray-900 cursor-pointer hover:bg-gray-100 rounded-md"
+                  onClick={() => setIsDropdownOpen(false)}
+                >
+                  <FiFileText className="h-5 w-5 text-gray-500" />
+                  Drafts
+                </Link>
+                <Link
+                  href="/bookmarks"
+                  className="flex gap-2 px-4 py-2 text-md items-center text-gray-900 cursor-pointer hover:bg-gray-100 rounded-md"
+                  onClick={() => setIsDropdownOpen(false)}
+                >
+                  <FiBookmark className="h-5 w-5 text-gray-500" />
+                  Bookmarks
+                </Link>
+                <Link
+                  href="/history"
+                  className="flex gap-2 px-4 py-2 text-md items-center text-gray-900 cursor-pointer hover:bg-gray-100 rounded-md"
+                  onClick={() => setIsDropdownOpen(false)}
+                >
+                  <FiClock className="h-5 w-5 text-gray-500" />
+                  Reading History
+                </Link>
+                <Link
+                  href="/settings"
+                  className="flex gap-2 px-4 py-2 text-md items-center text-gray-900 cursor-pointer hover:bg-gray-100 rounded-md"
+                  onClick={() => setIsDropdownOpen(false)}
+                >
+                  <FiSettings className="h-5 w-5 text-gray-500" />
+                  Settings
+                </Link>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </nav>
   );

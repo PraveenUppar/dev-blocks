@@ -11,6 +11,7 @@ import {
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import Navbar from "./components/Navbar";
+import AuthSetup from "./components/AuthSetup"; // Add this
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -48,7 +49,7 @@ const arimo = Arimo({
 
 const raleway = Raleway({
   weight: "400",
-  variable: "--font-arimo",
+  variable: "--font-raleway",
   subsets: ["latin"],
 });
 
@@ -68,6 +69,7 @@ export default function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} ${mrsSheppards.variable} ${googleSansCode.variable} ${montserrat.variable} ${arimo.variable} ${raleway.variable} bg-gray-50`}
         >
+          <AuthSetup />
           <Navbar />
           <main>{children}</main>
         </body>
@@ -75,3 +77,5 @@ export default function RootLayout({
     </ClerkProvider>
   );
 }
+
+// This ensures the auth token is always available before any component tries to make API calls.

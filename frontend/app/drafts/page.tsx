@@ -104,7 +104,7 @@ export default function DraftsPage() {
             className="text-4xl font-bold text-gray-900 mb-2"
             style={{ fontFamily: "var(--font-montserrat)" }}
           >
-            Your Drafts
+            Drafts
           </h1>
           <p
             className="text-gray-600"

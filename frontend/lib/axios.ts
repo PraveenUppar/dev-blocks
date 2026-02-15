@@ -1,4 +1,3 @@
-// api.ts
 import axios from "axios";
 import { API_BASE_URL } from "./config";
 
@@ -12,7 +11,7 @@ const api = axios.create({
 // Add an interceptor to attach the auth token
 let getTokenFunction: (() => Promise<string | null>) | null = null;
 
-// Function to set the token getter (call this from your components)
+// Function to set the token getter
 export const setAuthTokenGetter = (getter: () => Promise<string | null>) => {
   getTokenFunction = getter;
 };
