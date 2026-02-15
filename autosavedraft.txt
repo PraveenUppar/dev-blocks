@@ -1,0 +1,35 @@
+// Controller for auto-save (no slug needed yet)
+export async function autoSaveDraftController(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const userId = req.internalUserId;
+    const { draftId, title, subtitle, content } = req.body;
+
+    if (draftId) {
+      // Update existing draft
+      const draft = await prisma.post.update({
+        where: { id: draftId, authorId: userId },
+        data: { title, subtitle, content, updatedAt: new Date() },
+      });
+      return res.json({ success: true, data: draft });
+    } else {
+      // Create new auto-save draft
+      const draft = await prisma.post.create({
+        data: {
+          title: title || "Untitled",
+          subtitle: subtitle || "",
+          content: content || "",
+          slug: `draft-${nanoid(10)}`, // Temporary slug
+          authorId: userId,
+          status: "DRAFT",
+        },
+      });
+      return res.json({ success: true, data: draft });
+    }
+  } catch (error) {
+    next(error);
+  }
+}

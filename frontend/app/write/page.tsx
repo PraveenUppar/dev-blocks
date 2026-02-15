@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Editor from "./../components/Editor";
 import Image from "next/image";
 import api from "@/lib/axios";
@@ -9,6 +9,14 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { setAuthTokenGetter } from "@/lib/axios";
 
 export default function WritePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center"><div className="text-gray-500">Loading...</div></div>}>
+      <WritePageContent />
+    </Suspense>
+  );
+}
+
+function WritePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const draftId = searchParams.get("draftId");

@@ -1,12 +1,32 @@
+IMPROVEMENTS
+----------------------------------------------------------------------------------------------------------------
+
+- recheck below routes both do the same thing
+postRoute.get<{ id: string }>("/id/:id",validateIdParam,getPublishedPostByIdController,);
+postRoute.get("/slug/:slug",validateSlugParam,getPublishedPostBySlugController,);
+
+- changes made in schema do migrate and generate
+
 - Change the clerkId in controllers to ====> req.auth().userId;
+
 - No need to check for user it is done by clerk in the routes.ts through middleware require.auth()
 
+- for getting post based on id if the post has slug then fetch and add insteaad of making an api call to slug -- which slows down fetching and decrease operations
+
+- updateUserProfileController --     // choose the parts to update and sanitize the content
+
+----------------------------------------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------------------------------------
+
+PENDING/TODO
 
 
-PENDING
-
-
+** Features
 - follow
 - comments
-- notiffication
+- notification
 - reading history
+- add search and filtering in home page posts
+- auto save draft
+- add load more feature in home page

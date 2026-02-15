@@ -1,0 +1,5 @@
+using slug vs id
+
+Best Practice: Once a slug is created, don't change it even if the title changes. This prevents broken links and maintains SEO value.
+
+Your backend likely generates the slug on first creation. If the title is edited later, keep the original slug.
