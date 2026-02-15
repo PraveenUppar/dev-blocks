@@ -19,9 +19,9 @@ export interface PostTag {
 export interface Post {
   id: string;
   title: string;
-  subtitle?: string;
+  subtitle: string;
   slug: string;
-  content?: string;
+  content: string;
   coverImage?: string;
   readTime: number;
   publishedAt: string;

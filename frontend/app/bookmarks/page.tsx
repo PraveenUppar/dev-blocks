@@ -68,7 +68,7 @@ export default function BookmarksPage() {
   };
 
   const openPost = (post: Post) => {
-    router.push(post.slug ? `/post/${post.slug}` : `/post/${post.id}`);
+    router.push(`/posts/${post.id}/${post.slug}`);
   };
 
   const getPreview = (content: string) =>
@@ -83,7 +83,7 @@ export default function BookmarksPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center" style={{ fontFamily: "var(--font-montserrat)" }}>
         <span className="text-gray-500">Loading bookmarks...</span>
       </div>
     );
@@ -91,69 +91,81 @@ export default function BookmarksPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="max-w-7xl min-h-screen border-l border-r border-gray-500 mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            Your Bookmarks
+          <h1 className="text-4xl font-bold text-gray-900 mb-2" style={{ fontFamily: "var(--font-montserrat)" }}>
+            Saved Bookmarks
           </h1>
-          <p className="text-gray-600">
-            {pagination.total} saved{" "}
-            {pagination.total === 1 ? "story" : "stories"}
+          <p className="text-gray-600" style={{ fontFamily: "var(--font-montserrat)" }}>
+            [{pagination.total} saved{" "}
+            {pagination.total === 1 ? "story" : "stories"}]
           </p>
         </div>
 
         {/* Empty State */}
         {bookmarks.length === 0 ? (
           <div className="text-center py-16">
-            <h2 className="text-2xl font-semibold text-gray-700 mb-2">
+            <h2 className="text-2xl font-semibold text-gray-700 mb-2" style={{ fontFamily: "var(--font-montserrat)" }}>
               No bookmarks yet
             </h2>
-            <p className="text-gray-500">
+            <p className="text-gray-500" style={{ fontFamily: "var(--font-montserrat)" }}>
               Save stories to read them later
             </p>
           </div>
         ) : (
           <>
             {/* Bookmarks List */}
-            <div className="grid gap-6 mb-8">
-              {bookmarks.map((post) => (
-                <div
-                  key={post.id}
-                  onClick={() => openPost(post)}
-                  className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition cursor-pointer"
-                >
-                  <div className="flex gap-6">
-                    <div className="flex-1">
-                      <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                        {post.title}
-                      </h2>
-                      {post.subtitle && (
-                        <p className="text-gray-600 mb-3">
-                          {post.subtitle}
-                        </p>
-                      )}
-                      <p className="text-gray-700 mb-4 line-clamp-2">
-                        {getPreview(post.content)}
-                      </p>
-                      <span className="text-sm text-gray-500">
-                        Saved on {formatDate(post.createdAt)}
-                      </span>
-                    </div>
+<div className="grid gap-6 mb-8">
+  {bookmarks.map((post) => (
+    <div
+      key={post.id}
+      onClick={() => openPost(post)}
+      className="border-t border-gray-400 p-6 cursor-pointer group"
+    >
+      <div className="flex gap-6">
+        <div className="flex-1">
+          <h2
+            className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-500 transition"
+            style={{ fontFamily: "var(--font-montserrat)" }}
+          >
+            {post.title}
+          </h2>
+          {post.subtitle && (
+            <p
+              className="text-lg text-gray-600 mb-3"
+              style={{ fontFamily: "var(--font-arimo)" }}
+            >
+              {post.subtitle}
+            </p>
+          )}
+          <p
+            className="text-gray-700 mb-4 line-clamp-2"
+            style={{ fontFamily: "var(--font-montserrat)" }}
+          >
+            {getPreview(post.content)}
+          </p>
+          <div
+            className="flex items-center gap-4 text-sm text-gray-500"
+            style={{ fontFamily: "var(--font-montserrat)" }}
+          >
+            <span>Saved on {formatDate(post.createdAt)}</span>
+          </div>
+        </div>
 
-                    {post.coverImage && (
-                      <Image
-                        src={post.coverImage}
-                        alt={post.title}
-                        width={160}
-                        height={120}
-                        className="rounded-lg object-cover"
-                      />
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
+        {post.coverImage && (
+          <Image
+            src={post.coverImage}
+            alt={post.title}
+            width={160}
+            height={120}
+            className="rounded-lg object-cover"
+          />
+        )}
+      </div>
+    </div>
+  ))}
+</div>
 
             {/* Pagination */}
             {pagination.totalPages > 1 && (

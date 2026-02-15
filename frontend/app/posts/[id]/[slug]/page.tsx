@@ -7,76 +7,32 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@clerk/nextjs";
 import api from "@/lib/axios";
 import { setAuthTokenGetter } from "@/lib/axios";
-import { Post, PostResponse } from "@/types";
+import { Post } from "@/types";
+import { FiBookmark, FiHeart, FiMessageCircle } from "react-icons/fi";
+
 
 const HeartIcon = ({
   className,
-  filled,
 }: {
   className?: string;
-  filled?: boolean;
 }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill={filled ? "currentColor" : "none"}
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    className={className || "w-5 h-5"}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"
-    />
-  </svg>
+  <FiHeart className={className} />
 );
-
 const CommentIcon = ({ className }: { className?: string }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    className={className || "w-5 h-5"}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 12c0 2.104.859 4.023 2.273 5.48.432.447.74 1.04.586 1.641a4.483 4.483 0 0 1-.923 1.785A5.969 5.969 0 0 0 6 21c1.282 0 2.47-.402 3.445-1.087.81.22 1.668.337 2.555.337Z"
-    />
-  </svg>
+  <FiMessageCircle className={className} />
 );
-
 const BookmarkIcon = ({
   className,
-  filled,
 }: {
   className?: string;
-  filled?: boolean;
 }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill={filled ? "currentColor" : "none"}
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    className={className || "w-5 h-5"}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z"
-    />
-  </svg>
+  <FiBookmark className={className} />
 );
 
 export default function PostPage() {
   const params = useParams();
   const { getToken, isSignedIn } = useAuth();
   const id = params.id as string;
-
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
@@ -98,7 +54,7 @@ export default function PostPage() {
   const fetchPost = async () => {
     setLoading(true);
     try {
-      const response = await api.get<PostResponse>(`/post/id/${id}`);
+      const response = await api.get(`/post/id/${id}`);
       const postData = response.data.data;
       setPost(postData);
       setLikeCount(postData._count?.likes ?? 0);
@@ -117,20 +73,16 @@ export default function PostPage() {
       alert("Please sign in to like posts");
       return;
     }
-
     if (isLiking) return;
-
     setIsLiking(true);
     const previousLiked = isLiked;
     const previousCount = likeCount;
-
     // Optimistic update
     setIsLiked(!isLiked);
     setLikeCount(isLiked ? likeCount - 1 : likeCount + 1);
 
     try {
-      const response = await api.post(`/post/${id}/like`);
-
+      const response = await api.post(`/post/like/${id}`);
       if (response.data.success) {
         // Update with server response
         setIsLiked(response.data.data.liked);
@@ -159,18 +111,13 @@ export default function PostPage() {
       alert("Please sign in to bookmark posts");
       return;
     }
-
     if (isBookmarking) return;
-
     setIsBookmarking(true);
     const previousBookmarked = isBookmarked;
-
     // Optimistic update
     setIsBookmarked(!isBookmarked);
-
     try {
-      const response = await api.post(`/post/${id}/bookmark`);
-
+      const response = await api.post(`/post/bookmark/${id}`);
       if (response.data.success) {
         setIsBookmarked(response.data.data.bookmarked);
       }
@@ -178,7 +125,6 @@ export default function PostPage() {
       console.error("Failed to bookmark post:", error);
       // Revert on error
       setIsBookmarked(previousBookmarked);
-
       if (error.response?.status === 401) {
         alert("Please sign in to bookmark posts");
       } else {
@@ -192,7 +138,9 @@ export default function PostPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-gray-500">Loading post...</div>
+        <div className="text-gray-500" style={{ fontFamily: "var(--font-montserrat)" }}>
+          Loading post...
+        </div>
       </div>
     );
   }
@@ -205,20 +153,7 @@ export default function PostPage() {
     <div className="min-h-screen bg-gray-50 ">
       {/* Hero Section */}
       <div className="">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 border-l border-r border-gray-500">
-          {/* Tags */}
-          <div className="flex flex-wrap gap-2 mb-6   ">
-            {(post.tags || []).map((postTag) => (
-              <Link
-                key={postTag.tag.id}
-                href={`/tags/${postTag.tag.slug}`}
-                className="px-3 py-1.5 text-xs sm:text-sm font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full hover:bg-emerald-100 transition"
-              >
-                {postTag.tag.name}
-              </Link>
-            ))}
-          </div>
-
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 border-l border-r border-gray-500">  
           {/* Title */}
           <h1
             className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 leading-tight "
@@ -233,46 +168,39 @@ export default function PostPage() {
               {post.subtitle}
             </p>
           )}
-
+          {/* Tags */}
+          <div className="flex flex-wrap gap-2 mb-6   ">
+            {(post.tags || []).map((postTag) => (
+              <Link
+                key={postTag.tag.id}
+                href={`/tags/${postTag.tag.slug}`}
+                className="px-3 py-1.5 text-xs sm:text-sm font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full hover:bg-emerald-100 transition"
+              >
+                {postTag.tag.name}
+              </Link>
+            ))}
+          </div>
           {/* Author & Meta */}
           <div className="flex flex-col gap-4 py-6 px-3 border-l border-r border-t border-b border-gray-500">
             <div className="flex items-center justify-between">
               {/* Author Info */}
               <div className="flex items-center gap-3">
-                <Link
-                  href={`/users/${post.author.username}`}
-                  className="shrink-0"
-                >
-                  {post.author.avatar ? (
-                    <Image
-                      src={post.author.avatar}
-                      alt={post.author.name}
-                      width={48}
-                      height={48}
-                      className="rounded-full w-10 h-10 sm:w-12 sm:h-12 object-cover"
-                    />
-                  ) : (
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-300" />
-                  )}
-                </Link>
                 <div>
-                  <Link
-                    href={`/users/${post.author.username}`}
-                    className="block font-semibold text-gray-900 hover:text-emerald-600 transition text-sm sm:text-base"
-                  >
-                    {post.author.name}
-                  </Link>
-                  <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500">
-                    <span>{post.readTime} min read</span>
-                    <span>·</span>
-                    <span>
+                  <div className="flex items-center gap-2 text-xs sm:text-sm">
+                    <span className="text-gray-800 text-xl">•{" "}  </span>
+                    <span className="text-gray-800" style={{ fontFamily: "var(--font-montserrat)" }}>
                       {new Date(post.publishedAt).toLocaleDateString("en-US", {
                         month: "short",
                         day: "numeric",
                         year: "numeric",
                       })}
                     </span>
+                    <span className="text-gray-800 text-xl">•{" "}  </span>
+                    <span className="text-gray-800" style={{ fontFamily: "var(--font-montserrat)" }}>
+                      {post.readTime} min read
+                    </span>
                   </div>
+                   
                 </div>
               </div>
 
@@ -290,7 +218,6 @@ export default function PostPage() {
                 >
                   <HeartIcon
                     className="w-4 h-4 sm:w-5 sm:h-5"
-                    filled={isLiked}
                   />
                   <span className="hidden sm:inline">{likeCount}</span>
                 </button>
@@ -315,7 +242,6 @@ export default function PostPage() {
                 >
                   <BookmarkIcon
                     className="w-4 h-4 sm:w-5 sm:h-5"
-                    filled={isBookmarked}
                   />
                 </button>
               </div>

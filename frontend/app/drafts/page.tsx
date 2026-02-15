@@ -7,6 +7,7 @@ import { useAuth } from "@clerk/nextjs";
 import api from "@/lib/axios";
 import { setAuthTokenGetter } from "@/lib/axios";
 
+// Define how post object should look like
 interface Post {
   id: string;
   title: string;
@@ -17,6 +18,7 @@ interface Post {
   updatedAt: string;
 }
 
+// Define how response object should look like
 interface DraftsResponse {
   success: boolean;
   data: Post[];
@@ -97,50 +99,42 @@ export default function DraftsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 ">
-      <div className="max-w-7xl mx-auto px-4 py-8 border-l border-r border-gray-500">
+      <div className="min-h-screen max-w-7xl mx-auto px-4 py-8 border-l border-r border-gray-500">
         {/* Header */}
         <div className="mb-8">
           <h1
             className="text-4xl font-bold text-gray-900 mb-2"
             style={{ fontFamily: "var(--font-montserrat)" }}
           >
-            Drafts
+            Saved Drafts
           </h1>
           <p
             className="text-gray-600"
             style={{ fontFamily: "var(--font-montserrat)" }}
           >
-            {pagination.total} {pagination.total === 1 ? "draft" : "drafts"}
+            [{pagination.total} {pagination.total === 1 ? "draft" : "drafts"}]
           </p>
         </div>
 
         {/* Empty State */}
         {drafts.length === 0 ? (
           <div className="text-center py-16">
-            <div className="text-gray-400 mb-4">
-              <svg
-                className="mx-auto h-24 w-24"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-            </div>
-            <h2 className="text-2xl font-semibold text-gray-700 mb-2">
+            <h2
+              className="text-2xl font-semibold text-gray-700 mb-2"
+                style={{ fontFamily: "var(--font-montserrat)" }}
+            >
               No drafts yet
             </h2>
-            <p className="text-gray-500 mb-6">
+            <p
+              className="text-gray-500 mb-6"
+                style={{ fontFamily: "var(--font-montserrat)" }}
+            >
               Start writing to create your first draft
             </p>
             <button
               onClick={() => router.push("/write")}
-              className="px-6 py-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition"
+              className="px-6 py-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition cursor-pointer"                style={{ fontFamily: "var(--font-montserrat)" }}
+
             >
               Start Writing
             </button>
@@ -153,7 +147,7 @@ export default function DraftsPage() {
                 <div
                   key={draft.id}
                   onClick={() => handleDraftClick(draft.id)}
-                  className="border-t border-b border-gray-200  p-6  cursor-pointer group"
+                  className="border-t  border-gray-400  p-6  cursor-pointer group"
                 >
                   <div className="flex gap-6">
                     {/* Content */}

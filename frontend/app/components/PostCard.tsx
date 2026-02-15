@@ -61,7 +61,7 @@ export default function PostCard({ post }: PostCardProps) {
             className="flex flex-wrap items-center gap-x-4 gap-y-1 uppercase text-xs md:text-sm text-gray-500 mt-3"
             style={{ fontFamily: "var(--font-arimo)" }}
           >
-            <span>
+            <span className="text-gray-600">
               •{" "}
               {new Date(post.publishedAt).toLocaleDateString("en-US", {
                 month: "short",
@@ -69,15 +69,16 @@ export default function PostCard({ post }: PostCardProps) {
                 year: "numeric",
               })}
             </span>
-            <span>• {post.readTime} MIN READ</span>
+            <span className="text-green-600">• {post.readTime} MIN READ</span>
             {post._count && (
               <div className="flex items-center gap-2">
                 <span className="flex items-center gap-1">
-                  <FiHeart className="h-4 w-4 text-red-500" />{" "}
-                  {post._count.likes}
+                  <FiHeart className="h-4 w-4 text-red-600" />{" "}
+                  {post._count.likes}{" "}
+                  
                 </span>
                 <span className="flex items-center gap-1">
-                  <FiMessageCircle className="h-4 w-4 text-blue-500" />{" "}
+                  <FiMessageCircle className="h-4 w-4 text-gray-700" />{" "}
                   {post._count.comments}
                 </span>
               </div>

@@ -176,7 +176,7 @@ export default function WritePage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-gray-500">Loading draft...</div>
+        <div className="text-gray-500" style={{ fontFamily: "var(--font-montserrat)" }}>Loading draft...</div>
       </div>
     );
   }

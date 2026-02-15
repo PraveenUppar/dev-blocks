@@ -199,11 +199,10 @@ export default function UserPage() {
   // safe count fallbacks
   const followersCount = user?._count?.followers ?? 0;
   const followingCount = user?._count?.following ?? 0;
-  const postsCount = user?._count?.posts ?? 0;
 
   return (
     <div className="min-h-screen bg-gray-50 ">
-      <div className="container mx-auto px-4 py-8 max-w-7xl border-l border-r border-gray-500 ">
+      <div className="container min-h-screen mx-auto px-4 py-8 max-w-7xl border-l border-r border-gray-500 ">
         {/* Profile Header */}
         <div className="flex flex-col md:flex-row items-start text-black md:items-center gap-6 mb-8">
           <div className="relative w-24 h-24  md:w-32 md:h-32 rounded-full overflow-hidden border-2 border-gray-600">
