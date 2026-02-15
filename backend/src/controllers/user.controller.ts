@@ -32,7 +32,7 @@ export async function getCurrentUserController(
   next: NextFunction,
 ) {
   try {
-    const clerkId = getAuth(req).userId;
+    const clerkId = req.auth().userId;
     if (!clerkId) {
       return res.status(401).json({
         success: false,
@@ -257,7 +257,7 @@ export async function getUserBookmarksController(
   next: NextFunction,
 ) {
   try {
-    const clerkId = req.auth?.userId;
+    const clerkId = req.auth().userId;
     if (!clerkId) {
       return res.status(401).json({
         success: false,
@@ -286,7 +286,7 @@ export async function getUserDraftsController(
   next: NextFunction,
 ) {
   try {
-    const clerkId = req.auth?.userId;
+    const clerkId = req.auth().userId;
     if (!clerkId) {
       return res.status(401).json({
         success: false,
@@ -315,7 +315,7 @@ export async function getUserReadingHistoryController(
   next: NextFunction,
 ) {
   try {
-    const clerkId = req.auth?.userId;
+    const clerkId = req.auth().userId;
     if (!clerkId) {
       return res.status(401).json({
         success: false,

@@ -28,7 +28,7 @@ import {
 
 const postRoute = Router();
 
-postRoute.use(apiLimiter);
+// postRoute.use(apiLimiter);
 
 // GET Published Posts for Homepage - Fetches only the metadata of posts -- working and tested
 postRoute.get("/", getPublishedPostController);
@@ -52,8 +52,8 @@ postRoute.use(requireAuth());
 // CREATE a new Draft Post - working and tested
 postRoute.post(
   "/create",
-  createLimiter,
-  validateCreatePost,
+  // createLimiter,
+  // validateCreatePost,
   createPostController,
 );
 // GET Draft Post by ID - working and tested

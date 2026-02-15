@@ -1,0 +1,1 @@
+{"version":3,"file":"ownership.d.ts","sourceRoot":"","sources":["../../src/middleware/ownership.ts"],"names":[],"mappings":"AAAA;;GAEG;AACH,OAAO,KAAK,EAAE,YAAY,EAAE,OAAO,EAAE,QAAQ,EAAE,MAAM,SAAS,CAAC;AAE/D,UAAU,QAAQ;IAChB,EAAE,EAAE,MAAM,CAAC;CACZ;AAED,wBAAsB,mBAAmB,CACvC,GAAG,EAAE,OAAO,CAAC,QAAQ,CAAC,EACtB,GAAG,EAAE,QAAQ,EACb,IAAI,EAAE,YAAY,2DAgDnB"}
