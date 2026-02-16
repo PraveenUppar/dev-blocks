@@ -14,7 +14,17 @@ export function validate(
     if (!result.success) {
       throw result.error; // ZodError → caught by global error handler
     }
-    req[source] = result.data;
+    // Express 5: req.query is a prototype getter, so use defineProperty
+    // to shadow it on the instance with the validated/transformed data.
+    if (source === "query") {
+      Object.defineProperty(req, "query", {
+        value: result.data,
+        writable: true,
+        configurable: true,
+      });
+    } else {
+      req[source] = result.data;
+    }
     next();
   };
 }

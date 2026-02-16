@@ -8,7 +8,10 @@
     "dev": "nodemon --exec tsx src/server.ts",
     "dev:tsx": "tsx watch src/server.ts",
     "build": "npx prisma generate && tsc",
-    "start": "nodemon dist/server.js"
+    "start": "nodemon dist/server.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "keywords": [],
   "author": "",
@@ -38,9 +41,13 @@
     "@types/jsdom": "^27.0.0",
     "@types/node": "^25.2.1",
     "@types/pg": "^8.16.0",
+    "@types/supertest": "^6.0.3",
+    "@vitest/coverage-v8": "^4.0.18",
     "prisma": "^7.3.0",
+    "supertest": "^7.2.2",
     "ts-node": "^10.9.2",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
   }
 }

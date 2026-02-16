@@ -10,6 +10,7 @@ import { requestLogger } from "./middleware/requestLogger.js";
 import { AppError } from "./errors/AppError.js";
 import userRoute from "./routes/user.route.js";
 import postRoute from "./routes/post.route.js";
+import healthRouter from "./routes/health.route.js";
 import webhookRoutes from "./config/clerkwebhook.js";
 
 const app = Express();
@@ -31,7 +32,7 @@ app.use(
 app.use(Express.json({ limit: "10mb" }));
 app.use(clerkMiddleware());
 
-app.get("/health", (req, res) => res.json({ status: "ok" }));
+app.use("/health", healthRouter);
 app.use("/api/user", userRoute);
 app.use("/api/post", postRoute);
 

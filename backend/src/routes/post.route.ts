@@ -29,7 +29,7 @@ import {
 
 const postRoute = Router();
 
-postRoute.use(apiLimiter);
+// postRoute.use(apiLimiter);
 
 // GET Published Posts for Homepage - Fetches only the metadata of posts -- working and tested
 postRoute.get("/", validatePaginationQuery, getPublishedPostController);
@@ -55,7 +55,7 @@ postRoute.use(requireAuth());
 // CREATE a new Draft Post - working and tested
 postRoute.post(
   "/create",
-  createLimiter,
+  // createLimiter,
   validateCreatePost,
   createPostController,
 );
@@ -88,7 +88,7 @@ postRoute.patch<{ id: string }>(
 // LIKE and UNLIKE a Post by ID
 postRoute.post<{ id: string }>(
   "/like/:id",
-  interactionLimiter,
+  // interactionLimiter,
   validateIdParam,
   likePublishedPostController,
 );
@@ -96,7 +96,7 @@ postRoute.post<{ id: string }>(
 // BOOKMARK and UNBOOKMARK a Post by ID
 postRoute.post<{ id: string }>(
   "/bookmark/:id",
-  interactionLimiter,
+  // interactionLimiter,
   validateIdParam,
   bookmarkPublishedPostController,
 );
