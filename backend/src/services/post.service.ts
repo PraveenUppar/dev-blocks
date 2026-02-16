@@ -23,22 +23,41 @@ export const getUserIdService = async (id: string) => {
     select: { id: true },
   });
 };
-// GET ALL PUBLISHED POST Service
 interface GetPostsParams {
   page: number;
   limit: number;
+  search?: string;
+  sortBy?: "latest" | "oldest" | "popular";
 }
-export async function getPublishedPostService({ page, limit }: GetPostsParams) {
+export async function getPublishedPostService({ page, limit, search, sortBy }: GetPostsParams) {
   const skip = (page - 1) * limit;
+
+  // Build where clause
+  const where: any = {
+    status: "PUBLISHED",
+    deletedAt: null,
+    ...(search && {
+      OR: [
+        { title: { contains: search, mode: "insensitive" } },
+        { subtitle: { contains: search, mode: "insensitive" } },
+      ],
+    }),
+  };
+
+  // Build orderBy clause
+  const orderByMap = {
+    latest: { publishedAt: "desc" as const },
+    oldest: { publishedAt: "asc" as const },
+    popular: { viewCount: "desc" as const },
+  };
+  const orderBy = orderByMap[sortBy || "latest"];
+
   const [posts, total] = await Promise.all([
     prisma.post.findMany({
-      where: {
-        status: "PUBLISHED",
-        deletedAt: null,
-      },
+      where,
       skip,
       take: limit,
-      orderBy: { publishedAt: "desc" },
+      orderBy,
       select: {
         id: true,
         title: true,
@@ -69,12 +88,7 @@ export async function getPublishedPostService({ page, limit }: GetPostsParams) {
         },
       },
     }),
-    prisma.post.count({
-      where: {
-        status: "PUBLISHED",
-        deletedAt: null,
-      },
-    }),
+    prisma.post.count({ where }),
   ]);
   return {
     data: posts,
@@ -419,8 +433,18 @@ export async function updatePostService(data: UpdatePostData) {
   if (subtitle) {
     updateData.subtitle = subtitle;
   }
-  if (tags) {
-    updateData.tags = tags;
+  if (tags && tags.length > 0) {
+    updateData.tags = {
+      deleteMany: {},
+      create: tags.map((tagName) => ({
+        tag: {
+          connectOrCreate: {
+            where: { name: tagName },
+            create: { name: tagName, slug: generateSlug(tagName) },
+          },
+        },
+      })),
+    };
   }
   if (coverImage) {
     updateData.coverImage = coverImage;

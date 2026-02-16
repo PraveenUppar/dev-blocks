@@ -47,6 +47,8 @@ const paginationSchema = z.object({
       const num = parseInt(val || "10");
       return Math.min(50, Math.max(1, isNaN(num) ? 10 : num));
     }),
+  search: z.string().optional().default(""),
+  sortBy: z.enum(["latest", "oldest", "popular"]).optional().default("latest"),
 });
 
 export const validatePaginationQuery = validate(paginationSchema, "query");

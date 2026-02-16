@@ -26,12 +26,14 @@ export async function getPublishedPostController(
   next: NextFunction,
 ) {
   try {
-    // Pagination validated and clamped by validatePaginationQuery middleware
-    const { page, limit } = req.query as unknown as { page: number; limit: number };
-    // // Optional: Add sorting and filtering
-    // const sortBy = (req.query.sortBy as string) || "latest";
-    // const tag = req.query.tag as string;
-    const posts = await getPublishedPostService({ page, limit });
+    // Pagination, search, and sort validated by validatePaginationQuery middleware
+    const { page, limit, search, sortBy } = req.query as unknown as {
+      page: number;
+      limit: number;
+      search: string;
+      sortBy: "latest" | "oldest" | "popular";
+    };
+    const posts = await getPublishedPostService({ page, limit, search, sortBy });
     return res.status(HTTP_STATUS.OK).json({ success: true, ...posts });
   } catch (error) {
     next(error);
