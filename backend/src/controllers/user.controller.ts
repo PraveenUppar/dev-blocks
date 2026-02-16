@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
-import { getAuth } from "@clerk/express";
+import { AppError } from "../errors/AppError.js";
+import { HTTP_STATUS } from "../errors/httpStatus.js";
 
 import {
   getUserProfileService,
@@ -20,9 +21,6 @@ import {
 interface usernameParams {
   username: string;
 }
-// interface IdParams {
-//   id: string;
-// }
 
 // ==================== PUBLIC CONTROLLERS ====================
 
@@ -33,22 +31,12 @@ export async function getCurrentUserController(
 ) {
   try {
     const clerkId = req.auth().userId;
-    if (!clerkId) {
-      return res.status(401).json({
-        success: false,
-        error: { message: "Unauthorized" },
-      });
-    }
+    if (!clerkId) throw AppError.unauthorized();
 
     const user = await getUserClerkIdService(clerkId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: { message: "User not found" },
-      });
-    }
+    if (!user) throw AppError.notFound("User not found");
 
-    return res.json({ success: true, data: user });
+    return res.status(HTTP_STATUS.OK).json({ success: true, data: user });
   } catch (error) {
     next(error);
   }
@@ -63,17 +51,14 @@ export async function getUserProfileController(
   try {
     const { username } = req.params;
     const user = await getUserProfileService(username);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: { message: "User not found" },
-      });
-    }
-    return res.json({ success: true, data: user });
+    if (!user) throw AppError.notFound("User not found");
+
+    return res.status(HTTP_STATUS.OK).json({ success: true, data: user });
   } catch (error) {
     next(error);
   }
 }
+
 // Tested and Working
 export async function getUserPostsController(
   req: Request<usernameParams>,
@@ -83,20 +68,18 @@ export async function getUserPostsController(
   try {
     const { username } = req.params;
     const user = await getUserNameService(username);
+    if (!user) throw AppError.notFound("User not found");
+
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: { message: "User not found" },
-      });
-    }
     const posts = await getUserPostsService(username, page, limit);
-    return res.json({ success: true, ...posts });
+
+    return res.status(HTTP_STATUS.OK).json({ success: true, ...posts });
   } catch (error) {
     next(error);
   }
 }
+
 // Tested and Working
 export async function getUserFollowersController(
   req: Request<usernameParams>,
@@ -106,20 +89,18 @@ export async function getUserFollowersController(
   try {
     const { username } = req.params;
     const user = await getUserNameService(username);
+    if (!user) throw AppError.notFound("User not found");
+
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: { message: "User not found" },
-      });
-    }
     const followers = await getUserFollowerService(username, page, limit);
-    return res.json({ success: true, ...followers });
+
+    return res.status(HTTP_STATUS.OK).json({ success: true, ...followers });
   } catch (error) {
     next(error);
   }
 }
+
 // Tested and Working
 export async function getUserFollowingController(
   req: Request<usernameParams>,
@@ -129,16 +110,13 @@ export async function getUserFollowingController(
   try {
     const { username } = req.params;
     const user = await getUserNameService(username);
+    if (!user) throw AppError.notFound("User not found");
+
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: { message: "User not found" },
-      });
-    }
     const following = await getUserFollowingService(username, page, limit);
-    return res.json({ success: true, ...following });
+
+    return res.status(HTTP_STATUS.OK).json({ success: true, ...following });
   } catch (error) {
     next(error);
   }
@@ -146,7 +124,6 @@ export async function getUserFollowingController(
 
 // ==================== PROTECTED CONTROLLERS ====================
 
-//
 export async function updateUserProfileController(
   req: Request,
   res: Response,
@@ -154,27 +131,18 @@ export async function updateUserProfileController(
 ) {
   try {
     const clerkId = req.auth().userId;
-    if (!clerkId) {
-      return res.status(401).json({
-        success: false,
-        error: { message: "Unauthorized User" },
-      });
-    }
+    if (!clerkId) throw AppError.unauthorized();
+
     const user = await getUserClerkIdService(clerkId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: { message: "User not found" },
-      });
-    }
-    // choose the parts to update and sanitize the content
+    if (!user) throw AppError.notFound("User not found");
+
     const updated = await updateUserProfileService(user.id, req.body);
-    return res.json({ success: true, data: updated });
+    return res.status(HTTP_STATUS.OK).json({ success: true, data: updated });
   } catch (error) {
     next(error);
   }
 }
-//
+
 export async function followUserProfileController(
   req: Request,
   res: Response,
@@ -183,35 +151,21 @@ export async function followUserProfileController(
   try {
     const followingId = req.params.id;
     const clerkId = req.auth().userId;
-    if (!clerkId) {
-      return res.status(401).json({
-        success: false,
-        error: { message: "Unauthorized Unauthorized From Space" },
-      });
-    }
+    if (!clerkId) throw AppError.unauthorized();
+
     const user = await getUserClerkIdService(clerkId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: { message: "User not found" },
-      });
-    }
-    // Prevent following yourself
+    if (!user) throw AppError.notFound("User not found");
+
     if (user.id === followingId) {
-      return res.status(400).json({
-        success: false,
-        error: { message: "Cannot follow yourself" },
-      });
+      throw AppError.badRequest("Cannot follow yourself");
     }
+
     const targetUser = await getUserIdService(followingId as string);
-    if (!targetUser) {
-      return res.status(404).json({
-        success: false,
-        error: { message: "User to follow not found" },
-      });
-    }
+    if (!targetUser) throw AppError.notFound("User to follow not found");
+
     await followUserProfileService(user.id, followingId as string);
-    return res.status(201).json({
+
+    return res.status(HTTP_STATUS.CREATED).json({
       success: true,
       message: "Successfully followed user",
     });
@@ -219,7 +173,7 @@ export async function followUserProfileController(
     next(error);
   }
 }
-//
+
 export async function unfollowUserProfileController(
   req: Request,
   res: Response,
@@ -228,21 +182,14 @@ export async function unfollowUserProfileController(
   try {
     const followingId = req.params.id;
     const clerkId = req.auth().userId;
-    if (!clerkId) {
-      return res.status(401).json({
-        success: false,
-        error: { message: "Unauthorized Unauthorized From Space" },
-      });
-    }
+    if (!clerkId) throw AppError.unauthorized();
+
     const user = await getUserClerkIdService(clerkId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: { message: "User not found" },
-      });
-    }
+    if (!user) throw AppError.notFound("User not found");
+
     await unfollowUserProfileService(user.id, followingId as string);
-    return res.json({
+
+    return res.status(HTTP_STATUS.OK).json({
       success: true,
       message: "Successfully unfollowed user",
     });
@@ -250,7 +197,7 @@ export async function unfollowUserProfileController(
     next(error);
   }
 }
-//
+
 export async function getUserBookmarksController(
   req: Request,
   res: Response,
@@ -258,28 +205,21 @@ export async function getUserBookmarksController(
 ) {
   try {
     const clerkId = req.auth().userId;
-    if (!clerkId) {
-      return res.status(401).json({
-        success: false,
-        error: { message: "Unauthorized From Space" },
-      });
-    }
+    if (!clerkId) throw AppError.unauthorized();
+
     const user = await getUserClerkIdService(clerkId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: { message: "User not found" },
-      });
-    }
+    if (!user) throw AppError.notFound("User not found");
+
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const bookmarks = await getUserBookmarksService(user.id, page, limit);
-    return res.json({ success: true, ...bookmarks });
+
+    return res.status(HTTP_STATUS.OK).json({ success: true, ...bookmarks });
   } catch (error) {
     next(error);
   }
 }
-//
+
 export async function getUserDraftsController(
   req: Request,
   res: Response,
@@ -287,28 +227,21 @@ export async function getUserDraftsController(
 ) {
   try {
     const clerkId = req.auth().userId;
-    if (!clerkId) {
-      return res.status(401).json({
-        success: false,
-        error: { message: "Unauthorized Unauthorized " },
-      });
-    }
+    if (!clerkId) throw AppError.unauthorized();
+
     const user = await getUserClerkIdService(clerkId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: { message: "User not found" },
-      });
-    }
+    if (!user) throw AppError.notFound("User not found");
+
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const drafts = await getUserDraftsService(user.id, page, limit);
-    return res.json({ success: true, ...drafts });
+
+    return res.status(HTTP_STATUS.OK).json({ success: true, ...drafts });
   } catch (error) {
     next(error);
   }
 }
-//
+
 export async function getUserReadingHistoryController(
   req: Request,
   res: Response,
@@ -316,19 +249,11 @@ export async function getUserReadingHistoryController(
 ) {
   try {
     const clerkId = req.auth().userId;
-    if (!clerkId) {
-      return res.status(401).json({
-        success: false,
-        error: { message: "Unauthorized Unauthorized" },
-      });
-    }
+    if (!clerkId) throw AppError.unauthorized();
+
     const user = await getUserClerkIdService(clerkId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: { message: "User not found" },
-      });
-    }
+    if (!user) throw AppError.notFound("User not found");
+
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const readinghistory = await getUserReadingHistoryService(
@@ -336,7 +261,8 @@ export async function getUserReadingHistoryController(
       page,
       limit,
     );
-    return res.json({ success: true, ...readinghistory });
+
+    return res.status(HTTP_STATUS.OK).json({ success: true, ...readinghistory });
   } catch (error) {
     next(error);
   }

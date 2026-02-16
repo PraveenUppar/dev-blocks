@@ -1,4 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
+import { AppError } from "../errors/AppError.js";
+import { HTTP_STATUS } from "../errors/httpStatus.js";
 import {
   getPublishedPostService,
   getPublishedPostByIdService,
@@ -12,7 +14,6 @@ import {
   toggleBookmarkPostService,
   getDraftPostByIdService,
   getLikeCountService,
-  //   readingPublishedPostService, -- later
 } from "../services/post.service.js";
 import { sanitizeHtml } from "../utils/contentSanitization.js";
 
@@ -36,14 +37,16 @@ export async function getPublishedPostController(
     // const sortBy = (req.query.sortBy as string) || "latest";
     // const tag = req.query.tag as string;
     const posts = await getPublishedPostService({ page, limit });
-    return res.status(200).json({ success: true, ...posts });
+    return res.status(HTTP_STATUS.OK).json({ success: true, ...posts });
   } catch (error) {
     next(error);
   }
 }
+
 interface IdParams {
   id: string;
 }
+
 // GET Published Post Metadata by ID Controller
 // If user is signed in - return his likes on post and bookmark of post he did - so auth needed
 export async function getPublishedPostByIdController(
@@ -55,17 +58,13 @@ export async function getPublishedPostByIdController(
     const { id } = req.params;
     const userId = req.auth().userId;
     const post = await getPublishedPostByIdService(id, userId);
-    if (!post) {
-      return res.status(404).json({
-        success: false,
-        error: { message: "Post not found" },
-      });
-    }
-    return res.status(200).json({ success: true, data: post });
+    if (!post) throw AppError.notFound("Post not found");
+    return res.status(HTTP_STATUS.OK).json({ success: true, data: post });
   } catch (error) {
     next(error);
   }
 }
+
 // GET Published Post by Slug Controller
 export async function getPublishedPostBySlugController(
   req: Request,
@@ -76,13 +75,8 @@ export async function getPublishedPostBySlugController(
     const slug = req.params.slug as string;
     const userId = req.auth().userId;
     const post = await getPublishedPostBySlugService(slug, userId);
-    if (!post) {
-      return res.status(404).json({
-        success: false,
-        error: { message: "Post not found" },
-      });
-    }
-    return res.status(200).json({ success: true, data: post });
+    if (!post) throw AppError.notFound("Post not found");
+    return res.status(HTTP_STATUS.OK).json({ success: true, data: post });
   } catch (error) {
     next(error);
   }
@@ -99,12 +93,7 @@ export async function createPostController(
   try {
     const clerkId = req.auth().userId;
     const user = await getUserClerkIdService(clerkId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: { message: "User not found" },
-      });
-    }
+    if (!user) throw AppError.notFound("User not found");
 
     const { title, subtitle, content, coverImage, tags } = req.body;
     // For tags "React", "react ", and "React" are all treated as the same tag, preventing duplicate database entries - done during validation
@@ -117,11 +106,13 @@ export async function createPostController(
       tags,
       coverImage,
     });
-    return res.status(201).json({ success: true, data: post });
+
+    return res.status(HTTP_STATUS.CREATED).json({ success: true, data: post });
   } catch (error) {
     next(error);
   }
 }
+
 // GET Draft Post by ID Controller
 export async function getDraftPostByIdController(
   req: Request<IdParams>,
@@ -131,25 +122,17 @@ export async function getDraftPostByIdController(
   try {
     const clerkId = req.auth().userId;
     const user = await getUserClerkIdService(clerkId);
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        error: "User not found",
-      });
-    }
+    if (!user) throw AppError.unauthorized("User not found");
     const { id } = req.params;
     const post = await getDraftPostByIdService(id, user.id);
-    if (!post) {
-      return res.status(404).json({
-        success: false,
-        error: { message: "Post not found" },
-      });
-    }
-    return res.status(200).json({ success: true, data: post });
+    if (!post) throw AppError.notFound("Post not found");
+
+    return res.status(HTTP_STATUS.OK).json({ success: true, data: post });
   } catch (error) {
     next(error);
   }
 }
+
 // UPDATE a Draft Post by ID Controller
 export async function updatePostController(
   req: Request<IdParams>,
@@ -159,20 +142,12 @@ export async function updatePostController(
   try {
     const clerkId = req.auth().userId;
     const user = await getUserClerkIdService(clerkId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: { message: "User not found" },
-      });
-    }
+    if (!user) throw AppError.notFound("User not found");
+
     const { id } = req.params;
     const findpost = await getDraftPostByIdService(id, user.id);
-    if (!findpost) {
-      return res.status(404).json({
-        success: false,
-        error: { message: "Post not found" },
-      });
-    }
+    if (!findpost) throw AppError.notFound("Post not found");
+
     const { title, subtitle, content, tags, coverImage } = req.body;
     const sanitizedContent = sanitizeHtml(content);
     const post = await updatePostService({
@@ -184,17 +159,14 @@ export async function updatePostController(
       subtitle,
       coverImage,
     });
-    if (!post) {
-      return res.status(404).json({
-        success: false,
-        error: "Post not found",
-      });
-    }
-    return res.status(200).json({ success: true, data: post });
+    if (!post) throw AppError.notFound("Post not found");
+
+    return res.status(HTTP_STATUS.OK).json({ success: true, data: post });
   } catch (error) {
     next(error);
   }
 }
+
 // DELETE a Post by ID Controller
 export async function deletePostController(
   req: Request<IdParams>,
@@ -204,26 +176,23 @@ export async function deletePostController(
   try {
     const clerkId = req.auth().userId;
     const user = await getUserClerkIdService(clerkId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: { message: "User not found" },
-      });
-    }
+    if (!user) throw AppError.notFound("User not found");
+
     const { id: postId } = req.params;
     const findpost = await getDraftPostByIdService(postId, user.id);
-    if (!findpost) {
-      return res.status(404).json({
-        success: false,
-        error: { message: "Post not found" },
-      });
-    }
+    if (!findpost) throw AppError.notFound("Post not found");
+
     await deletePostService(postId, user.id);
-    return res.json({ success: true, message: "Post deleted" });
+
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      message: "Post deleted",
+    });
   } catch (error) {
     next(error);
   }
 }
+
 // PUBLISH a Post by ID Controller
 export async function publishPostController(
   req: Request<IdParams>,
@@ -233,26 +202,17 @@ export async function publishPostController(
   try {
     const clerkId = req.auth().userId;
     const user = await getUserClerkIdService(clerkId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: { message: "User not found" },
-      });
-    }
+    if (!user) throw AppError.notFound("User not found");
+
     const { id: postId } = req.params;
-    // const findpost = await getDraftPostByIdService(postId, user.id);
-    // if (!findpost) {
-    //   return res.status(404).json({
-    //     success: false,
-    //     error: { message: "Post not found" },
-    //   });
-    // }
     const post = await publishPostService(postId, user.id);
-    return res.json({ success: true, data: post });
+
+    return res.status(HTTP_STATUS.OK).json({ success: true, data: post });
   } catch (error) {
     next(error);
   }
 }
+
 // LIKE and UNLIKE a Post by ID Controller
 export async function likePublishedPostController(
   req: Request<IdParams>,
@@ -262,23 +222,16 @@ export async function likePublishedPostController(
   try {
     const clerkId = req.auth().userId;
     const user = await getUserClerkIdService(clerkId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: { message: "User not found" },
-      });
-    }
+    if (!user) throw AppError.notFound("User not found");
+
     const { id: postId } = req.params;
     const existing = await getPublishedPostByIdService(postId);
-    if (!existing) {
-      return res.status(404).json({
-        success: false,
-        error: { message: "Post not found" },
-      });
-    }
+    if (!existing) throw AppError.notFound("Post not found");
+
     const result = await toggleLikePostService(user.id, postId);
     const likeCount = await getLikeCountService(postId);
-    return res.json({
+
+    return res.status(HTTP_STATUS.OK).json({
       success: true,
       data: {
         liked: result.liked,
@@ -290,6 +243,7 @@ export async function likePublishedPostController(
     next(error);
   }
 }
+
 // BOOKMARK and UNBOOKMARK a Post by ID Controller
 export async function bookmarkPublishedPostController(
   req: Request<IdParams>,
@@ -299,40 +253,22 @@ export async function bookmarkPublishedPostController(
   try {
     const clerkId = req.auth().userId;
     const user = await getUserClerkIdService(clerkId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: { message: "User not found" },
-      });
-    }
+    if (!user) throw AppError.notFound("User not found");
+
     const { id: postId } = req.params;
     const existing = await getPublishedPostByIdService(postId);
-    if (!existing) {
-      return res.status(404).json({
-        success: false,
-        error: { message: "Post not found" },
-      });
-    }
+    if (!existing) throw AppError.notFound("Post not found");
+
     const result = await toggleBookmarkPostService(user.id, postId);
-    return res.json({
+
+    return res.status(HTTP_STATUS.OK).json({
       success: true,
       data: {
         bookmarked: result.bookmarked,
-        message: result.bookmarked ? "Post bookmarked" : "Bookmarked removed",
+        message: result.bookmarked ? "Post bookmarked" : "Bookmark removed",
       },
     });
   } catch (error) {
     next(error);
   }
 }
-// RECORD a Reading History -- later
-// export async function readingPublishedPostController(
-//   req: Request,
-//   res: Response,
-//   next: NextFunction,
-// ) {
-//   try {
-//   } catch (error) {
-//     next(error);
-//   }
-// }

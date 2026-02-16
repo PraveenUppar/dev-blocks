@@ -6,6 +6,7 @@ import cors from "cors";
 import helmet from "helmet";
 import { clerkMiddleware } from "@clerk/express";
 import { errorHandler } from "./middleware/errorHandler.js";
+import { AppError } from "./errors/AppError.js";
 import userRoute from "./routes/user.route.js";
 import postRoute from "./routes/post.route.js";
 import webhookRoutes from "./config/clerkwebhook.js";
@@ -32,8 +33,8 @@ app.get("/health", (req, res) => res.json({ status: "ok" }));
 app.use("/api/user", userRoute);
 app.use("/api/post", postRoute);
 
-app.use((req, res) => {
-  res.status(404).json({ error: "Route not found" });
+app.use((req, res, next) => {
+  next(AppError.notFound("Route not found"));
 });
 
 app.use(errorHandler);

@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import { z } from "zod";
+import { AppError } from "../errors/AppError.js";
 
 // UUID validation
 export const validateIdParam = (
@@ -9,12 +10,8 @@ export const validateIdParam = (
 ) => {
   const uuidSchema = z.uuid();
   const result = uuidSchema.safeParse(req.params.id);
-
   if (!result.success) {
-    return res.status(400).json({
-      error: "Invalid ID format",
-      details: result.error.issues,
-    });
+    throw AppError.badRequest("Invalid ID format");
   }
   next();
 };
@@ -24,27 +21,19 @@ const createPostSchema = z.object({
   title: z
     .string()
     .min(1, "Title is required")
-    .max(200, "Title must be less than 200 characters")
+    .max(100, "Title must be less than 200 characters")
     .trim(),
 
   subtitle: z
     .string()
     .min(1, "Subtitle is required")
-    .max(500, "Subtitle must be less than 500 characters")
+    .max(200, "Subtitle must be less than 500 characters")
     .trim(),
 
   content: z
     .string()
     .min(10, "Content must be at least 10 characters")
-    .max(1000, "Content must be less than 1000 characters"), // ~ pages
-
-  // coverImage: z
-  //   .url("Invalid image URL")
-  //   .optional()
-  //   .refine(
-  //     (url) => !url || /\.(jpg|jpeg|png|webp|gif)$/i.test(url),
-  //     "Cover image must be a valid image URL",
-  //   ),
+    .max(10000, "Content must be less than 1000 characters"),
 
   tags: z
     .array(
@@ -66,23 +55,12 @@ export const validateCreatePost = (
   res: Response,
   next: NextFunction,
 ) => {
-  try {
-    const result = createPostSchema.parse(req.body);
-    req.body = result; // Replace with validated & sanitized data
-    next();
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return res.status(400).json({
-        success: false,
-        error: "Validation failed",
-        details: error.issues.map((e) => ({
-          field: e.path.join("."),
-          message: e.message,
-        })),
-      });
-    }
-    next(error);
+  const result = createPostSchema.safeParse(req.body);
+  if (!result.success) {
+    throw result.error; 
   }
+  req.body = result.data;
+  next();
 };
 
 const updatePostSchema = z
@@ -96,24 +74,24 @@ const updatePostSchema = z
 
     subtitle: z
       .string()
-      .max(500, "Subtitle must be less than 500 characters")
+      .max(200, "Subtitle must be less than 200 characters")
       .trim()
       .optional(),
 
     content: z
       .string()
       .min(100, "Content must be at least 100 characters")
-      .max(100000, "Content must be less than 100,000 characters")
+      .max(10000, "Content must be less than 10,000 characters")
       .optional(),
 
-    coverImage: z.url("Invalid image URL").optional().nullable(), // Allow null to remove image
+    coverImage: z.url("Invalid image URL").optional().nullable(),
 
     tags: z
       .array(
         z
           .string()
           .min(2, "Tag must be at least 2 characters")
-          .max(30, "Tag must be less than 30 characters"),
+          .max(20, "Tag must be less than 30 characters"),
       )
       .max(5, "Maximum 5 tags allowed")
       .optional()
@@ -133,23 +111,12 @@ export const validateUpdatePost = (
   res: Response,
   next: NextFunction,
 ) => {
-  try {
-    const result = updatePostSchema.parse(req.body);
-    req.body = result;
-    next();
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return res.status(400).json({
-        success: false,
-        error: "Validation failed",
-        details: error.issues.map((e) => ({
-          field: e.path.join("."),
-          message: e.message,
-        })),
-      });
-    }
-    next(error);
+  const result = updatePostSchema.safeParse(req.body);
+  if (!result.success) {
+    throw result.error; 
   }
+  req.body = result.data;
+  next();
 };
 
 export const validateSlugParam = (
@@ -158,25 +125,19 @@ export const validateSlugParam = (
   next: NextFunction,
 ) => {
   const slug = req.params.slug as string;
-
-  // Slug validation rules
   const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
   if (!slug || slug.length < 3 || slug.length > 200) {
-    return res.status(400).json({
-      success: false,
-      error: "Invalid slug format: must be 3-200 characters",
-    });
+    throw AppError.badRequest(
+      "Invalid slug format: must be 3-200 characters",
+    );
   }
 
   if (!slugRegex.test(slug)) {
-    return res.status(400).json({
-      success: false,
-      error:
-        "Invalid slug format: only lowercase letters, numbers, and hyphens allowed",
-    });
+    throw AppError.badRequest(
+      "Invalid slug format: only lowercase letters, numbers, and hyphens allowed",
+    );
   }
 
   next();
 };
-// Add validateUpdatePost similarly...

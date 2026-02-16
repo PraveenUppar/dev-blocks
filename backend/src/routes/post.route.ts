@@ -28,16 +28,18 @@ import {
 
 const postRoute = Router();
 
-// postRoute.use(apiLimiter);
+postRoute.use(apiLimiter);
 
 // GET Published Posts for Homepage - Fetches only the metadata of posts -- working and tested
 postRoute.get("/", getPublishedPostController);
+
 // GET Published Post by ID - Fetches full content of the post --  working and tested
 postRoute.get<{ id: string }>(
   "/id/:id",
   validateIdParam,
   getPublishedPostByIdController,
 );
+
 // GET Published Post by Slug - SEO friendly and Fetches full content of the post
 postRoute.get(
   "/slug/:slug",
@@ -52,8 +54,8 @@ postRoute.use(requireAuth());
 // CREATE a new Draft Post - working and tested
 postRoute.post(
   "/create",
-  // createLimiter,
-  // validateCreatePost,
+  createLimiter,
+  validateCreatePost,
   createPostController,
 );
 // GET Draft Post by ID - working and tested

@@ -3,5 +3,5 @@ import app from "./app.js";
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`Backend Server Running:${PORT}`);
+  console.log(`Dev-Blocks Backend Server Running:${PORT}`);
 });
