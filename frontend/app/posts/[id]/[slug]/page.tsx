@@ -90,6 +90,11 @@ export default function PostPage() {
         if (response.data.data.likeCount !== undefined) {
           setLikeCount(response.data.data.likeCount);
         }
+        if (response.data.data.liked) {
+          toast.success("Post liked!");
+        } else {
+          toast.info("Post unliked");
+        }
       }
     } catch (error: any) {
       console.error("Failed to like post:", error);
@@ -121,6 +126,11 @@ export default function PostPage() {
       const response = await api.post(`/post/bookmark/${id}`);
       if (response.data.success) {
         setIsBookmarked(response.data.data.bookmarked);
+        if (response.data.data.bookmarked) {
+          toast.success("Post bookmarked!");
+        } else {
+          toast.info("Removed from bookmarks");
+        }
       }
     } catch (error: any) {
       console.error("Failed to bookmark post:", error);
@@ -172,14 +182,13 @@ export default function PostPage() {
           {/* Tags */}
           <div className="flex flex-wrap gap-2 mb-6  ">
             {(post.tags || []).map((postTag: any) => (
-              <Link
+              <span
                 key={postTag.slug}
-                href={`/tags/${postTag.slug}`}
                 className="px-3 py-1.5 text-xs sm:text-sm font-medium text-gray-900 bg-gray-100 border border-gray-300 rounded-md hover:bg-emerald-100 transition"            style={{ fontFamily: "var(--font-montserrat)" }}
 
               >
                 {postTag.name}
-              </Link>
+              </span>
             ))}
           </div>
           {/* Author & Meta */}
@@ -212,7 +221,7 @@ export default function PostPage() {
                 <button
                   onClick={handleLike}
                   disabled={isLiking}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition text-sm disabled:opacity-50 ${
+                  className={`flex items-center gap-1.5 px-3 cursor-pointer py-1.5 rounded-full transition text-sm disabled:opacity-50 ${
                     isLiked
                       ? "text-red-500 bg-red-50"
                       : "text-gray-600 hover:text-red-500 hover:bg-red-50"
@@ -225,7 +234,7 @@ export default function PostPage() {
                 </button>
 
                 {/* Comment Button */}
-                <button className="flex items-center gap-1.5 px-3 py-1.5 text-gray-600 hover:text-blue-500 hover:bg-blue-50 rounded-full transition text-sm">
+                <button className="flex items-center gap-1.5 px-3 py-1.5 cursor-pointer  text-gray-600 hover:text-blue-500 hover:bg-blue-50 rounded-full transition text-sm">
                   <CommentIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                   <span className="hidden sm:inline">
                     {post._count?.comments ?? 0}
@@ -236,7 +245,7 @@ export default function PostPage() {
                 <button
                   onClick={handleBookmark}
                   disabled={isBookmarking}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition disabled:opacity-50 ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 cursor-pointer rounded-full transition disabled:opacity-50 ${
                     isBookmarked
                       ? "text-amber-600 bg-amber-50"
                       : "text-gray-600 hover:text-amber-600 hover:bg-amber-50"
@@ -252,7 +261,7 @@ export default function PostPage() {
           {/* Content */}
           <div
             className="bg-gray-50 border-l border-r border-gray-500"
-            style={{ fontFamily: "var(--font-arimo)" }}
+            style={{ fontFamily: "var(--font-montserrat)" }}
           >
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-black py-12 sm:py-16">
               <article

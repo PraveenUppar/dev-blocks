@@ -78,8 +78,7 @@ export default function Home() {
               className="text-base sm:text-lg text-gray-700 max-w-3xl mx-auto leading-relaxed"
               style={{ fontFamily: "var(--font-arimo)" }}
             >
-              A place to read, write, and deepen your understanding about tech. Welcome to dev blocks community.
-            </p>
+Welcome to the Dev Blocks Community, a collaborative space for developers, engineers, and tech enthusiasts to read, write, and deepen their understanding of technology.             </p>
           </div>
         </div>
       </div>
@@ -149,7 +148,7 @@ export default function Home() {
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={!pagination.hasPrevPage}
-              className="px-6 py-2 border border-gray-300 rounded-full text-gray-700 text-sm hover:bg-gray-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
+              className="px-6 py-2 border border-gray-300 rounded-full cursor-pointer text-gray-700 text-sm hover:bg-gray-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
               style={{ fontFamily: "var(--font-montserrat)" }}
             >
               Previous
@@ -163,7 +162,7 @@ export default function Home() {
             <button
               onClick={() => setPage((p) => p + 1)}
               disabled={!pagination.hasNextPage}
-              className="px-6 py-2 border border-gray-300 rounded-full text-gray-700 text-sm hover:bg-gray-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
+              className="px-6 py-2 border border-gray-300 rounded-full cursor-pointer text-gray-700 text-sm hover:bg-gray-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
               style={{ fontFamily: "var(--font-montserrat)" }}
             >
               Next

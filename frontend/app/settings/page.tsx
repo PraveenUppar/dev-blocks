@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth, useUser } from "@clerk/nextjs";
+import { handleApiError } from "@/utils/errorHandler";
 import { useRouter } from "next/navigation";
 import api from "@/lib/axios";
 import { setAuthTokenGetter } from "@/lib/axios";
@@ -92,10 +93,7 @@ export default function Settings() {
         }
       }
     } catch (error: any) {
-      console.error("Failed to update profile:", error);
-      toast.error(
-        error.response?.data?.error?.message || "Failed to update profile",
-      );
+      handleApiError(error, "Failed to update profile");
     } finally {
       setSaving(false);
     }
