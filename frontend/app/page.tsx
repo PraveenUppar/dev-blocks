@@ -1,22 +1,67 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
 import PostCard from "./components/PostCard";
-import { PostsResponse } from "@/types";
+import { Post } from "@/types";
 import api from "@/lib/axios";
 import { FiSearch } from "react-icons/fi";
 
-// Fetch posts from the API
-async function getPosts(): Promise<PostsResponse | null> {
-  try {
-    const response = await api.get("/post/");
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching posts:", error);
-    return null;
-  }
+type SortBy = "latest" | "oldest" | "popular";
+
+interface Pagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
 }
 
-export default async function Home() {
-  const postsData = await getPosts();
-  const posts = postsData?.data ?? [];
+export default function Home() {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState<SortBy>("latest");
+  const [pagination, setPagination] = useState<Pagination | null>(null);
+  const [page, setPage] = useState(1);
+
+  const fetchPosts = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params: any = { page, limit: 10, sortBy };
+      if (search.trim()) params.search = search.trim();
+      const response = await api.get("/post/", { params });
+      if (response.data.success) {
+        setPosts(response.data.data);
+        setPagination(response.data.pagination);
+      }
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, search, sortBy]);
+
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setPage(1);
+      fetchPosts();
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search, sortBy]);
+
+  // Fetch on page change (but not on search/sort — handled above)
+  useEffect(() => {
+    fetchPosts();
+  }, [page]);
+
+  const sortTabs: { label: string; value: SortBy }[] = [
+    { label: "Latest", value: "latest" },
+    { label: "Popular", value: "popular" },
+    { label: "Oldest", value: "oldest" },
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
@@ -39,7 +84,7 @@ export default async function Home() {
         </div>
       </div>
 
-      {/* Search and Filter Section */}
+      {/* Search and Sort Section */}
       <div className="bg-white border-b border-gray-500">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 border-l border-r border-gray-500">
           <div className="flex gap-4 items-center">
@@ -50,37 +95,31 @@ export default async function Home() {
               </div>
               <input
                 type="text"
-                placeholder="Search"
-                className="w-full pl-12 pr-20 py-3 border border-gray-400 rounded-full text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search posts..."
+                className="w-full pl-12 pr-4 py-3 border border-gray-400 rounded-full text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent"
                 style={{ fontFamily: "var(--font-arimo)" }}
               />
-              <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
-                <kbd className="px-2 py-1 text-xs text-gray-500 bg-gray-100 border border-gray-300 rounded">
-                  ⌘K
-                </kbd>
-              </div>
             </div>
 
-            {/* Filter Button */}
-            <button
-              className="px-8 py-3 bg-gray-900 text-white rounded font-medium hover:bg-gray-800 transition flex items-center gap-2"
-              style={{ fontFamily: "var(--font-arimo)" }}
-            >
-              Filter
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </button>
+            {/* Sort Tabs */}
+            <div className="flex gap-1 bg-gray-100 rounded-full p-1">
+              {sortTabs.map((tab) => (
+                <button
+                  key={tab.value}
+                  onClick={() => setSortBy(tab.value)}
+                  className={`px-5 py-2 rounded-full text-sm font-medium transition ${
+                    sortBy === tab.value
+                      ? "bg-gray-900 text-white"
+                      : "text-gray-600 hover:text-gray-900"
+                  }`}
+                  style={{ fontFamily: "var(--font-arimo)" }}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -89,24 +128,48 @@ export default async function Home() {
       <div className="mx-auto max-w-7xl -mt-7 px-4 sm:px-6 lg:px-8 py-8 sm:py-12 border-l border-r border-gray-500">
         {/* Post Feed */}
         <div className="space-y-0">
-          {posts.length > 0 ? (
+          {loading ? (
+            <div className="text-center py-12 text-gray-500">
+              <p style={{ fontFamily: "var(--font-montserrat)" }}>Loading posts...</p>
+            </div>
+          ) : posts.length > 0 ? (
             posts.map((post) => <PostCard key={post.id} post={post} />)
           ) : (
             <div className="text-center py-12 text-gray-500">
-              <p>No posts yet. Be the first to write one!</p>
+              <p style={{ fontFamily: "var(--font-montserrat)" }}>
+                {search ? `No posts found for "${search}"` : "No posts yet. Be the first to write one!"}
+              </p>
             </div>
           )}
         </div>
 
-        {/* Load More */}
-        <div className="flex justify-center mt-8 sm:mt-12">
-          <button
-            className="px-6 py-2 border border-gray-300 rounded-full text-gray-700 text-sm sm:text-base hover:bg-gray-50 transition"
-            style={{ fontFamily: "var(--font-montserrat)" }}
-          >
-            Load More
-          </button>
-        </div>
+        {/* Pagination */}
+        {pagination && pagination.totalPages > 1 && (
+          <div className="flex justify-center items-center gap-4 mt-8 sm:mt-12">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={!pagination.hasPrevPage}
+              className="px-6 py-2 border border-gray-300 rounded-full text-gray-700 text-sm hover:bg-gray-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
+              style={{ fontFamily: "var(--font-montserrat)" }}
+            >
+              Previous
+            </button>
+            <span
+              className="text-sm text-gray-500"
+              style={{ fontFamily: "var(--font-montserrat)" }}
+            >
+              Page {pagination.page} of {pagination.totalPages}
+            </span>
+            <button
+              onClick={() => setPage((p) => p + 1)}
+              disabled={!pagination.hasNextPage}
+              className="px-6 py-2 border border-gray-300 rounded-full text-gray-700 text-sm hover:bg-gray-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
+              style={{ fontFamily: "var(--font-montserrat)" }}
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

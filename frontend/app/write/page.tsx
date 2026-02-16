@@ -2,7 +2,6 @@
 
 import { useState, useEffect, Suspense } from "react";
 import Editor from "./../components/Editor";
-import Image from "next/image";
 import api from "@/lib/axios";
 import { useAuth } from "@clerk/nextjs";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -45,7 +44,6 @@ function WritePageContent() {
   const fetchDraft = async (id: string) => {
     setLoading(true);
     try {
-      // Using your GET /id/:id endpoint -- working
       const response = await api.get(`/post/draft/${id}`);
       if (response.data.success) {
         const draft = response.data.data;
@@ -53,8 +51,11 @@ function WritePageContent() {
         setSubtitle(draft.subtitle || "");
         setContent(draft.content || "");
         setCoverImage(draft.coverImage || "");
-        setTags(draft.tags || "");
-        // setTags if your API returns tags
+        setTags(
+          Array.isArray(draft.tags)
+            ? draft.tags.map((t: any) => t.tag?.name || t.name || t).join(", ")
+            : draft.tags || ""
+        );
       }
     } catch (error) {
       console.error("Failed to fetch draft:", error);
@@ -80,6 +81,7 @@ function WritePageContent() {
           subtitle: subtitle || undefined,
           content,
           coverImage: coverImage || undefined,
+          tags: tags.split(",").map(t => t.trim()).filter(Boolean)
         });
 
         if (response.data.success) {
@@ -92,11 +94,11 @@ function WritePageContent() {
           subtitle: subtitle || undefined,
           content,
           coverImage: coverImage || undefined,
+          tags: tags.split(",").map(t => t.trim()).filter(Boolean)
         });
 
         if (response.data.success) {
           toast.success("Draft saved!");
-          // Update URL with new draft ID
           const newDraftId = response.data.data.id;
           router.push(`/write?draftId=${newDraftId}`);
         }
@@ -124,6 +126,7 @@ function WritePageContent() {
           subtitle: subtitle || undefined,
           content,
           coverImage: coverImage || undefined,
+          tags: tags.split(",").map(t => t.trim()).filter(Boolean)
         });
 
         const response = await api.patch(`/post/publish/${draftId}`);
@@ -139,6 +142,7 @@ function WritePageContent() {
           subtitle: subtitle || undefined,
           content,
           coverImage: coverImage || undefined,
+          tags: tags.split(",").map(t => t.trim()).filter(Boolean)
         });
 
         if (createResponse.data.success) {

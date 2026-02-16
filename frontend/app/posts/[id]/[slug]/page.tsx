@@ -158,26 +158,27 @@ export default function PostPage() {
           {/* Title */}
           <h1
             className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 leading-tight "
-            style={{ fontFamily: "var(--font-arimo)" }}
+             style={{ fontFamily: "var(--font-arimo)" }}
           >
             {post.title}
           </h1>
 
           {/* Subtitle */}
           {post.subtitle && (
-            <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-6 leading-relaxed">
+            <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-6 leading-relaxed"  style={{ fontFamily: "var(--font-montserrat)" }}>
               {post.subtitle}
             </p>
           )}
           {/* Tags */}
-          <div className="flex flex-wrap gap-2 mb-6   ">
-            {(post.tags || []).map((postTag) => (
+          <div className="flex flex-wrap gap-2 mb-6  ">
+            {(post.tags || []).map((postTag: any) => (
               <Link
-                key={postTag.tag.id}
-                href={`/tags/${postTag.tag.slug}`}
-                className="px-3 py-1.5 text-xs sm:text-sm font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full hover:bg-emerald-100 transition"
+                key={postTag.slug}
+                href={`/tags/${postTag.slug}`}
+                className="px-3 py-1.5 text-xs sm:text-sm font-medium text-gray-900 bg-gray-100 border border-gray-300 rounded-md hover:bg-emerald-100 transition"            style={{ fontFamily: "var(--font-montserrat)" }}
+
               >
-                {postTag.tag.name}
+                {postTag.name}
               </Link>
             ))}
           </div>

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { FiHeart, FiMessageCircle } from "react-icons/fi";
+import { FiHeart, FiMessageCircle, FiEye } from "react-icons/fi";
 
 import { Post } from "@/types";
 
@@ -71,11 +71,14 @@ export default function PostCard({ post }: PostCardProps) {
             </span>
             <span className="text-green-600">• {post.readTime} MIN READ</span>
             {post._count && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-4">
+                <span className="flex items-center gap-1">
+                  <FiEye className="h-4 w-4 text-gray-600" />{" "}
+                  {post.viewCount ?? 0}
+                </span>
                 <span className="flex items-center gap-1">
                   <FiHeart className="h-4 w-4 text-red-600" />{" "}
                   {post._count.likes}{" "}
-                  
                 </span>
                 <span className="flex items-center gap-1">
                   <FiMessageCircle className="h-4 w-4 text-gray-700" />{" "}
