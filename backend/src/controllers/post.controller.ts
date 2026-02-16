@@ -26,13 +26,8 @@ export async function getPublishedPostController(
   next: NextFunction,
 ) {
   try {
-    // User sends: ?limit=999999999
-    // Your DB tries to fetch 999 million records → Server crashes
-    const page = Math.max(1, parseInt(req.query.page as string) || 1);
-    const limit = Math.min(
-      50,
-      Math.max(1, parseInt(req.query.limit as string) || 10),
-    );
+    // Pagination validated and clamped by validatePaginationQuery middleware
+    const { page, limit } = req.query as unknown as { page: number; limit: number };
     // // Optional: Add sorting and filtering
     // const sortBy = (req.query.sortBy as string) || "latest";
     // const tag = req.query.tag as string;

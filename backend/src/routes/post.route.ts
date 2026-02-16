@@ -20,6 +20,7 @@ import {
 import {
   validateCreatePost,
   validateIdParam,
+  validatePaginationQuery,
   validateSlugParam,
   validateUpdatePost,
 } from "../middleware/validation.js";
@@ -31,7 +32,7 @@ const postRoute = Router();
 postRoute.use(apiLimiter);
 
 // GET Published Posts for Homepage - Fetches only the metadata of posts -- working and tested
-postRoute.get("/", getPublishedPostController);
+postRoute.get("/", validatePaginationQuery, getPublishedPostController);
 
 // GET Published Post by ID - Fetches full content of the post --  working and tested
 postRoute.get<{ id: string }>(

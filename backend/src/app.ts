@@ -6,6 +6,7 @@ import cors from "cors";
 import helmet from "helmet";
 import { clerkMiddleware } from "@clerk/express";
 import { errorHandler } from "./middleware/errorHandler.js";
+import { requestLogger } from "./middleware/requestLogger.js";
 import { AppError } from "./errors/AppError.js";
 import userRoute from "./routes/user.route.js";
 import postRoute from "./routes/post.route.js";
@@ -13,6 +14,7 @@ import webhookRoutes from "./config/clerkwebhook.js";
 
 const app = Express();
 app.use(helmet());
+app.use(requestLogger);
 app.use(
   cors({
     origin: process.env.FRONTEND_URL,

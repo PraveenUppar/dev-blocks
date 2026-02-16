@@ -18,10 +18,6 @@ import {
   getUserReadingHistoryService,
 } from "../services/user.service.js";
 
-interface usernameParams {
-  username: string;
-}
-
 // ==================== PUBLIC CONTROLLERS ====================
 
 export async function getCurrentUserController(
@@ -44,12 +40,12 @@ export async function getCurrentUserController(
 
 // Tested and Working
 export async function getUserProfileController(
-  req: Request<usernameParams>,
+  req: Request,
   res: Response,
   next: NextFunction,
 ) {
   try {
-    const { username } = req.params;
+    const username = req.params.username as string;
     const user = await getUserProfileService(username);
     if (!user) throw AppError.notFound("User not found");
 
@@ -61,17 +57,16 @@ export async function getUserProfileController(
 
 // Tested and Working
 export async function getUserPostsController(
-  req: Request<usernameParams>,
+  req: Request,
   res: Response,
   next: NextFunction,
 ) {
   try {
-    const { username } = req.params;
+    const username = req.params.username as string;
     const user = await getUserNameService(username);
     if (!user) throw AppError.notFound("User not found");
 
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
+    const { page, limit } = req.query as unknown as { page: number; limit: number };
     const posts = await getUserPostsService(username, page, limit);
 
     return res.status(HTTP_STATUS.OK).json({ success: true, ...posts });
@@ -82,17 +77,16 @@ export async function getUserPostsController(
 
 // Tested and Working
 export async function getUserFollowersController(
-  req: Request<usernameParams>,
+  req: Request,
   res: Response,
   next: NextFunction,
 ) {
   try {
-    const { username } = req.params;
+    const username = req.params.username as string;
     const user = await getUserNameService(username);
     if (!user) throw AppError.notFound("User not found");
 
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
+    const { page, limit } = req.query as unknown as { page: number; limit: number };
     const followers = await getUserFollowerService(username, page, limit);
 
     return res.status(HTTP_STATUS.OK).json({ success: true, ...followers });
@@ -103,17 +97,16 @@ export async function getUserFollowersController(
 
 // Tested and Working
 export async function getUserFollowingController(
-  req: Request<usernameParams>,
+  req: Request,
   res: Response,
   next: NextFunction,
 ) {
   try {
-    const { username } = req.params;
+    const username = req.params.username as string;
     const user = await getUserNameService(username);
     if (!user) throw AppError.notFound("User not found");
 
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
+    const { page, limit } = req.query as unknown as { page: number; limit: number };
     const following = await getUserFollowingService(username, page, limit);
 
     return res.status(HTTP_STATUS.OK).json({ success: true, ...following });
@@ -210,8 +203,7 @@ export async function getUserBookmarksController(
     const user = await getUserClerkIdService(clerkId);
     if (!user) throw AppError.notFound("User not found");
 
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
+    const { page, limit } = req.query as unknown as { page: number; limit: number };
     const bookmarks = await getUserBookmarksService(user.id, page, limit);
 
     return res.status(HTTP_STATUS.OK).json({ success: true, ...bookmarks });
@@ -232,8 +224,7 @@ export async function getUserDraftsController(
     const user = await getUserClerkIdService(clerkId);
     if (!user) throw AppError.notFound("User not found");
 
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
+    const { page, limit } = req.query as unknown as { page: number; limit: number };
     const drafts = await getUserDraftsService(user.id, page, limit);
 
     return res.status(HTTP_STATUS.OK).json({ success: true, ...drafts });
@@ -254,8 +245,7 @@ export async function getUserReadingHistoryController(
     const user = await getUserClerkIdService(clerkId);
     if (!user) throw AppError.notFound("User not found");
 
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
+    const { page, limit } = req.query as unknown as { page: number; limit: number };
     const readinghistory = await getUserReadingHistoryService(
       user.id,
       page,

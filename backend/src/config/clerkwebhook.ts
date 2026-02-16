@@ -1,6 +1,7 @@
 import { Router, type Request, type Response } from "express";
 import { Webhook } from "svix";
 import prisma from "../libs/prisma.js";
+import logger from "./logger.js";
 
 const webhookRouter = Router();
 
@@ -8,7 +9,7 @@ webhookRouter.post("/clerk", async (req: Request, res: Response) => {
   const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
 
   if (!WEBHOOK_SECRET) {
-    console.error("CLERK_WEBHOOK_SECRET not set");
+    logger.error("CLERK_WEBHOOK_SECRET not set");
     return res.status(500).json({ error: "Server misconfigured" });
   }
 
@@ -33,7 +34,7 @@ webhookRouter.post("/clerk", async (req: Request, res: Response) => {
       "svix-signature": svix_signature,
     });
   } catch (err) {
-    console.error("Verification failed:", err);
+    logger.error("Webhook verification failed", { error: err });
     return res.status(400).json({ error: "Invalid signature" });
   }
 
@@ -42,7 +43,7 @@ webhookRouter.post("/clerk", async (req: Request, res: Response) => {
     evt.data;
   const eventType = evt.type;
 
-  console.log(`Webhook received: ${eventType}`);
+  logger.info(`Webhook received: ${eventType}`);
 
   try {
     if (eventType === "user.created") {
@@ -67,7 +68,7 @@ webhookRouter.post("/clerk", async (req: Request, res: Response) => {
           avatar: image_url,
         },
       });
-      console.log(`✅ User created/updated: ${email}`);
+      logger.info(`User created/updated: ${email}`);
     }
 
     if (eventType === "user.updated") {
@@ -84,19 +85,19 @@ webhookRouter.post("/clerk", async (req: Request, res: Response) => {
           avatar: image_url,
         },
       });
-      console.log(`✅ User updated: ${email}`);
+      logger.info(`User updated: ${email}`);
     }
 
     if (eventType === "user.deleted") {
       await prisma.user.delete({
         where: { clerkId: id },
       });
-      console.log(`✅ User deleted: ${id}`);
+      logger.info(`User deleted: ${id}`);
     }
 
     return res.status(200).json({ received: true });
   } catch (error) {
-    console.error("Webhook error:", error);
+    logger.error("Webhook processing error", { error });
     return res.status(500).json({ error: "Processing failed" });
   }
 });

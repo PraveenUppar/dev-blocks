@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { AppError } from "../errors/AppError.js";
 import { HTTP_STATUS } from "../errors/httpStatus.js";
+import logger from "../config/logger.js";
 
 export const errorHandler = (
   err: unknown,
@@ -76,7 +77,12 @@ export const errorHandler = (
   }
 
   // ---- Unknown / Internal Errors ----
-  console.error("Unhandled Error:", err);
+  logger.error("Unhandled Error:", {
+    error: err instanceof Error ? err.message : err,
+    stack: err instanceof Error ? err.stack : undefined,
+    url: req.originalUrl,
+    method: req.method,
+  });
 
   return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
     success: false,
