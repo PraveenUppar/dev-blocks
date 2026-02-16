@@ -33,8 +33,7 @@ export default async function Home() {
               className="text-base sm:text-lg text-gray-700 max-w-3xl mx-auto leading-relaxed"
               style={{ fontFamily: "var(--font-arimo)" }}
             >
-              We are a team of engineers all passionate about tech. Welcome to
-              our blog about tech.
+              A place to read, write, and deepen your understanding about tech. Welcome to dev blocks community.
             </p>
           </div>
         </div>

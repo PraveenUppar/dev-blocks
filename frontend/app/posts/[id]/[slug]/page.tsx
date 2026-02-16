@@ -9,6 +9,7 @@ import api from "@/lib/axios";
 import { setAuthTokenGetter } from "@/lib/axios";
 import { Post } from "@/types";
 import { FiBookmark, FiHeart, FiMessageCircle } from "react-icons/fi";
+import { toast } from "react-toastify";
 
 
 const HeartIcon = ({
@@ -70,7 +71,7 @@ export default function PostPage() {
 
   const handleLike = async () => {
     if (!isSignedIn) {
-      alert("Please sign in to like posts");
+      toast.info("Please sign in to like posts");
       return;
     }
     if (isLiking) return;
@@ -97,9 +98,9 @@ export default function PostPage() {
       setLikeCount(previousCount);
 
       if (error.response?.status === 401) {
-        alert("Please sign in to like posts");
+        toast.info("Please sign in to like posts");
       } else {
-        alert("Failed to like post. Please try again.");
+        toast.error("Failed to like post. Please try again.");
       }
     } finally {
       setIsLiking(false);
@@ -108,7 +109,7 @@ export default function PostPage() {
 
   const handleBookmark = async () => {
     if (!isSignedIn) {
-      alert("Please sign in to bookmark posts");
+      toast.info("Please sign in to bookmark posts");
       return;
     }
     if (isBookmarking) return;
@@ -126,9 +127,9 @@ export default function PostPage() {
       // Revert on error
       setIsBookmarked(previousBookmarked);
       if (error.response?.status === 401) {
-        alert("Please sign in to bookmark posts");
+        toast.info("Please sign in to bookmark posts");
       } else {
-        alert("Failed to bookmark post. Please try again.");
+        toast.error("Failed to bookmark post. Please try again.");
       }
     } finally {
       setIsBookmarking(false);

@@ -7,6 +7,7 @@ import api from "@/lib/axios";
 import { useAuth } from "@clerk/nextjs";
 import { useRouter, useSearchParams } from "next/navigation";
 import { setAuthTokenGetter } from "@/lib/axios";
+import { toast } from "react-toastify";
 
 export default function WritePage() {
   return (
@@ -57,7 +58,7 @@ function WritePageContent() {
       }
     } catch (error) {
       console.error("Failed to fetch draft:", error);
-      alert("Failed to load draft");
+      toast.error("Failed to load draft");
       router.push("/write");
     } finally {
       setLoading(false);
@@ -66,7 +67,7 @@ function WritePageContent() {
 
   const handleSaveDraft = async () => {
     if (!title.trim() || !content.trim()) {
-      alert("Please add a title and content");
+      toast.warning("Please add a title and content");
       return;
     }
 
@@ -82,7 +83,7 @@ function WritePageContent() {
         });
 
         if (response.data.success) {
-          alert("Draft updated successfully!");
+          toast.success("Draft updated successfully!");
         }
       } else {
         // Create new draft using POST /create
@@ -94,7 +95,7 @@ function WritePageContent() {
         });
 
         if (response.data.success) {
-          alert("Draft saved!");
+          toast.success("Draft saved!");
           // Update URL with new draft ID
           const newDraftId = response.data.data.id;
           router.push(`/write?draftId=${newDraftId}`);
@@ -102,7 +103,7 @@ function WritePageContent() {
       }
     } catch (error: unknown) {
       console.error("Failed to save draft:", error);
-      alert("Failed to save draft. Please try again.");
+      toast.error("Failed to save draft. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -110,7 +111,7 @@ function WritePageContent() {
 
   const handlePublish = async () => {
     if (!title.trim() || !content.trim()) {
-      alert("Please add a title and content");
+      toast.warning("Please add a title and content");
       return;
     }
 
@@ -128,7 +129,7 @@ function WritePageContent() {
         const response = await api.patch(`/post/publish/${draftId}`);
 
         if (response.data.success) {
-          alert("Post published successfully!");
+          toast.success("Post published successfully!");
           router.push("/");
         }
       } else {
@@ -147,14 +148,14 @@ function WritePageContent() {
           const publishResponse = await api.patch(`/post/publish/${newPostId}`);
 
           if (publishResponse.data.success) {
-            alert("Post published successfully!");
+            toast.success("Post published successfully!");
             router.push("/");
           }
         }
       }
     } catch (error: unknown) {
       console.error("Failed to publish:", error);
-      alert("Failed to publish. Please try again.");
+      toast.error("Failed to publish. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -169,12 +170,12 @@ function WritePageContent() {
       const response = await api.delete(`/post/delete/${draftId}`);
 
       if (response.data.success) {
-        alert("Draft deleted successfully!");
+        toast.success("Draft deleted successfully!");
         router.push("/drafts");
       }
     } catch (error) {
       console.error("Failed to delete draft:", error);
-      alert("Failed to delete draft. Please try again.");
+      toast.error("Failed to delete draft. Please try again.");
     } finally {
       setSaving(false);
       setShowDeleteModal(false);
@@ -242,7 +243,7 @@ function WritePageContent() {
         </div>
 
         {/* Cover Image URL */}
-        <div className="mb-6">
+        {/* <div className="mb-6">
           <input
             type="text"
             value={coverImage}
@@ -259,7 +260,7 @@ function WritePageContent() {
               className="mt-4 w-full h-64 object-cover rounded-lg"
             />
           )}
-        </div>
+        </div> */}
 
         {/* Title */}
         <div className="mb-4">

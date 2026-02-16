@@ -11,7 +11,8 @@ import {
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import Navbar from "./components/Navbar";
-import AuthSetup from "./components/AuthSetup"; // Add this
+import AuthSetup from "./components/AuthSetup";
+import ToastProvider from "./components/ToastProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -71,6 +72,7 @@ export default function RootLayout({
         >
           <AuthSetup />
           <Navbar />
+          <ToastProvider />
           <main>{children}</main>
         </body>
       </html>

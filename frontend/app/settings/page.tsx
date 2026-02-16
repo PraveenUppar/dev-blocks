@@ -5,7 +5,7 @@ import { useAuth, useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import api from "@/lib/axios";
 import { setAuthTokenGetter } from "@/lib/axios";
-// import Image from "next/image";
+import { toast } from "react-toastify";
 
 interface UserProfile {
   id: string;
@@ -40,10 +40,6 @@ export default function Settings() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState<{
-    type: "success" | "error";
-    text: string;
-  } | null>(null);
 
   useEffect(() => {
     setAuthTokenGetter(getToken);
@@ -62,7 +58,7 @@ export default function Settings() {
       }
     } catch (error) {
       console.error("Failed to fetch profile:", error);
-      showMessage("error", "Failed to load profile");
+      toast.error("Failed to load profile");
     } finally {
       setLoading(false);
     }
@@ -72,7 +68,7 @@ export default function Settings() {
     e.preventDefault();
 
     if (!profile.name.trim()) {
-      showMessage("error", "Name is required");
+      toast.warning("Name is required");
       return;
     }
 
@@ -89,7 +85,7 @@ export default function Settings() {
       });
 
       if (response.data.success) {
-        showMessage("success", "Profile updated successfully!");
+        toast.success("Profile updated successfully!");
         // Optionally refresh Clerk user data
         if (clerkUser) {
           await clerkUser.reload();
@@ -97,8 +93,7 @@ export default function Settings() {
       }
     } catch (error: any) {
       console.error("Failed to update profile:", error);
-      showMessage(
-        "error",
+      toast.error(
         error.response?.data?.error?.message || "Failed to update profile",
       );
     } finally {
@@ -106,10 +101,7 @@ export default function Settings() {
     }
   };
 
-  const showMessage = (type: "success" | "error", text: string) => {
-    setMessage({ type, text });
-    setTimeout(() => setMessage(null), 5000);
-  };
+
 
   const handleInputChange = (field: keyof UserProfile, value: string) => {
     setProfile({ ...profile, [field]: value });
@@ -153,18 +145,7 @@ export default function Settings() {
           </p>
         </div>
 
-        {/* Success/Error Message */}
-        {message && (
-          <div
-            className={`mb-6 p-4 rounded-lg ${
-              message.type === "success"
-                ? "bg-green-50 text-green-800 border border-green-200"
-                : "bg-red-50 text-red-800 border border-red-200"
-            }`}
-          >
-            {message.text}
-          </div>
-        )}
+
 
         {/* Settings Form */}
         <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm">
