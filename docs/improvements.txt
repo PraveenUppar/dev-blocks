@@ -13,12 +13,7 @@ Priority - Medium - [Need claude]
 Priority - Low
 - soc of middleware validation of schema 
 - inform user about api limit
-- auto save drafts
 - backend shuts down after some time so when i restart it takes time to load fix
 - Readme 
 
-style={{ fontFamily: "var(--font-montserrat)" }}
-style={{ fontFamily: "var(--font-raleway)" }}
-style={{ fontFamily: "var(--font-mozilla-text)" }}
-style={{ fontFamily: "var(--font-arimo)" }}
 

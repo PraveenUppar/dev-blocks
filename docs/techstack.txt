@@ -3,8 +3,6 @@ Frontend:
 Next.js 14+ with App Router - Server-side rendering for SEO, excellent performance, built-in routing
 TypeScript - Type safety, better developer experience
 Tailwind CSS - Rapid styling, consistent design system
-shadcn - High-quality, customizable components
-TanStack Query - Data fetching and caching
 Zustand  - State management
 
 Backend:
@@ -12,8 +10,6 @@ Backend:
 Node.js with Express - JavaScript everywhere, large ecosystem
 PostgreSQL - Robust relational database for complex queries (articles, users, relationships)
 Prisma ORM - Type-safe database access, excellent DX
-Redis - Caching, session storage
-Cloudinary - Image/media storage
 
 Authentication:
 
@@ -21,8 +17,6 @@ Clerk - Social auth, email/password
 
 Other Services:
 
-Elasticsearch - Full-text search
-Resend - Email notifications
 Vercel - Hosting
 
 Summary
