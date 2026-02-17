@@ -16,35 +16,10 @@ graph TD
     Backend -->|Queries| DB[(PostgreSQL Database)]
 ```
 
-## Tech Stack
-
-### Frontend
-- **Framework:** Next.js 14+ (App Router)
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS
-- **State Management:** Zustand
-- **Editor:** TipTap (Rich Text Editor)
-- **HTTP Client:** Axios
-- **Icons:** React Icons
-
-### Backend
-- **Runtime:** Node.js
-- **Framework:** Express.js
-- **Database:** PostgreSQL
-- **ORM:** Prisma
-- **Validation:** Zod
-- **Logging:** Winston
-- **Testing:** Vitest + Supertest
-- **Rate Limiting:** express-rate-limit
-
-### Authentication
-- **Provider:** Clerk (Social Auth, Email/Password)
-
-### Hosting & DevOps
-- **Frontend:** Vercel 
-- **Backend:** Render
-
 ## 💾 Database Schema
+
+![Database Schema](docs/schema.png)
+
 
 ```mermaid
 erDiagram
@@ -82,6 +57,34 @@ erDiagram
         string parentId
     }
 ```
+
+## Tech Stack
+
+### Frontend
+- **Framework:** Next.js 14+ (App Router)
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS
+- **State Management:** Zustand
+- **Editor:** TipTap (Rich Text Editor)
+- **HTTP Client:** Axios
+- **Icons:** React Icons
+
+### Backend
+- **Runtime:** Node.js
+- **Framework:** Express.js
+- **Database:** PostgreSQL
+- **ORM:** Prisma
+- **Validation:** Zod
+- **Logging:** Winston
+- **Testing:** Vitest + Supertest
+- **Rate Limiting:** express-rate-limit
+
+### Authentication
+- **Provider:** Clerk (Social Auth, Email/Password)
+
+### Hosting 
+- **Frontend:** Vercel 
+- **Backend:** Render
 
 ## Features
 
