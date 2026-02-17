@@ -24,3 +24,12 @@ Other Services:
 Elasticsearch - Full-text search
 Resend - Email notifications
 Vercel - Hosting
+
+Summary
+Feature	Tool	Why
+Error Handling	Custom AppError class + global handler	No library needed, gives consistent response shape for frontend notifications
+Data Validation	Zod (already installed)	You know it, it's already partially set up
+Logging	Winston	Full-featured, you know it, supports file + console + custom transports
+Unit Testing	Vitest + Supertest	ESM-native, TS-native, Jest-compatible API, zero config
+Rate Limiting	express-rate-limit	Simple, effective, zero config
+Redis	redis	Simple, effective, zero config

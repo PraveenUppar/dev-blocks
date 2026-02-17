@@ -1,32 +1,24 @@
-IMPROVEMENTS
-----------------------------------------------------------------------------------------------------------------
-
-- recheck below routes both do the same thing
-postRoute.get<{ id: string }>("/id/:id",validateIdParam,getPublishedPostByIdController,);
-postRoute.get("/slug/:slug",validateSlugParam,getPublishedPostBySlugController,);
-
-- changes made in schema do migrate and generate
-
-- Change the clerkId in controllers to ====> req.auth().userId;
-
-- No need to check for user it is done by clerk in the routes.ts through middleware require.auth()
-
-- for getting post based on id if the post has slug then fetch and add insteaad of making an api call to slug -- which slows down fetching and decrease operations
-
-- updateUserProfileController --     // choose the parts to update and sanitize the content
-
-----------------------------------------------------------------------------------------------------------------
-
 ----------------------------------------------------------------------------------------------------------------
 
 PENDING/TODO
 
-
-** Features
-- follow
-- comments
-- notification
+Priority - Medium - [Need claude] 
+- follow and unfollow feature
+- Add a profile and frontend author see followers and foloowing and perfoerm action
+- comments feature
+- notification center for user follow and post like 
 - reading history
-- add search and filtering in home page posts
-- auto save draft
-- add load more feature in home page
+
+
+Priority - Low
+- soc of middleware validation of schema 
+- inform user about api limit
+- auto save drafts
+- backend shuts down after some time so when i restart it takes time to load fix
+- Readme 
+
+style={{ fontFamily: "var(--font-montserrat)" }}
+style={{ fontFamily: "var(--font-raleway)" }}
+style={{ fontFamily: "var(--font-mozilla-text)" }}
+style={{ fontFamily: "var(--font-arimo)" }}
+

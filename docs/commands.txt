@@ -15,4 +15,7 @@
 - npm install zod
 - npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-placeholder @tiptap/extension-image @tiptap/extension-link @tiptap/extension-code-block-lowlight lowlight
 
-= npm install axios @tanstack/react-query
+- npm install axios @tanstack/react-query
+- npm install -D vitest supertest @types/supertest
+- npm install winston
+npm install react-toastify

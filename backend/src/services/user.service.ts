@@ -25,21 +25,21 @@ export async function getUserProfileService(username: string) {
       },
     },
   });
-}
+  }
 
-// CHECK USER BY USERNAME - working
-export async function getUserNameService(username: string) {
-  return prisma.user.findUnique({
-    where: { username },
-  });
-}
+  // CHECK USER BY USERNAME - working
+  export async function getUserNameService(username: string) {
+    return prisma.user.findUnique({
+      where: { username },
+    });
+  }
 
-// GET USER BY CLERKID - working
-export const getUserClerkIdService = async (clerkId: string) => {
-  return prisma.user.findUnique({
-    where: { clerkId },
-  });
-};
+  // GET USER BY CLERKID - working
+  export const getUserClerkIdService = async (clerkId: string) => {
+    return prisma.user.findUnique({
+      where: { clerkId },
+    });
+  };
 
 // GET USER BY ID - working
 export const getUserIdService = async (id: string) => {

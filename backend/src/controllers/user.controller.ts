@@ -48,7 +48,6 @@ export async function getUserProfileController(
     const username = req.params.username as string;
     const user = await getUserProfileService(username);
     if (!user) throw AppError.notFound("User not found");
-
     return res.status(HTTP_STATUS.OK).json({ success: true, data: user });
   } catch (error) {
     next(error);
@@ -145,19 +144,14 @@ export async function followUserProfileController(
     const followingId = req.params.id;
     const clerkId = req.auth().userId;
     if (!clerkId) throw AppError.unauthorized();
-
     const user = await getUserClerkIdService(clerkId);
     if (!user) throw AppError.notFound("User not found");
-
     if (user.id === followingId) {
       throw AppError.badRequest("Cannot follow yourself");
     }
-
     const targetUser = await getUserIdService(followingId as string);
     if (!targetUser) throw AppError.notFound("User to follow not found");
-
     await followUserProfileService(user.id, followingId as string);
-
     return res.status(HTTP_STATUS.CREATED).json({
       success: true,
       message: "Successfully followed user",
@@ -166,6 +160,8 @@ export async function followUserProfileController(
     next(error);
   }
 }
+
+
 
 export async function unfollowUserProfileController(
   req: Request,
