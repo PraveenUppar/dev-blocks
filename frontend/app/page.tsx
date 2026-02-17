@@ -103,22 +103,22 @@ Welcome to the Dev Blocks Community, a collaborative space for developers, engin
             </div>
 
             {/* Sort Tabs */}
-            <div className="flex gap-1 bg-gray-100 rounded-full p-1">
-              {sortTabs.map((tab) => (
-                <button
-                  key={tab.value}
-                  onClick={() => setSortBy(tab.value)}
-                  className={`px-5 py-2 rounded-full text-sm font-medium transition ${
-                    sortBy === tab.value
-                      ? "bg-gray-900 text-white"
-                      : "text-gray-600 hover:text-gray-900"
-                  }`}
-                  style={{ fontFamily: "var(--font-arimo)" }}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
+              <div className="flex gap-1 bg-gray-100 rounded-full p-1">
+                {sortTabs.map((tab) => (
+                  <button
+                    key={tab.value}
+                    onClick={() => setSortBy(tab.value)}
+                    className={`px-5 py-2 rounded-full text-sm font-medium transition ${
+                      sortBy === tab.value
+                        ? "bg-gray-900 text-white"
+                        : "text-gray-600 hover:text-gray-900"
+                    }`}
+                    style={{ fontFamily: "var(--font-arimo)" }}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
           </div>
         </div>
       </div>
@@ -128,7 +128,7 @@ Welcome to the Dev Blocks Community, a collaborative space for developers, engin
         {/* Post Feed */}
         <div className="space-y-0">
           {loading ? (
-            <div className=" mt-10 bg-gray-50 flex flex-col items-center justify-center gap-4" style={{ fontFamily: "var(--font-mozilla-text)" }}>
+            <div className=" mt-10 min-h-[300px]  bg-gray-50 flex flex-col items-center justify-center gap-4" style={{ fontFamily: "var(--font-mozilla-text)" }}>
         <div className="w-8 h-8 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin" />
         <span className="text-gray-600 text-lg">Loading posts...</span>
       </div>

@@ -204,7 +204,7 @@ function WritePageContent() {
             className="px-6 py-2 text-gray-700 border cursor-pointer border-gray-300 rounded-full hover:bg-gray-50 transition"
           >
             
-            {draftId ? "Back to Drafts" : "Cancel"}
+            Home
           </button>
 
           <div className="flex gap-3">
@@ -212,7 +212,7 @@ function WritePageContent() {
               <button
                 onClick={() => setShowDeleteModal(true)}
                 disabled={saving}
-                className="px-4 py-2 text-red-600 hover:bg-red-50 cursor-pointer  rounded-full transition disabled:opacity-50"
+                className="px-4 py-2 text-red-600 bg-red-50 hover:bg-red-100 cursor-pointer  rounded-full transition disabled:opacity-50"
               >
                 Delete
               </button>
