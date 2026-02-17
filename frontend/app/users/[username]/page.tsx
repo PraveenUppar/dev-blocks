@@ -9,6 +9,10 @@ import { User, Post } from "../../../types/index";
 import PostCard from "../../components/PostCard";
 import { FiGlobe, FiGithub, FiLinkedin } from "react-icons/fi";
 import { FaXTwitter } from "react-icons/fa6";
+import { FaUserPlus } from 'react-icons/fa';
+import { FaBeer } from "react-icons/fa"
+
+
 
 type TabType = "posts" | "followers" | "following";
 
@@ -33,7 +37,6 @@ interface PaginatedResponse<T> {
 interface ApiResponse<T> {
   success: boolean;
   data: T;
-  // optional pagination might be inside data for non-paginated endpoints
 }
 
 export default function UserPage() {
@@ -83,7 +86,7 @@ export default function UserPage() {
         if (!cancelled) setLoading(false);
       }
     };
-
+    window.scrollTo(0, 0)
     fetchUser();
     return () => {
       cancelled = true;
@@ -179,20 +182,29 @@ export default function UserPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-600"></div>
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-4" style={{ fontFamily: "var(--font-mozilla-text)" }}>
+        <div className="w-8 h-8 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin" />
+        <span className="text-gray-600 text-lg">Loading User...</span>
       </div>
     );
   }
 
   if (error || !user) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen text-center px-4">
-        <h1 className="text-2xl font-bold mb-2">User not found</h1>
-        <p className="text-gray-600">
-          {error || "The user you are looking for does not exist."}
-        </p>
-      </div>
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="bg-gray-100 p-6 rounded-full mb-6">
+              <FaUserPlus className="w-12 h-12 text-gray-400" />
+            </div>
+            <h2 
+              className="text-2xl font-bold text-gray-900 mb-2" 
+              style={{ fontFamily: "var(--font-raleway)" }}
+            >
+              User not found
+            </h2>
+            <p className="text-gray-500" style={{ fontFamily: "var(--font-raleway)" }}>
+              {error || "The user you are looking for does not exist."}
+            </p>
+          </div>
     );
   }
 
@@ -202,10 +214,10 @@ export default function UserPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 ">
-      <div className="container min-h-screen mx-auto px-4 py-8 max-w-7xl border-l border-r border-gray-500 ">
+      <div className="container  min-h-screen mx-auto px-4 py-8 max-w-7xl border-l border-r border-gray-500 ">
         {/* Profile Header */}
-        <div className="flex flex-col md:flex-row items-start text-black md:items-center gap-6 mb-8">
-          <div className="relative w-24 h-24  md:w-32 md:h-32 rounded-full overflow-hidden border-2 border-gray-600">
+        <div className="flex md:flex-row  items-start text-black md:items-center gap-6 mb-8">
+          <div className="relative w-24 h-24  md:w-32 md:h-32 rounded-full overflow-hidden border-2 border-green-600">
             {user.avatar ? (
               <Image
                 src={user.avatar}
@@ -223,13 +235,13 @@ export default function UserPage() {
           <div className="flex-1">
             <h1
               className="text-3xl font-bold mb-1"
-              style={{ fontFamily: "var(--font-montserrat)" }}
+style={{ fontFamily: "var(--font-arimo)" }}
             >
               {user.name}
             </h1>
             <p
               className="text-lg text-gray-600 mb-2"
-              style={{ fontFamily: "var(--font-montserrat)" }}
+              style={{ fontFamily: "var(--font-mozilla-text)" }}
             >
               @{user.username}
             </p>
@@ -237,7 +249,7 @@ export default function UserPage() {
             {user.bio && (
               <p
                 className="text-base mb-4 max-w-2xl"
-                style={{ fontFamily: "var(--font-arimo)" }}
+                style={{ fontFamily: "var(--font-mozilla-text)" }}
               >
                 {user.bio}
               </p>
@@ -245,43 +257,43 @@ export default function UserPage() {
 
             {/* Social Links */}
             {(user.website || user.twitter || user.github || user.linkedin) && (
-              <div className="flex gap-4 mt-4">
+              <div className="flex gap-2 mt-4">
                 {user.website && (
                   <a
                     href={user.website}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className=" cursor-pointer  p-1 border border-gray-900"
+                    className=" cursor-pointer rounded-full p-2 border border-gray-500 hover:bg-gray-200 "
                   >
                     <FiGlobe className="w-4 h-4" />
                   </a>
                 )}
                 {user.twitter && (
                   <a
-                    href={`https://twitter.com/${user.twitter}`}
+                    href={user.twitter}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className=" cursor-pointer p-1 border border-gray-900"
+                    className=" cursor-pointer rounded-full p-2 border border-gray-500 hover:bg-gray-200 "
                   >
                     <FaXTwitter className="w-4 h-4" />
                   </a>
                 )}
                 {user.github && (
                   <a
-                    href={`https://github.com/${user.github}`}
+                    href={user.github}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className=" cursor-pointer p-1 border border-gray-900"
+                    className=" cursor-pointer rounded-full p-2 border border-gray-500 hover:bg-gray-200 "
                   >
                     <FiGithub className="w-4 h-4" />
                   </a>
                 )}
                 {user.linkedin && (
                   <a
-                    href={`https://linkedin.com/in/${user.linkedin}`}
+                    href={user.linkedin}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className=" cursor-pointer p-1 border border-gray-900"
+                    className=" cursor-pointer rounded-full p-2 border border-gray-500 hover:bg-gray-200 "
                   >
                     <FiLinkedin className="w-4 h-4" />
                   </a>
@@ -324,15 +336,24 @@ export default function UserPage() {
           {activeTab === "posts" && (
             <>
               {postsLoading ? (
-                <div className="flex justify-center p-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-600"></div>
-                </div>
+                <div className="mt-10 bg-gray-50 flex flex-col items-center justify-center gap-4" style={{ fontFamily: "var(--font-mozilla-text)" }}>
+        <div className="w-8 h-8 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin" />
+        <span className="text-gray-600 text-lg">Loading posts...</span>
+      </div>
               ) : posts.length > 0 ? (
                 posts.map((post) => <PostCard key={post.id} post={post} />)
               ) : (
-                <div className="p-8 text-center border border-dashed border-gray-300 rounded-lg text-gray-600">
-                  No posts yet.
-                </div>
+                <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="bg-gray-100 p-6 rounded-full mb-6">
+              <FaBeer className="w-12 h-12 text-gray-400" />
+            </div>
+            <h2 
+              className="text-2xl font-bold text-gray-900 mb-2" 
+              style={{ fontFamily: "var(--font-raleway)" }}
+            >
+              No posts yet
+            </h2>
+          </div>
               )}
             </>
           )}
@@ -341,9 +362,10 @@ export default function UserPage() {
           {activeTab === "followers" && (
             <>
               {followersLoading ? (
-                <div className="flex justify-center p-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-600"></div>
-                </div>
+                <div className="mt-10 bg-gray-50 flex flex-col items-center justify-center gap-4" style={{ fontFamily: "var(--font-mozilla-text)" }}>
+        <div className="w-8 h-8 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin" />
+        <span className="text-gray-600 text-lg">Loading followers...</span>
+      </div>
               ) : followers.length > 0 ? (
                 <>
                   <div className="space-y-4">
@@ -385,7 +407,7 @@ export default function UserPage() {
 
                   {/* Pagination */}
                   {followersPagination.totalPages > 1 && (
-                    <div className="flex justify-center items-center gap-4 mt-6">
+          <div className="flex justify-center items-center gap-4 mt-8 sm:mt-12">
                       <button
                         onClick={() =>
                           fetchFollowers(
@@ -393,11 +415,14 @@ export default function UserPage() {
                           )
                         }
                         disabled={followersPagination.page === 1}
-                        className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                      >
+              className="px-6 py-2 border border-gray-600 rounded-full cursor-pointer text-gray-900 text-sm hover:bg-gray-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                             style={{ fontFamily: "var(--font-montserrat)" }}
+
+ >
                         Previous
                       </button>
-                      <span className="text-gray-600">
+                      <span className="text-sm text-gray-900"               style={{ fontFamily: "var(--font-montserrat)" }}
+>
                         Page {followersPagination.page} of{" "}
                         {followersPagination.totalPages}
                       </span>
@@ -414,17 +439,27 @@ export default function UserPage() {
                           followersPagination.page ===
                           followersPagination.totalPages
                         }
-                        className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                      >
+              className="px-6 py-2 border border-gray-300 rounded-full cursor-pointer text-gray-700 text-sm hover:bg-gray-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                              style={{ fontFamily: "var(--font-montserrat)" }}
+
+  >
                         Next
                       </button>
                     </div>
                   )}
                 </>
               ) : (
-                <div className="p-8 text-center border border-dashed border-gray-300 rounded-lg text-gray-600">
-                  No followers yet.
-                </div>
+                <div className="flex flex-col items-center justify-center py-20 text-center">
+                            <div className="bg-gray-100 p-6 rounded-full mb-6">
+                              <FaUserPlus className="w-12 h-12 text-gray-400" />
+                            </div>
+                            <h2 
+                              className="text-2xl font-bold text-gray-900 mb-2" 
+                              style={{ fontFamily: "var(--font-raleway)" }}
+                            >
+                              No Followers yet
+                            </h2>
+                        </div>
               )}
             </>
           )}
@@ -433,9 +468,10 @@ export default function UserPage() {
           {activeTab === "following" && (
             <>
               {followingLoading ? (
-                <div className="flex justify-center p-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-600"></div>
-                </div>
+                <div className="mt-10 bg-gray-50 flex flex-col items-center justify-center gap-4" style={{ fontFamily: "var(--font-mozilla-text)" }}>
+        <div className="w-8 h-8 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin" />
+        <span className="text-gray-600 text-lg">Loading Following...</span>
+      </div>
               ) : following.length > 0 ? (
                 <>
                   <div className="space-y-4">
@@ -512,9 +548,17 @@ export default function UserPage() {
                   )}
                 </>
               ) : (
-                <div className="p-8 text-center border border-dashed border-gray-300 rounded-lg text-gray-600">
-                  Not following anyone yet.
-                </div>
+                <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="bg-gray-100 p-6 rounded-full mb-6">
+              <FaUserPlus className="w-12 h-12 text-gray-400" />
+            </div>
+            <h2 
+              className="text-2xl font-bold text-gray-900 mb-2" 
+              style={{ fontFamily: "var(--font-raleway)" }}
+            >
+              No Following yet
+            </h2>
+          </div>
               )}
             </>
           )}

@@ -72,7 +72,7 @@ export default function Home() {
               className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6 tracking-tight"
               style={{ fontFamily: "var(--font-montserrat)" }}
             >
-              THE DEV BLOCKS
+              DEV BLOCKS
             </h1>
             <p
               className="text-base sm:text-lg text-gray-700 max-w-3xl mx-auto leading-relaxed"

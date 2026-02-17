@@ -187,8 +187,9 @@ function WritePageContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-gray-500" style={{ fontFamily: "var(--font-montserrat)" }}>Loading draft...</div>
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-4" style={{ fontFamily: "var(--font-mozilla-text)" }}>
+        <div className="w-8 h-8 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin" />
+        <span className="text-gray-600 text-lg">Loading draft post...</span>
       </div>
     );
   }
