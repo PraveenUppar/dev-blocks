@@ -298,8 +298,8 @@ function WritePageContent() {
             }{" "}
             words
           </div>
-           <div className={`${content.length > 10000 ? 'text-red-500' : ''}`}>
-            {content.length}/10000 characters
+           <div className={`${content.length > 20000 ? 'text-red-500' : ''}`}>
+            {content.length}/20000 characters
           </div>
         </div>
       </div>
