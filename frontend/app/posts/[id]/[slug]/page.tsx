@@ -316,9 +316,6 @@ export default function PostPage() {
                         Follow
                       </button>
                     </div>
-                    <p className="text-gray-600 mt-3 text-sm sm:text-base leading-relaxed">
-                      {post.author.bio}
-                    </p>
                   </div>
                 </div>
               </div>

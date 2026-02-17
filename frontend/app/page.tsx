@@ -128,14 +128,15 @@ Welcome to the Dev Blocks Community, a collaborative space for developers, engin
         {/* Post Feed */}
         <div className="space-y-0">
           {loading ? (
-            <div className="text-center py-12 text-gray-500">
-              <p style={{ fontFamily: "var(--font-montserrat)" }}>Loading posts...</p>
-            </div>
+            <div className=" mt-10 bg-gray-50 flex flex-col items-center justify-center gap-4" style={{ fontFamily: "var(--font-mozilla-text)" }}>
+        <div className="w-8 h-8 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin" />
+        <span className="text-gray-600 text-lg">Loading posts...</span>
+      </div>
           ) : posts.length > 0 ? (
             posts.map((post) => <PostCard key={post.id} post={post} />)
           ) : (
-            <div className="text-center py-12 text-gray-500">
-              <p style={{ fontFamily: "var(--font-montserrat)" }}>
+            <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-4" style={{ fontFamily: "var(--font-montserrat)" }}>
+              <p className="text-gray-600 text-lg">
                 {search ? `No posts found for "${search}"` : "No posts yet. Be the first to write one!"}
               </p>
             </div>

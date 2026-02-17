@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import api from "@/lib/axios";
 import { setAuthTokenGetter } from "@/lib/axios";
 import { toast } from "react-toastify";
+import {   FiSettings,
+ } from "react-icons/fi";
 
 interface UserProfile {
   id: string;
@@ -107,8 +109,9 @@ export default function Settings() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-gray-500">Loading settings...</div>
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-4" style={{ fontFamily: "var(--font-mozilla-text)" }}>
+        <div className="w-8 h-8 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin" />
+        <span className="text-gray-600 text-lg">Loading settings...</span>
       </div>
     );
   }
@@ -117,47 +120,39 @@ export default function Settings() {
     <div className="min-h-screen bg-gray-50 ">
       <div className="max-w-7xl mx-auto px-4 py-8 border-l border-r  border-gray-500">
         {/* Header */}
-        <div className="mb-8">
-          <button
-            onClick={() => router.back()}
-            className="text-gray-600 hover:text-gray-900 flex items-center gap-2 mb-4"
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
-            Back
-          </button>
-          <h1 className="text-4xl font-bold text-gray-900">Settings</h1>
-          <p className="text-gray-600 mt-2">
-            Manage your account settings and profile information
-          </p>
-        </div>
+        <div className=" border-gray-200 pb-8">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="p-3 bg-gray-200 rounded-full">
+                      <FiSettings className="w-6 h-6 text-gray-700" />
+                    </div>
+                    <div>
+                      <h1 className="text-3xl font-bold text-gray-900" style={{ fontFamily: "var(--font-mozilla-text)" }}>
+                        Account Settings
+                      </h1>
+                      <p className="text-gray-600 text-sm mt-1" style={{ fontFamily: "var(--font-montserrat)" }}>
+                        Manage your account settings and profile information
+                      </p>
+                    </div>
+                  </div>
+                </div>
 
 
 
         {/* Settings Form */}
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm">
+        <form onSubmit={handleSubmit} className="bg-gray-50 ">
           {/* Profile Picture Section */}
 
           {/* Basic Information */}
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+          <div className="p-6 border-b border-t border-gray-400">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4"               style={{ fontFamily: "var(--font-raleway)" }}
+>
               Basic Information
             </h2>
             <div className="space-y-4">
               {/* Name */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2"             style={{ fontFamily: "var(--font-arimo)" }}
+>
                   Name <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -166,13 +161,13 @@ export default function Settings() {
                   onChange={(e) => handleInputChange("name", e.target.value)}
                   placeholder="Your full name"
                   required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                  className="w-full text-gray-700 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
                 />
               </div>
 
               {/* Username (Read-only) */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "var(--font-raleway)" }}>
                   Username
                 </label>
                 <input
@@ -181,14 +176,15 @@ export default function Settings() {
                   disabled
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
                 />
-                <p className="text-sm text-gray-500 mt-1">
-                  Username cannot be changed
+                <p className="text-sm text-gray-500 mt-1"             style={{ fontFamily: "var(--font-armio)" }}
+>
+                  Username managed by authentication provider
                 </p>
               </div>
 
               {/* Email (Read-only) */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "var(--font-raleway)" }}>
                   Email
                 </label>
                 <input
@@ -197,24 +193,27 @@ export default function Settings() {
                   disabled
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
                 />
-                <p className="text-sm text-gray-500 mt-1">
-                  Email is managed by your authentication provider
+                <p className="text-sm text-gray-500 mt-1"             style={{ fontFamily: "var(--font-armio)" }}
+>
+                  Email managed by authentication provider
                 </p>
               </div>
 
               {/* Bio */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "var(--font-raleway)" }}>
                   Bio
                 </label>
                 <textarea
+                  style={{ fontFamily: "var(--font-armio)" }}
                   value={profile.bio || ""}
                   onChange={(e) => handleInputChange("bio", e.target.value)}
                   placeholder="Tell us about yourself..."
                   rows={4}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none resize-none"
+                  className="w-full px-4 py-2 border text-gray-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none resize-none"
                 />
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-gray-500 mt-1"             style={{ fontFamily: "var(--font-armio)" }}
+>
                   Brief description for your profile (max 160 characters)
                 </p>
               </div>
@@ -222,14 +221,15 @@ export default function Settings() {
           </div>
 
           {/* Social Links */}
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+          <div className="p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4" style={{ fontFamily: "var(--font-raleway)" }}>
               Social Links
             </h2>
             <div className="space-y-4">
               {/* Website */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2"             style={{ fontFamily: "var(--font-armio)" }}
+>
                   Website
                 </label>
                 <input
@@ -237,19 +237,17 @@ export default function Settings() {
                   value={profile.website || ""}
                   onChange={(e) => handleInputChange("website", e.target.value)}
                   placeholder="https://yourwebsite.com"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                  className="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
                 />
               </div>
 
               {/* Twitter */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2"             style={{ fontFamily: "var(--font-armio)" }}
+>
                   Twitter
                 </label>
                 <div className="flex">
-                  <span className="inline-flex items-center px-3 text-gray-600 bg-gray-100 border border-r-0 border-gray-300 rounded-l-lg">
-                    @
-                  </span>
                   <input
                     type="text"
                     value={profile.twitter || ""}
@@ -257,20 +255,18 @@ export default function Settings() {
                       handleInputChange("twitter", e.target.value)
                     }
                     placeholder="username"
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                    className="flex-1 px-4 py-2 text-gray-700 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
                   />
                 </div>
               </div>
 
               {/* GitHub */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2"             style={{ fontFamily: "var(--font-armio)" }}
+>
                   GitHub
                 </label>
                 <div className="flex">
-                  <span className="inline-flex items-center px-3 text-gray-600 bg-gray-100 border border-r-0 border-gray-300 rounded-l-lg">
-                    github.com/
-                  </span>
                   <input
                     type="text"
                     value={profile.github || ""}
@@ -278,20 +274,18 @@ export default function Settings() {
                       handleInputChange("github", e.target.value)
                     }
                     placeholder="username"
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                    className="flex-1 px-4 py-2 text-gray-700 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
                   />
                 </div>
               </div>
 
               {/* LinkedIn */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2"             style={{ fontFamily: "var(--font-armio)" }}
+>
                   LinkedIn
                 </label>
                 <div className="flex">
-                  <span className="inline-flex items-center px-3 text-gray-600 bg-gray-100 border border-r-0 border-gray-300 rounded-l-lg">
-                    linkedin.com/in/
-                  </span>
                   <input
                     type="text"
                     value={profile.linkedin || ""}
@@ -299,7 +293,7 @@ export default function Settings() {
                       handleInputChange("linkedin", e.target.value)
                     }
                     placeholder="username"
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                    className="flex-1 px-4 py-2 text-gray-700 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
                   />
                 </div>
               </div>
