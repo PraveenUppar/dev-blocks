@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
 import {
-  Geist,
-  Geist_Mono,
+
   Mrs_Sheppards,
-  Google_Sans_Code,
   Montserrat,
   Arimo,
   Raleway,
+  Mozilla_Text
 } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
@@ -14,27 +13,12 @@ import Navbar from "./components/Navbar";
 import AuthSetup from "./components/AuthSetup";
 import ToastProvider from "./components/ToastProvider";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 const mrsSheppards = Mrs_Sheppards({
   weight: "400",
   variable: "--font-mrs-sheppards",
   subsets: ["latin"],
 });
 
-const googleSansCode = Google_Sans_Code({
-  weight: "300",
-  variable: "--font-google-sans-code",
-  subsets: ["latin"],
-});
 
 const montserrat = Montserrat({
   weight: "400",
@@ -54,6 +38,12 @@ const raleway = Raleway({
   subsets: ["latin"],
 });
 
+const mozillaText = Mozilla_Text({
+  weight: "400",
+  variable: "--font-mozilla-text",
+  subsets: ["latin"],
+});
+
 export const metadata: Metadata = {
   title: "Dev Blocks",
   description: "A Medium-like blogging platform",
@@ -68,7 +58,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body
-          className={`${geistSans.variable} ${geistMono.variable} ${mrsSheppards.variable} ${googleSansCode.variable} ${montserrat.variable} ${arimo.variable} ${raleway.variable} bg-gray-50`}
+          className={`${mrsSheppards.variable}  ${montserrat.variable} ${arimo.variable} ${raleway.variable} ${mozillaText.variable} bg-gray-50`}
         >
           <AuthSetup />
           <Navbar />

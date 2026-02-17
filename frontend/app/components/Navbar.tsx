@@ -11,6 +11,8 @@ import {
   FiSettings,
   FiMenu,
   FiUser,
+  FiBell
+  
 } from "react-icons/fi";
 
 export default function Navbar() {
@@ -33,49 +35,49 @@ export default function Navbar() {
 
           {/* Desktop Menu options - Hidden on mobile */}
           {isSignedIn && (
-            <div className="hidden md:flex items-center gap-8">
+            <div className="hidden md:flex items-center gap-8" style={{ fontFamily: "var(--font-mozilla-text)" }}>
              
               <Link
                 href="/write"
-                className="text-md font-medium text-gray-700 hover:text-gray-900 transition"
-                style={{ fontFamily: "var(--font-montserrat)" }}
+                className="text-md font-medium text-gray-900 hover:text-gray-900 transition"
               >
                 Write
               </Link>
               <Link
                 href="/drafts"
-                className="text-md font-medium text-gray-700 hover:text-gray-900 transition"
-                style={{ fontFamily: "var(--font-montserrat)" }}
+                className="text-md font-medium text-gray-900 hover:text-gray-900 transition"
               >
                 Drafts
               </Link>
               <Link
                 href="/bookmarks"
-                className="text-md font-medium text-gray-700 hover:text-gray-900 transition"
-                style={{ fontFamily: "var(--font-montserrat)" }}
+                className="text-md font-medium text-gray-900 hover:text-gray-900 transition"
               >
                 Bookmarks
               </Link>
               <Link
                 href="/history"
-                className="text-md font-medium text-gray-700 hover:text-gray-900 transition"
-                style={{ fontFamily: "var(--font-montserrat)" }}
+                className="text-md font-medium text-gray-900 hover:text-gray-900 transition"
               >
                 Reading History
               </Link>
                <Link
                 href="/profile"
-                className="text-md font-medium text-gray-700 hover:text-gray-900 transition"
-                style={{ fontFamily: "var(--font-montserrat)" }}
+                className="text-md font-medium text-gray-900 hover:text-gray-900 transition"
               >
                 Profile
               </Link>
               <Link
                 href="/settings"
-                className="text-md font-medium text-gray-700 hover:text-gray-900 transition"
-                style={{ fontFamily: "var(--font-montserrat)" }}
+                className="text-md font-medium text-gray-900 hover:text-gray-900 transition"
               >
                 Settings
+              </Link>
+              <Link
+                href="/notifications"
+                className="text-md font-medium text-gray-900 hover:text-gray-900 transition"
+              >
+                Notifications
               </Link>
             </div>
           )}
@@ -91,7 +93,7 @@ export default function Navbar() {
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   className="md:hidden rounded-md flex gap-2 bg-white px-3 py-2 text-sm items-center text-black border border-gray-300 hover:bg-gray-50"
-                  style={{ fontFamily: "var(--font-montserrat)" }}
+                  style={{ fontFamily: "var(--font-mozilla-text)" }}
                 >
                   <FiMenu className="h-5 w-5" />
                   Menu
@@ -110,7 +112,7 @@ export default function Navbar() {
               <SignInButton mode="modal">
                 <button
                   className="bg-gray-200 text-black px-4 py-2 rounded-full cursor-pointer"
-                  style={{ fontFamily: "var(--font-google-sans-code)" }}
+                  style={{ fontFamily: "var(--font-mozilla-text)" }}
                 >
                   Get started
                 </button>
@@ -181,6 +183,14 @@ export default function Navbar() {
                 >
                   <FiSettings className="h-5 w-5 text-gray-500" />
                   Settings
+                </Link>
+                <Link
+                  href="/notifications"
+                  className="flex gap-2 px-4 py-2 text-md items-center text-gray-900 cursor-pointer hover:bg-gray-100 rounded-md"
+                  onClick={() => setIsDropdownOpen(false)}
+                >
+                  <FiBell className="h-5 w-5 text-gray-500" />
+                  Notifications
                 </Link>
               </div>
             </div>

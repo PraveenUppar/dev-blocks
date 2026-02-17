@@ -148,13 +148,13 @@ Welcome to the Dev Blocks Community, a collaborative space for developers, engin
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={!pagination.hasPrevPage}
-              className="px-6 py-2 border border-gray-300 rounded-full cursor-pointer text-gray-700 text-sm hover:bg-gray-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
+              className="px-6 py-2 border border-gray-600 rounded-full cursor-pointer text-gray-900 text-sm hover:bg-gray-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
               style={{ fontFamily: "var(--font-montserrat)" }}
             >
               Previous
             </button>
             <span
-              className="text-sm text-gray-500"
+              className="text-sm text-gray-900"
               style={{ fontFamily: "var(--font-montserrat)" }}
             >
               Page {pagination.page} of {pagination.totalPages}
@@ -162,7 +162,7 @@ Welcome to the Dev Blocks Community, a collaborative space for developers, engin
             <button
               onClick={() => setPage((p) => p + 1)}
               disabled={!pagination.hasNextPage}
-              className="px-6 py-2 border border-gray-300 rounded-full cursor-pointer text-gray-700 text-sm hover:bg-gray-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
+              className="px-6 py-2 border border-gray-600 rounded-full cursor-pointer text-gray-900 text-sm hover:bg-gray-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
               style={{ fontFamily: "var(--font-montserrat)" }}
             >
               Next

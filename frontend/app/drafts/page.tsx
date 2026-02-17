@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-// import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import api from "@/lib/axios";
+import { MdDrafts } from 'react-icons/md';
 import { setAuthTokenGetter } from "@/lib/axios";
 
 // Define how post object should look like
@@ -91,8 +91,9 @@ export default function DraftsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-500">Loading drafts...</div>
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-4" style={{ fontFamily: "var(--font-mozilla-text)" }}>
+        <div className="w-8 h-8 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin" />
+        <span className="text-gray-600 text-lg">Loading your saved drafts...</span>
       </div>
     );
   }
@@ -101,44 +102,51 @@ export default function DraftsPage() {
     <div className="min-h-screen bg-gray-50 ">
       <div className="min-h-screen max-w-7xl mx-auto px-4 py-8 border-l border-r border-gray-500">
         {/* Header */}
-        <div className="mb-8">
-          <h1
-            className="text-4xl font-bold text-gray-900 mb-2"
-            style={{ fontFamily: "var(--font-montserrat)" }}
-          >
-            Saved Drafts
-          </h1>
-          <p
-            className="text-gray-600"
-            style={{ fontFamily: "var(--font-montserrat)" }}
-          >
-            [{pagination.total} {pagination.total === 1 ? "draft" : "drafts"}]
-          </p>
-        </div>
+        <div className=" border-gray-200 pb-8">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="p-3 bg-gray-200 rounded-full">
+                      <MdDrafts className="w-6 h-6 text-gray-700" />
+                    </div>
+                    <div>
+                      <h1 className="text-3xl font-bold text-gray-900" style={{ fontFamily: "var(--font-mozilla-text)" }}>
+                        Saved Drafts
+                      </h1>
+                      <p className="text-gray-600 text-sm mt-1" style={{ fontFamily: "var(--font-montserrat)" }}>
+                        Manage your saved drafts for later edits.
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <span className="px-3 py-1 bg-gray-200 text-gray-800 rounded-full text-xs font-medium uppercase tracking-wide" style={{ fontFamily: "var(--font-arimo)" }}>
+                      {pagination.total} {pagination.total === 1 ? "draft" : "drafts"} saved
+                    </span>
+                  </div>
+                </div>
 
         {/* Empty State */}
         {drafts.length === 0 ? (
-          <div className="text-center py-16">
-            <h2
-              className="text-2xl font-semibold text-gray-700 mb-2"
-                style={{ fontFamily: "var(--font-montserrat)" }}
-            >
-              No drafts yet
-            </h2>
-            <p
-              className="text-gray-500 mb-6"
-                style={{ fontFamily: "var(--font-montserrat)" }}
-            >
-              Start writing to create your first draft
-            </p>
-            <button
-              onClick={() => router.push("/write")}
-              className="px-6 py-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition cursor-pointer"                style={{ fontFamily: "var(--font-montserrat)" }}
-
-            >
-              Start Writing
-            </button>
-          </div>
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+                      <div className="bg-gray-100 p-6 rounded-full mb-6">
+                        <MdDrafts className="w-12 h-12 text-gray-400" />
+                      </div>
+                      <h2 
+                        className="text-2xl font-bold text-gray-900 mb-2" 
+                        style={{ fontFamily: "var(--font-raleway)" }}
+                      >
+                        No drafts saved yet
+                      </h2>
+                      <p className="text-gray-500" style={{ fontFamily: "var(--font-raleway)" }}>
+                        Start writing to create your first draft.
+                      </p>
+                      <button
+                        onClick={() => router.push("/write")}
+                        className="px-6 py-2 mt-3 bg-green-600 text-white rounded-full hover:bg-green-700 transition cursor-pointer"                style={{ fontFamily: "var(--font-montserrat)" }}
+          
+                      >
+                        Start Writing
+                      </button>
+                    </div>
         ) : (
           <>
             {/* Drafts Grid */}
@@ -154,27 +162,27 @@ export default function DraftsPage() {
                     <div className="flex-1">
                       <h2
                         className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-500 transition"
-                        style={{ fontFamily: "var(--font-montserrat)" }}
+                        style={{ fontFamily: "var(--font-arimo)" }}
                       >
                         {draft.title}
                       </h2>
                       {draft.subtitle && (
                         <p
                           className="text-lg text-gray-600 mb-3"
-                          style={{ fontFamily: "var(--font-arimo)" }}
+            style={{ fontFamily: "var(--font-arimo)" }}
                         >
                           {draft.subtitle}
                         </p>
                       )}
                       <p
                         className="text-gray-700 mb-4 line-clamp-2"
-                        style={{ fontFamily: "var(--font-montserrat)" }}
+            style={{ fontFamily: "var(--font-arimo)" }}
                       >
                         {getContentPreview(draft.content)}
                       </p>
                       <div
                         className="flex items-center gap-4 text-sm text-gray-500"
-                        style={{ fontFamily: "var(--font-montserrat)" }}
+            style={{ fontFamily: "var(--font-arimo)" }}
                       >
                         <span>Last edited {formatDate(draft.updatedAt)}</span>
                         <span>•</span>
@@ -189,19 +197,6 @@ export default function DraftsPage() {
                         </span>
                       </div>
                     </div>
-
-                    {/* Cover Image
-                    {draft.coverImage && (
-                      <div className="shrink-0">
-                        <Image
-                          src={draft.coverImage}
-                          width={160}
-                          height={120}
-                          alt={draft.title}
-                          className="w-40 h-30 object-cover rounded-lg"
-                        />
-                      </div>
-                    )} */}
                   </div>
                 </div>
               ))}
@@ -209,17 +204,19 @@ export default function DraftsPage() {
 
             {/* Pagination */}
             {pagination.totalPages > 1 && (
-              <div className="flex justify-center items-center gap-4">
+          <div className="flex justify-center items-center gap-4 mt-8 sm:mt-12">
                 <button
                   onClick={() =>
                     setCurrentPage((prev) => Math.max(1, prev - 1))
                   }
                   disabled={currentPage === 1}
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  className="px-6 py-2 border border-gray-600 rounded-full cursor-pointer text-gray-900 text-sm hover:bg-gray-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
+              style={{ fontFamily: "var(--font-montserrat)" }}
                 >
                   Previous
                 </button>
-                <span className="text-gray-600">
+                <span  className="text-sm text-gray-900"
+              style={{ fontFamily: "var(--font-montserrat)" }}>
                   Page {currentPage} of {pagination.totalPages}
                 </span>
                 <button
@@ -229,7 +226,9 @@ export default function DraftsPage() {
                     )
                   }
                   disabled={currentPage === pagination.totalPages}
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+              className="px-6 py-2 border border-gray-600 rounded-full cursor-pointer text-gray-900 text-sm hover:bg-gray-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                            style={{ fontFamily: "var(--font-montserrat)" }}
+
                 >
                   Next
                 </button>
