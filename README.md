@@ -16,7 +16,7 @@ graph TD
     Backend -->|Queries| DB[(PostgreSQL Database)]
 ```
 
-## 💾 Database Schema
+## Database Schema
 
 ![Database Schema](docs/schema.png)
 
