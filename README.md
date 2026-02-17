@@ -66,7 +66,9 @@ erDiagram
 
 | User Profile | Bookmarks | Drafts |
 |:---:|:---:|:---:|
-| ![Account](docs/account.png) | ![Bookmarks](docs/bookmark.png) | ![Drafts](docs/drafts.png) |## Features
+| ![Account](docs/account.png) | ![Bookmarks](docs/bookmark.png) | ![Drafts](docs/drafts.png) |
+
+## Features
 
 - **User Authentication:** Secure login and signup via Clerk.
 - **Rich Text Editor:** WYSIWYG editor for creating formatting posts (TipTap).
