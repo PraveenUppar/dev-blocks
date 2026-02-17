@@ -13,7 +13,6 @@ Priority - Medium - [Need claude]
 Priority - Low
 - soc of middleware validation of schema 
 - inform user about api limit
-- backend shuts down after some time so when i restart it takes time to load fix
-- Readme 
+- backend shuts down after some time so when i restart it takes time to load fix 
 
 

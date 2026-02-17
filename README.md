@@ -58,6 +58,27 @@ erDiagram
     }
 ```
 
+## Screenshots
+
+| Home Page | Post View | Editor |
+|:---:|:---:|:---:|
+| ![Home](docs/home.png) | ![Post](docs/post.png) | ![Write](docs/write.png) |
+
+| User Profile | Bookmarks | Drafts |
+|:---:|:---:|:---:|
+| ![Account](docs/account.png) | ![Bookmarks](docs/bookmark.png) | ![Drafts](docs/drafts.png) |## Features
+
+- **User Authentication:** Secure login and signup via Clerk.
+- **Rich Text Editor:** WYSIWYG editor for creating formatting posts (TipTap).
+- **Post Management:** Create, edit, publish, delete, and archive posts.
+- **Draft System:** Auto-save drafts to work on later.
+- **Social Interactions:** Like, Bookmark, and Comment on posts.
+- **User Profiles:** Customizable profiles with bio, social links, and post history.
+- **Follow System:** Follow other authors to see their latest content.
+- **Reading History:** Track read articles and scroll depth.
+- **Search & Filtering:** Find posts by keywords or tags.
+- **Notifications:** Real-time alerts for likes, comments, and follows.
+
 ## Tech Stack
 
 ### Frontend
@@ -85,19 +106,6 @@ erDiagram
 ### Hosting 
 - **Frontend:** Vercel 
 - **Backend:** Render
-
-## Features
-
-- **User Authentication:** Secure login and signup via Clerk.
-- **Rich Text Editor:** WYSIWYG editor for creating formatting posts (TipTap).
-- **Post Management:** Create, edit, publish, delete, and archive posts.
-- **Draft System:** Auto-save drafts to work on later.
-- **Social Interactions:** Like, Bookmark, and Comment on posts.
-- **User Profiles:** Customizable profiles with bio, social links, and post history.
-- **Follow System:** Follow other authors to see their latest content.
-- **Reading History:** Track read articles and scroll depth.
-- **Search & Filtering:** Find posts by keywords or tags.
-- **Notifications:** Real-time alerts for likes, comments, and follows.
 
 ## Getting Started
 
