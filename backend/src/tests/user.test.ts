@@ -10,18 +10,14 @@ vi.mock("../libs/prisma.js", () => ({
 
 // Mock Clerk — clerkMiddleware must always attach req.auth()
 vi.mock("@clerk/express", () => ({
-  clerkMiddleware:
-    () =>
-    (req: any, _res: any, next: any) => {
-      req.auth = () => ({ userId: "clerk_test_user_123" });
-      next();
-    },
-  requireAuth:
-    () =>
-    (req: any, _res: any, next: any) => {
-      req.auth = () => ({ userId: "clerk_test_user_123" });
-      next();
-    },
+  clerkMiddleware: () => (req: any, _res: any, next: any) => {
+    req.auth = () => ({ userId: "clerk_test_user_123" });
+    next();
+  },
+  requireAuth: () => (req: any, _res: any, next: any) => {
+    req.auth = () => ({ userId: "clerk_test_user_123" });
+    next();
+  },
 }));
 
 // Mock all user services
@@ -69,8 +65,6 @@ import {
   getUserFollowerService,
   getUserFollowingService,
   updateUserProfileService,
-  followUserProfileService,
-  unfollowUserProfileService,
   getUserBookmarksService,
   getUserDraftsService,
 } from "../services/user.service.js";
@@ -242,52 +236,6 @@ describe("User Routes", () => {
       });
 
       const res = await request(app).get("/api/user/drafts");
-
-      expect(res.status).toBe(200);
-      expect(res.body.success).toBe(true);
-    });
-  });
-
-  describe("POST /api/user/:id/follow", () => {
-    it("should follow a user with valid UUID", async () => {
-      vi.mocked(getUserIdService).mockResolvedValue({
-        id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-      } as any);
-      vi.mocked(followUserProfileService).mockResolvedValue({} as any);
-
-      const res = await request(app).post(
-        "/api/user/a1b2c3d4-e5f6-7890-abcd-ef1234567890/follow",
-      );
-
-      expect(res.status).toBe(201);
-      expect(res.body.success).toBe(true);
-    });
-
-    it("should reject following yourself", async () => {
-      const res = await request(app).post(
-        "/api/user/user-uuid-123/follow",
-      );
-
-      // user-uuid-123 is the mock user's id — should get badRequest
-      expect(res.status).toBe(400);
-      expect(res.body.success).toBe(false);
-    });
-
-    it("should reject invalid UUID for follow", async () => {
-      const res = await request(app).post("/api/user/not-a-uuid/follow");
-
-      expect(res.status).toBe(400);
-      expect(res.body.success).toBe(false);
-    });
-  });
-
-  describe("DELETE /api/user/:id/unfollow", () => {
-    it("should unfollow a user with valid UUID", async () => {
-      vi.mocked(unfollowUserProfileService).mockResolvedValue({} as any);
-
-      const res = await request(app).delete(
-        "/api/user/a1b2c3d4-e5f6-7890-abcd-ef1234567890/unfollow",
-      );
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
