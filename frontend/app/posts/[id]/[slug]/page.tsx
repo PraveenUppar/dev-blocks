@@ -4,40 +4,34 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound, useParams } from "next/navigation";
 import { useState, useEffect } from "react";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 import api from "@/lib/axios";
 import { setAuthTokenGetter } from "@/lib/axios";
 import { Post } from "@/types";
 import { FiBookmark, FiHeart, FiMessageCircle } from "react-icons/fi";
 import { toast } from "react-toastify";
+import FollowButton from "@/app/components/FollowButton";
 
-
-const HeartIcon = ({
-  className,
-}: {
-  className?: string;
-}) => (
+const HeartIcon = ({ className }: { className?: string }) => (
   <FiHeart className={className} />
 );
 const CommentIcon = ({ className }: { className?: string }) => (
   <FiMessageCircle className={className} />
 );
-const BookmarkIcon = ({
-  className,
-}: {
-  className?: string;
-}) => (
+const BookmarkIcon = ({ className }: { className?: string }) => (
   <FiBookmark className={className} />
 );
 
 export default function PostPage() {
   const params = useParams();
   const { getToken, isSignedIn } = useAuth();
+  const { user: clerkUser } = useUser();
   const id = params.id as string;
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [isLiking, setIsLiking] = useState(false);
   const [isBookmarking, setIsBookmarking] = useState(false);
@@ -62,6 +56,7 @@ export default function PostPage() {
       setLikeCount(postData._count?.likes ?? 0);
       setIsLiked(postData.isLiked ?? false);
       setIsBookmarked(postData.isBookmarked ?? false);
+      setIsFollowing(postData.isFollowing ?? false);
     } catch (error) {
       console.error("Error fetching post:", error);
       setPost(null);
@@ -149,7 +144,10 @@ export default function PostPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-4" style={{ fontFamily: "var(--font-mozilla-text)" }}>
+      <div
+        className="min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-4"
+        style={{ fontFamily: "var(--font-mozilla-text)" }}
+      >
         <div className="w-8 h-8 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin" />
         <span className="text-gray-600 text-lg">Loading post...</span>
       </div>
@@ -164,18 +162,21 @@ export default function PostPage() {
     <div className="min-h-screen bg-gray-50 ">
       {/* Hero Section */}
       <div className="">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 border-l border-r border-gray-500">  
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 border-l border-r border-gray-500">
           {/* Title */}
           <h1
             className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 leading-tight "
-             style={{ fontFamily: "var(--font-arimo)" }}
+            style={{ fontFamily: "var(--font-arimo)" }}
           >
             {post.title}
           </h1>
 
           {/* Subtitle */}
           {post.subtitle && (
-            <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-6 leading-relaxed"  style={{ fontFamily: "var(--font-montserrat)" }}>
+            <p
+              className="text-base sm:text-lg md:text-xl text-gray-600 mb-6 leading-relaxed"
+              style={{ fontFamily: "var(--font-montserrat)" }}
+            >
               {post.subtitle}
             </p>
           )}
@@ -184,8 +185,8 @@ export default function PostPage() {
             {(post.tags || []).map((postTag: any) => (
               <span
                 key={postTag.slug}
-                className="px-3 py-1.5 text-xs sm:text-sm font-medium text-gray-900 bg-gray-100 border border-gray-300 rounded-md hover:bg-emerald-100 transition"            style={{ fontFamily: "var(--font-montserrat)" }}
-
+                className="px-3 py-1.5 text-xs sm:text-sm font-medium text-gray-900 bg-gray-100 border border-gray-300 rounded-md hover:bg-emerald-100 transition"
+                style={{ fontFamily: "var(--font-montserrat)" }}
               >
                 {postTag.name}
               </span>
@@ -198,20 +199,25 @@ export default function PostPage() {
               <div className="flex items-center gap-3">
                 <div>
                   <div className="flex items-center gap-2 text-xs sm:text-sm">
-                    <span className="text-gray-800 text-xl">•{" "}  </span>
-                    <span className="text-gray-800" style={{ fontFamily: "var(--font-montserrat)" }}>
+                    <span className="text-gray-800 text-xl">• </span>
+                    <span
+                      className="text-gray-800"
+                      style={{ fontFamily: "var(--font-montserrat)" }}
+                    >
                       {new Date(post.publishedAt).toLocaleDateString("en-US", {
                         month: "short",
                         day: "numeric",
                         year: "numeric",
                       })}
                     </span>
-                    <span className="text-gray-800 text-xl">•{" "}  </span>
-                    <span className="text-gray-800" style={{ fontFamily: "var(--font-montserrat)" }}>
+                    <span className="text-gray-800 text-xl">• </span>
+                    <span
+                      className="text-gray-800"
+                      style={{ fontFamily: "var(--font-montserrat)" }}
+                    >
                       {post.readTime} min read
                     </span>
                   </div>
-                   
                 </div>
               </div>
 
@@ -227,9 +233,7 @@ export default function PostPage() {
                       : "text-gray-600 hover:text-red-500 hover:bg-red-50"
                   }`}
                 >
-                  <HeartIcon
-                    className="w-4 h-4 sm:w-5 sm:h-5"
-                  />
+                  <HeartIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                   <span className="hidden sm:inline">{likeCount}</span>
                 </button>
 
@@ -251,9 +255,7 @@ export default function PostPage() {
                       : "text-gray-600 hover:text-amber-600 hover:bg-amber-50"
                   }`}
                 >
-                  <BookmarkIcon
-                    className="w-4 h-4 sm:w-5 sm:h-5"
-                  />
+                  <BookmarkIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
               </div>
             </div>
@@ -312,9 +314,14 @@ export default function PostPage() {
                           {post.author.name}
                         </Link>
                       </div>
-                      <button className="px-5 py-2 bg-emerald-600 text-white rounded-full text-sm font-medium hover:bg-emerald-700 transition shrink-0">
-                        Follow
-                      </button>
+                      {post.author.id &&
+                        clerkUser?.username !== post.author.username && (
+                          <FollowButton
+                            targetUserId={post.author.id}
+                            initialIsFollowing={isFollowing}
+                            onToggle={(followed) => setIsFollowing(followed)}
+                          />
+                        )}
                     </div>
                   </div>
                 </div>

@@ -29,7 +29,12 @@ interface GetPostsParams {
   search?: string;
   sortBy?: "latest" | "oldest" | "popular";
 }
-export async function getPublishedPostService({ page, limit, search, sortBy }: GetPostsParams) {
+export async function getPublishedPostService({
+  page,
+  limit,
+  search,
+  sortBy,
+}: GetPostsParams) {
   const skip = (page - 1) * limit;
 
   // Build where clause
@@ -175,6 +180,20 @@ export async function getPublishedPostByIdService(id: string, userId?: string) {
   const isLiked = userId && post.likes && post.likes.length > 0;
   const isBookmarked = userId && post.bookmarks && post.bookmarks.length > 0;
 
+  // Check if current user follows the author
+  let isFollowing = false;
+  if (userId && post.author.id) {
+    const follow = await prisma.follow.findUnique({
+      where: {
+        followerId_followingId: {
+          followerId: userId,
+          followingId: post.author.id,
+        },
+      },
+    });
+    isFollowing = !!follow;
+  }
+
   const flattenedTags = post.tags.map((t) => t.tag);
   const { likes, bookmarks, tags, ...postData } = post; // Remove the likes and bookmarks and tags arrays(not needed) for response
   return {
@@ -182,6 +201,7 @@ export async function getPublishedPostByIdService(id: string, userId?: string) {
     tags: flattenedTags,
     isLiked: !!isLiked,
     isBookmarked: !!isBookmarked,
+    isFollowing,
   };
 }
 // GET POST BY SLUG Service
@@ -260,6 +280,20 @@ export async function getPublishedPostBySlugService(
   const isLiked = userId && post.likes && post.likes.length > 0;
   const isBookmarked = userId && post.bookmarks && post.bookmarks.length > 0;
 
+  // Check if current user follows the author
+  let isFollowing = false;
+  if (userId && post.author.id) {
+    const follow = await prisma.follow.findUnique({
+      where: {
+        followerId_followingId: {
+          followerId: userId,
+          followingId: post.author.id,
+        },
+      },
+    });
+    isFollowing = !!follow;
+  }
+
   const flattenedTags = post.tags.map((t) => t.tag);
   const { likes, bookmarks, tags, ...postData } = post; // Remove the likes and bookmarks and tags arrays(not needed) for response
   return {
@@ -267,6 +301,7 @@ export async function getPublishedPostBySlugService(
     tags: flattenedTags,
     isLiked: !!isLiked,
     isBookmarked: !!isBookmarked,
+    isFollowing,
   };
 }
 // CREATE A NEW DRAFT POST Service

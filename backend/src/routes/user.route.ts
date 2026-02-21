@@ -6,11 +6,9 @@ import {
   getUserFollowersController,
   getUserFollowingController,
   updateUserProfileController,
-  followUserProfileController,
-  unfollowUserProfileController,
+  toggleFollowController,
   getUserBookmarksController,
   getUserDraftsController,
-  getUserReadingHistoryController,
   getCurrentUserController,
 } from "../controllers/user.controller.js";
 import {
@@ -47,26 +45,13 @@ userRoute.get(
   validatePaginationQuery,
   getUserBookmarksController,
 );
-// GET USER Reading History - LATER
-userRoute.get(
-  "/reading-history",
-  requireAuth(),
-  validatePaginationQuery,
-  getUserReadingHistoryController,
-);
-// POST Follow USER - LATER
+
+// POST Follow/Unfollow USER Toggle
 userRoute.post(
-  "/:id/follow",
+  "/:id/follow-toggle",
   requireAuth(),
   validateIdParam,
-  followUserProfileController,
-);
-// POST Unfollow USER - LATER
-userRoute.delete(
-  "/:id/unfollow",
-  requireAuth(),
-  validateIdParam,
-  unfollowUserProfileController,
+  toggleFollowController,
 );
 
 // ==================== PUBLIC ROUTES ====================

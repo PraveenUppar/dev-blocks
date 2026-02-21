@@ -33,7 +33,12 @@ export async function getPublishedPostController(
       search: string;
       sortBy: "latest" | "oldest" | "popular";
     };
-    const posts = await getPublishedPostService({ page, limit, search, sortBy });
+    const posts = await getPublishedPostService({
+      page,
+      limit,
+      search,
+      sortBy,
+    });
     return res.status(HTTP_STATUS.OK).json({ success: true, ...posts });
   } catch (error) {
     next(error);
@@ -53,7 +58,17 @@ export async function getPublishedPostByIdController(
 ) {
   try {
     const { id } = req.params;
-    const userId = req.auth().userId;
+    // Resolve clerkId to internal userId for interaction checks
+    let userId: string | undefined;
+    try {
+      const clerkId = req.auth?.()?.userId;
+      if (clerkId) {
+        const user = await getUserClerkIdService(clerkId);
+        userId = user?.id;
+      }
+    } catch {
+      // Not authenticated — fine for a public route
+    }
     const post = await getPublishedPostByIdService(id, userId);
     if (!post) throw AppError.notFound("Post not found");
     return res.status(HTTP_STATUS.OK).json({ success: true, data: post });
@@ -70,7 +85,17 @@ export async function getPublishedPostBySlugController(
 ) {
   try {
     const slug = req.params.slug as string;
-    const userId = req.auth().userId;
+    // Resolve clerkId to internal userId for interaction checks
+    let userId: string | undefined;
+    try {
+      const clerkId = req.auth?.()?.userId;
+      if (clerkId) {
+        const user = await getUserClerkIdService(clerkId);
+        userId = user?.id;
+      }
+    } catch {
+      // Not authenticated — fine for a public route
+    }
     const post = await getPublishedPostBySlugService(slug, userId);
     if (!post) throw AppError.notFound("Post not found");
     return res.status(HTTP_STATUS.OK).json({ success: true, data: post });

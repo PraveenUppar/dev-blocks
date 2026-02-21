@@ -7,12 +7,9 @@ import {
   FiEdit,
   FiFileText,
   FiBookmark,
-  FiClock,
   FiSettings,
   FiMenu,
-  FiUser,
-  FiBell
-  
+  FiBell,
 } from "react-icons/fi";
 
 export default function Navbar() {
@@ -35,8 +32,10 @@ export default function Navbar() {
 
           {/* Desktop Menu options - Hidden on mobile */}
           {isSignedIn && (
-            <div className="hidden md:flex items-center gap-8" style={{ fontFamily: "var(--font-mozilla-text)" }}>
-             
+            <div
+              className="hidden md:flex items-center gap-8"
+              style={{ fontFamily: "var(--font-mozilla-text)" }}
+            >
               <Link
                 href="/write"
                 className="text-md font-medium text-gray-900 hover:text-gray-900 transition"
@@ -54,18 +53,6 @@ export default function Navbar() {
                 className="text-md font-medium text-gray-900 hover:text-gray-900 transition"
               >
                 Bookmarks
-              </Link>
-              <Link
-                href="/history"
-                className="text-md font-medium text-gray-900 hover:text-gray-900 transition"
-              >
-                Reading History
-              </Link>
-               <Link
-                href="/profile"
-                className="text-md font-medium text-gray-900 hover:text-gray-900 transition"
-              >
-                Profile
               </Link>
               <Link
                 href="/settings"
@@ -137,14 +124,6 @@ export default function Navbar() {
             >
               <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <Link
-                  href="/profile"
-                  className="flex gap-2 px-4 py-2 items-center text-md text-gray-900 cursor-pointer hover:bg-gray-100 rounded-md"
-                  onClick={() => setIsDropdownOpen(false)}
-                >
-                  <FiUser className="h-5 w-5 text-gray-500" />
-                  Profile
-                </Link>
-                <Link
                   href="/write"
                   className="flex gap-2 px-4 py-2 items-center text-md text-gray-900 cursor-pointer hover:bg-gray-100 rounded-md"
                   onClick={() => setIsDropdownOpen(false)}
@@ -167,14 +146,6 @@ export default function Navbar() {
                 >
                   <FiBookmark className="h-5 w-5 text-gray-500" />
                   Bookmarks
-                </Link>
-                <Link
-                  href="/history"
-                  className="flex gap-2 px-4 py-2 text-md items-center text-gray-900 cursor-pointer hover:bg-gray-100 rounded-md"
-                  onClick={() => setIsDropdownOpen(false)}
-                >
-                  <FiClock className="h-5 w-5 text-gray-500" />
-                  Reading History
                 </Link>
                 <Link
                   href="/settings"

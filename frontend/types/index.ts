@@ -32,6 +32,9 @@ export interface Post {
     likes: number;
     comments: number;
   };
+  isLiked?: boolean;
+  isBookmarked?: boolean;
+  isFollowing?: boolean;
   // Backend specific fields that might be useful later
   likes?: string[];
   comments?: Comment[];
@@ -59,6 +62,7 @@ export interface User {
   github?: string;
   linkedin?: string;
   createdAt: string;
+  isFollowing?: boolean;
   _count: {
     followers: number;
     following: number;

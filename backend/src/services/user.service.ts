@@ -1,8 +1,11 @@
 import prisma from "../libs/prisma.js";
 
 // CHECK USER BY USERNAME GET USER PROFILE DETAILS - working
-export async function getUserProfileService(username: string) {
-  return prisma.user.findUnique({
+export async function getUserProfileService(
+  username: string,
+  currentUserId?: string,
+) {
+  const user = await prisma.user.findUnique({
     where: { username },
     select: {
       id: true,
@@ -25,21 +28,38 @@ export async function getUserProfileService(username: string) {
       },
     },
   });
+
+  if (!user) return null;
+
+  let isFollowing = false;
+  if (currentUserId) {
+    const follow = await prisma.follow.findUnique({
+      where: {
+        followerId_followingId: {
+          followerId: currentUserId,
+          followingId: user.id,
+        },
+      },
+    });
+    isFollowing = !!follow;
   }
 
-  // CHECK USER BY USERNAME - working
-  export async function getUserNameService(username: string) {
-    return prisma.user.findUnique({
-      where: { username },
-    });
-  }
+  return { ...user, isFollowing };
+}
 
-  // GET USER BY CLERKID - working
-  export const getUserClerkIdService = async (clerkId: string) => {
-    return prisma.user.findUnique({
-      where: { clerkId },
-    });
-  };
+// CHECK USER BY USERNAME - working
+export async function getUserNameService(username: string) {
+  return prisma.user.findUnique({
+    where: { username },
+  });
+}
+
+// GET USER BY CLERKID - working
+export const getUserClerkIdService = async (clerkId: string) => {
+  return prisma.user.findUnique({
+    where: { clerkId },
+  });
+};
 
 // GET USER BY ID - working
 export const getUserIdService = async (id: string) => {
@@ -101,10 +121,17 @@ export async function getUserFollowerService(
   page: number = 1,
   limit: number = 10,
 ) {
+  const user = await prisma.user.findUnique({
+    where: { username },
+    select: { id: true },
+  });
+  if (!user)
+    return { data: [], pagination: { page, limit, total: 0, totalPages: 0 } };
+
   const skip = (page - 1) * limit;
   const [followers, total] = await Promise.all([
     prisma.follow.findMany({
-      where: { followingId: username }, // people who follow this username
+      where: { followingId: user.id }, // people who follow this user
       skip,
       take: limit,
       include: {
@@ -121,7 +148,7 @@ export async function getUserFollowerService(
       orderBy: { createdAt: "desc" },
     }),
     prisma.follow.count({
-      where: { followingId: username },
+      where: { followingId: user.id },
     }),
   ]);
   return {
@@ -140,10 +167,17 @@ export async function getUserFollowingService(
   page: number = 1,
   limit: number = 10,
 ) {
+  const user = await prisma.user.findUnique({
+    where: { username },
+    select: { id: true },
+  });
+  if (!user)
+    return { data: [], pagination: { page, limit, total: 0, totalPages: 0 } };
+
   const skip = (page - 1) * limit;
   const [following, total] = await Promise.all([
     prisma.follow.findMany({
-      where: { followerId: username }, // people this user follows
+      where: { followerId: user.id }, // people this user follows
       skip,
       take: limit,
       include: {
@@ -160,7 +194,7 @@ export async function getUserFollowingService(
       orderBy: { createdAt: "desc" },
     }),
     prisma.follow.count({
-      where: { followingId: username },
+      where: { followerId: user.id },
     }),
   ]);
   return {
@@ -193,30 +227,30 @@ export async function updateUserProfileService(
   });
 }
 
-// FOLLOW USER LOGIC
-export async function followUserProfileService(
+// TOGGLE FOLLOW/UNFOLLOW USER
+export async function toggleFollowService(
   followerId: string,
   followingId: string,
 ) {
-  const follow = await prisma.follow.create({
-    data: { followerId, followingId },
-  });
-  return follow;
-}
-
-// UNFOLLOW USER LOGIC
-export async function unfollowUserProfileService(
-  followerId: string,
-  followingId: string,
-) {
-  return prisma.follow.delete({
+  const existingFollow = await prisma.follow.findUnique({
     where: {
-      followerId_followingId: {
-        followerId,
-        followingId,
-      },
+      followerId_followingId: { followerId, followingId },
     },
   });
+
+  if (existingFollow) {
+    await prisma.follow.delete({
+      where: {
+        followerId_followingId: { followerId, followingId },
+      },
+    });
+    return { followed: false };
+  } else {
+    await prisma.follow.create({
+      data: { followerId, followingId },
+    });
+    return { followed: true };
+  }
 }
 
 // GET USER BOOKMARKS
@@ -285,42 +319,6 @@ export async function getUserDraftsService(
 
   return {
     data: posts,
-    pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
-  };
-}
-
-// GET USER READING HISTORY
-export async function getUserReadingHistoryService(
-  userId: string,
-  page: number = 1,
-  limit: number = 10,
-) {
-  const skip = (page - 1) * limit;
-
-  const [history, total] = await Promise.all([
-    prisma.readingHistory.findMany({
-      where: { userId },
-      skip,
-      take: limit,
-      orderBy: { createdAt: "desc" },
-      include: {
-        post: {
-          include: {
-            author: {
-              select: { id: true, username: true, name: true, avatar: true },
-            },
-          },
-        },
-      },
-    }),
-    prisma.readingHistory.count({ where: { userId } }),
-  ]);
-
-  return {
-    data: history.map((h) => ({
-      ...h.post,
-      readingProgress: { timeSpent: h.timeSpent, scrollDepth: h.scrollDepth },
-    })),
     pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
   };
 }
