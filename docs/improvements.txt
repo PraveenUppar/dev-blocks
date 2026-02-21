@@ -2,9 +2,7 @@
 
 PENDING/TODO
 
-Priority - Medium - [Need claude] 
-- follow and unfollow feature
-- Add a profile and frontend author see followers and foloowing and perfoerm action
+Priority - Medium - 
 - comments feature
 - notification center for user follow and post like 
 - reading history
