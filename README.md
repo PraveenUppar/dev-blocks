@@ -1,9 +1,44 @@
-# Dev-Blocks - Medium-like Blog Application
-### A Modern Blogging Platform for Developers
+<p align="center">
+  <img src="frontend/app/favicon.ico" alt="Dev-Blocks Logo" width="120" />
+</p>
+
+<h1 align="center">Dev-Blocks</h1>
+
+<p align="center">
+  A Modern Blogging Platform for Developers
+</p>
+
+<p align="center">
+  <a href="https://dev-blocks.vercel.app/">
+    <img src="https://img.shields.io/website?url=https%3A%2F%2Fdev-blocks.vercel.app&label=Live%20Demo" alt="Website" />
+  </a>
+  <img src="https://img.shields.io/github/license/PraveenUppar/Dev-Blocks" alt="License" />
+  <img src="https://img.shields.io/github/stars/PraveenUppar/Dev-Blocks?style=social" alt="Stars" />
+  <img src="https://img.shields.io/github/forks/PraveenUppar/Dev-Blocks?style=social" alt="Forks" />
+  <img src="https://img.shields.io/github/issues/PraveenUppar/Dev-Blocks" alt="Issues" />
+  <img src="https://img.shields.io/github/last-commit/PraveenUppar/Dev-Blocks" alt="Last Commit" />
+</p>
+
+---
+
+## Description
 
 Dev-Blocks is a full-stack blogging application designed for developers to share knowledge, read articles, and connect with peers. It features a rich text editor, robust content management, and social interaction capabilities.
 
-Live: https://dev-blocks.vercel.app/
+🔗 **Live:** [https://dev-blocks.vercel.app/](https://dev-blocks.vercel.app/)
+
+## Features
+
+- **User Authentication:** Secure login and signup via Clerk.
+- **Rich Text Editor:** WYSIWYG editor for creating formatted posts (TipTap).
+- **Post Management:** Create, edit, publish, delete, and archive posts.
+- **Draft System:** Auto-save drafts to work on later.
+- **Social Interactions:** Like, Bookmark, and Comment on posts.
+- **User Profiles:** Customizable profiles with bio, social links, and post history.
+- **Follow System:** Follow other authors to see their latest content.
+- **Reading History:** Track read articles and scroll depth.
+- **Search & Filtering:** Find posts by keywords or tags.
+- **Notifications:** Real-time alerts for likes, comments, and follows.
 
 ## System Architecture
 
@@ -19,7 +54,6 @@ graph TD
 ## Database Schema
 
 ![Database Schema](docs/schema.png)
-
 
 ```mermaid
 erDiagram
@@ -68,53 +102,7 @@ erDiagram
 |:---:|:---:|:---:|
 | ![Account](docs/account.png) | ![Bookmarks](docs/bookmark.png) | ![Drafts](docs/drafts.png) |
 
-## Features
-
-- **User Authentication:** Secure login and signup via Clerk.
-- **Rich Text Editor:** WYSIWYG editor for creating formatting posts (TipTap).
-- **Post Management:** Create, edit, publish, delete, and archive posts.
-- **Draft System:** Auto-save drafts to work on later.
-- **Social Interactions:** Like, Bookmark, and Comment on posts.
-- **User Profiles:** Customizable profiles with bio, social links, and post history.
-- **Follow System:** Follow other authors to see their latest content.
-- **Reading History:** Track read articles and scroll depth.
-- **Search & Filtering:** Find posts by keywords or tags.
-- **Notifications:** Real-time alerts for likes, comments, and follows.
-
-## Tech Stack
-
-### Frontend
-- **Framework:** Next.js 14+ (App Router)
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS
-- **State Management:** Zustand
-- **Editor:** TipTap (Rich Text Editor)
-- **HTTP Client:** Axios
-- **Icons:** React Icons
-
-### Backend
-- **Runtime:** Node.js
-- **Framework:** Express.js
-- **Database:** PostgreSQL
-- **ORM:** Prisma
-- **Validation:** Zod
-- **Logging:** Winston
-- **Testing:** Vitest + Supertest
-- **Rate Limiting:** express-rate-limit
-
-### Authentication
-- **Provider:** Clerk (Social Auth, Email/Password)
-
-### Hosting 
-- **Frontend:** Vercel 
-- **Backend:** Render
-
-## Getting Started
-
-### Prerequisites
-- Node.js 18+
-- PostgreSQL
-- Clerk Account
+## Installation
 
 ### 1. Clone the repository
 ```bash
@@ -160,28 +148,44 @@ npm install
 npm run dev
 ```
 
+## Usage
+
 Visit `http://localhost:3000` to view the application.
 
-## Project Structure
+1. **Sign up** using Clerk authentication (social or email/password).
+2. **Create a post** using the rich text editor.
+3. **Explore** posts, like, comment, and bookmark your favorites.
+4. **Follow** other authors to see their latest content in your feed.
 
-```
-dev-blocks/
-├── frontend/                 # Next.js Frontend
-│   ├── app/                  # App Router Pages
-│   ├── components/           # Reusable Components
-│   ├── lib/                  # Utilities (Axios, Utils)
-│   ├── types/                # TypeScript Interfaces
-│   └── public/               # Static Assets
-│
-├── backend/                  # Express Backend
-│   ├── src/
-│   │   ├── config/           # App Configuration
-│   │   ├── controllers/      # Route Controllers
-│   │   ├── middleware/       # Auth, Validation, Error Handling
-│   │   ├── routes/           # API Routes
-│   │   ├── services/         # Business Logic
-│   │   └── utils/            # Helper Functions
-│   └── prisma/               # Database Schema
-│
-└── docs/                     # Documentation & Improvements
-```
+## Support
+
+If you encounter any issues or have questions, please [open an issue](https://github.com/PraveenUppar/Dev-Blocks/issues) on GitHub.
+
+## Roadmap
+
+- [ ] Dark mode support
+- [ ] Markdown export for posts
+- [ ] Email newsletter integration
+- [ ] Analytics dashboard for authors
+
+## Contributing
+
+Contributions are welcome! To get started:
+
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature/your-feature`).
+3. Commit your changes (`git commit -m 'Add your feature'`).
+4. Push to the branch (`git push origin feature/your-feature`).
+5. Open a Pull Request.
+
+## Authors and Acknowledgment
+
+Built by [Praveen Uppar](https://github.com/PraveenUppar). Thanks to all contributors who help improve Dev-Blocks.
+
+## License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+## Project Status
+
+This project is actively maintained. Contributions, feedback, and suggestions are always welcome!
