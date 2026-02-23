@@ -117,15 +117,6 @@ npm install
 npm run dev
 ```
 
-## Usage
-
-Visit `http://localhost:3000` to view the application.
-
-1. **Sign up** using Clerk authentication (social or email/password).
-2. **Create a post** using the rich text editor.
-3. **Explore** posts, like, comment, and bookmark your favorites.
-4. **Follow** other authors to see their latest content in your feed.
-
 ## Support
 
 If you encounter any issues or have questions, please [open an issue](https://github.com/PraveenUppar/Dev-Blocks/issues) on GitHub.
