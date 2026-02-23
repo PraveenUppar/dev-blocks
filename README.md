@@ -24,6 +24,12 @@ Dev-Blocks is a full-stack blogging application designed for developers to share
 
 🔗 **Live:** [https://dev-blocks.vercel.app/](https://dev-blocks.vercel.app/)
 
+🔗 **Demo Video:** [https://drive.google.com/file/d/1DebndTOLidLi4mo6EVBM2Xzm2sEtJXdy/view?usp=sharing
+](https://drive.google.com/file/d/1DebndTOLidLi4mo6EVBM2Xzm2sEtJXdy/view?usp=sharing)
+
+<video src="docs/dev-block-demo.mp4" controls="controls" width="100%">
+</video>
+
 ## Features
 
 - **User Authentication:** Secure login and signup via Clerk.
